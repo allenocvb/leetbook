@@ -70,7 +70,7 @@ no editor embeds/databases. Local-first is a feature.
 
 ## Phase 7 — Extension capture
 
-- [ ] 7.1 Capture adapter: detect Accepted, pull slug/title/difficulty/topics/runtime/code (isolated module + tests)
+- [x] 7.1 Capture adapter: detect Accepted, pull slug/title/difficulty/topics/runtime/code (isolated module + tests)
 - [ ] 7.2 Desktop listener on 127.0.0.1 (fixed port + pairing token)
 - [ ] 7.3 In-page 0–5 toast; post payload to app
 - [ ] 7.4 Offline queue in extension storage, flush on reconnect
