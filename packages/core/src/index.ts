@@ -1,7 +1,19 @@
 export type { SqlExecutor } from "./db/executor.js";
-export { scheduleReview } from "./fsrs.js";
 export { migrate } from "./db/migrate.js";
 export { MIGRATIONS, type Migration } from "./db/migrations.js";
+export { createNotesRepo, type NotesRepo } from "./db/repositories/notes.js";
+export {
+  createProblemsRepo,
+  type ProblemInput,
+  type ProblemsRepo,
+} from "./db/repositories/problems.js";
+export {
+  createReviewsRepo,
+  type ReviewInput,
+  type ReviewsRepo,
+} from "./db/repositories/reviews.js";
+export { createSchedulingRepo, type SchedulingRepo } from "./db/repositories/scheduling.js";
+export { scheduleReview } from "./fsrs.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {
   type Difficulty,
