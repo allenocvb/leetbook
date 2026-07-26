@@ -74,13 +74,14 @@ function DeleteProblemAction({
   }
 
   return (
-    <span className="problem-notes-header__confirm" role="group" aria-label={`Delete ${title}`}>
+    <span className="problem-notes-header__confirm">
       <span className="problem-notes-header__confirm-label">Delete for good?</span>
       <Button variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>
         Cancel
       </Button>
       <Button
         variant="outline"
+        aria-label={`Delete ${title}`}
         disabled={pending}
         onClick={() => {
           setPending(true);

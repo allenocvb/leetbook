@@ -247,8 +247,8 @@ describe("ProblemNotesPage", () => {
     expect(await createProblemsRepo(db).getById(problem.id)).not.toBeNull();
 
     await userEvent.click(screen.getByRole("button", { name: "Delete" }));
-    const confirm = within(screen.getByRole("group", { name: "Delete Two Sum" }));
-    await userEvent.click(confirm.getByRole("button", { name: "Delete" }));
+    // The confirm button names its target, so it is unambiguous to both tests and readers.
+    await userEvent.click(screen.getByRole("button", { name: "Delete Two Sum" }));
 
     await waitFor(() => expect(onBack).toHaveBeenCalled());
     expect(await createProblemsRepo(db).getById(problem.id)).toBeNull();
@@ -266,8 +266,7 @@ describe("ProblemNotesPage", () => {
     await userEvent.keyboard("pending edit");
 
     await userEvent.click(screen.getByRole("button", { name: "Delete" }));
-    const confirm = within(screen.getByRole("group", { name: "Delete Two Sum" }));
-    await userEvent.click(confirm.getByRole("button", { name: "Delete" }));
+    await userEvent.click(screen.getByRole("button", { name: "Delete Two Sum" }));
     await waitFor(() => expect(onBack).toHaveBeenCalled());
 
     cleanup(); // unmount runs the autosave flush
