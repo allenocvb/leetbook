@@ -327,3 +327,33 @@
     display: none;
   }
 }
+
+.settings-connection__setup {
+  margin-top: var(--lb-space-5);
+  padding-top: var(--lb-space-5);
+  border-top: 1px solid var(--lb-bd);
+}
+
+.settings-connection__setup-title {
+  margin: 0 0 var(--lb-space-3);
+  color: var(--lb-text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-connection__setup ol {
+  display: grid;
+  gap: var(--lb-space-2);
+  margin: 0;
+  padding-left: 18px;
+  color: var(--lb-text-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-connection__setup-note {
+  margin: var(--lb-space-3) 0 0;
+  color: var(--lb-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}

@@ -162,7 +162,9 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.30 Pairing handshake: extension requests pairing, the app approves it with a matching
       code, and the token is exchanged automatically — no copy-paste, and the token is no longer
       shown in the UI at all
-- [ ] 9.31 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.31 Retire the Capture view: fold its setup guide into the Settings connection card and
+      delete the page, route and nav item now that pairing is a handshake
+- [ ] 9.32 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.

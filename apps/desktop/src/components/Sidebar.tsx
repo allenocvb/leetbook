@@ -1,7 +1,7 @@
 import { LogoMark } from "./ui/LogoMark.js";
 import "./Sidebar.css";
 
-export type ViewId = "all-problems" | "due-today" | "review" | "capture" | "settings";
+export type ViewId = "all-problems" | "due-today" | "review" | "settings";
 
 export interface NavItem {
   id: ViewId;
@@ -12,7 +12,6 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "all-problems", label: "All Problems" },
   { id: "due-today", label: "Due Today" },
   { id: "review", label: "Review Session" },
-  { id: "capture", label: "Capture (extension)" },
   { id: "settings", label: "Settings & Pairing" },
 ];
 

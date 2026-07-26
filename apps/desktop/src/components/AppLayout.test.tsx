@@ -141,13 +141,14 @@ describe("App shell", () => {
     expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument();
   });
 
-  it("navigates to the real capture setup and status view", async () => {
+  it("has no Capture nav item — its state and setup live in Settings", async () => {
     await renderApp();
-    await userEvent.click(screen.getByRole("button", { name: /Capture/ }));
-    expect(screen.getByRole("heading", { name: "Capture" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Set up automatic capture" })).toBeInTheDocument();
-    expect(screen.getByText("Waiting for an extension report")).toBeInTheDocument();
-    expect(screen.queryByText(/arrives in Phase 7/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Capture/ })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: /Settings & Pairing/ }));
+    expect(screen.getByText("Set up automatic capture")).toBeInTheDocument();
+    expect(screen.getByText("Listener")).toBeInTheDocument();
+    expect(screen.getByText("Paired extension")).toBeInTheDocument();
   });
 
   it("navigates to the final settings cards", async () => {

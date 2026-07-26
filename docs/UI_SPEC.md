@@ -135,8 +135,9 @@ Dark status pills:
 
 - Fixed 236px width, `surf2`, 1px `bd` right border, `16px 10px 12px` padding.
 - Header: 22px logo, Chewy 16px name, mono 10px `v1`.
-- Navigation order: All Problems, Due Today, Review Session, Capture (extension),
-  Settings & Pairing.
+- Navigation order: All Problems, Due Today, Review Session, Settings & Pairing. There is no
+  Capture view: the approval handshake made its setup guide a few lines, and every piece of
+  live state it showed (listener, queue, last capture, pairing) already lives in Settings.
 - Navigation rows use 7px radius and `7px 9px` padding. Active and hover states use `tint`;
   the active label uses `accTxt`.
 - Show category counts beneath a 10.5px uppercase section label. Clicking a category filters
@@ -243,20 +244,11 @@ Editor:
 - Keyboard behavior: 0–5 selects, Enter confirms, Escape exits.
 - Confirming appends a review, recomputes FSRS, and advances. End with a session summary.
 
-### Capture
+### Extension capture toast
 
-- Desktop Capture view explains pairing and shows current listener/queue state; it must not contain
-  stale phase-placeholder copy.
-- Pairing is a **handshake, not a shared secret**. The extension asks the listener to pair, the app
-  raises an approval dialog showing a short code, and the token is handed over only once the user
-  approves. The code exists for recognition — it lets the user confirm this is the request they
-  just made — not for secrecy. Requests expire after two minutes and a newer request supersedes an
-  older one, so a stale prompt can never be approved into a live pairing.
-- The approval dialog is global: it appears over whatever view is open, because the user will be in
-  the browser when it fires. Dismissing it counts as a denial; nothing pairs by default.
-- Extension toast is fixed bottom-right with 22px inset, 320px width, 11px radius, `surf`,
-  `bd2`, and the floating shadow.
-- Header shows logo, “Accepted · captured” or “Queued — N waiting,” and dismiss.
+- Fixed bottom-right with 22px inset, 320px width, 11px radius, `surf`, `bd2`, and the
+  floating shadow.
+- Header shows the logo, “Accepted · captured” or “Queued — N waiting,” and dismiss.
 - Show title, difficulty/runtime/memory/code status, and six score buttons.
 - A chosen score is posted or queued. Dismiss/skip schedules as Good, as specified by the handoff.
 - Shadow DOM isolates the toast from LeetCode styles.
@@ -266,7 +258,8 @@ Editor:
 - Content has `28px 34px` padding and a 600px maximum width.
 - Three cards use `bd2`, 9px radius, 18px padding, and 14px gaps.
 - Connection card: truthful connection state, last capture, listener, paired-extension state,
-  Disconnect, and queued count. The pairing token is **never displayed**. Showing it invites
+  Disconnect, and queued count. It also carries the three-step setup guide, shown **only while
+  nothing is paired** — instructions that disappear once they stop being useful. The pairing token is **never displayed**. Showing it invites
   the copy-paste flow the approval handshake replaced.
 - Scheduling card: FSRS identity, daily new limit, and score mapping.
 - Data card: database stats, Import Notion CSV, Export JSON, and Export Markdown.

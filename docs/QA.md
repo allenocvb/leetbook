@@ -108,6 +108,8 @@ pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
 - [ ] Press Connect with the app closed: it says LeetBook isn't running rather than hanging.
 - [ ] Settings & Pairing shows a paired extension and no token. Disconnect, then confirm the
       extension has to pair again before the next capture lands.
+- [ ] The sidebar has **four** items — no Capture tab. Settings & Pairing shows the setup steps
+      while unpaired, and hides them once connected.
 - [ ] Sidebar footer shows `Listener ready :7749`.
 - [ ] Submit a real Accepted solution on leetcode.com. **A toast appears bottom-right.**
 - [ ] Toast shows the real title, difficulty, runtime/memory, and code status.

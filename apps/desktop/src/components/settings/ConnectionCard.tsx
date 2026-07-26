@@ -97,6 +97,20 @@ export function ConnectionCard({ capture }: ConnectionCardProps) {
             : `${capture.queued} payload${capture.queued === 1 ? "" : "s"}`}
         </dd>
       </dl>
+      {!extensionReported && (
+        <div className="settings-connection__setup">
+          <p className="settings-connection__setup-title">Set up automatic capture</p>
+          <ol>
+            <li>Install the LeetBook Capture extension and open its Options page.</li>
+            <li>Press Connect to LeetBook, then approve the code shown here.</li>
+            <li>Rate accepted submissions from the toast as you practice.</li>
+          </ol>
+          <p className="settings-connection__setup-note">
+            If LeetBook is closed, captures stay queued in Chrome and retry every minute.
+          </p>
+        </div>
+      )}
+
       {(message ?? capture.pairingError) && (
         <p className="settings-card__message" role="status">
           {message ?? capture.pairingError}

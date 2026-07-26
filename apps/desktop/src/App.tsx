@@ -9,7 +9,6 @@ import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
-import { CapturePage } from "./pages/CapturePage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
@@ -137,8 +136,6 @@ function Page({
       );
     case "review":
       return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
-    case "capture":
-      return <CapturePage runtime={capture} />;
     case "settings":
       return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
   }
