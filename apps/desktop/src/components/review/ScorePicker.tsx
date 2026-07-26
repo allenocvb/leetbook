@@ -1,5 +1,5 @@
 import type { PerformanceScore } from "@leetbook/core";
-import type { Ref } from "react";
+import { type Ref, useState } from "react";
 import "./ScorePicker.css";
 
 export const SCORE_LABELS: Record<PerformanceScore, string> = {
@@ -38,6 +38,9 @@ export function ScorePicker({
   focusOption,
   focusOptionRef,
 }: ScorePickerProps) {
+  const [hovered, setHovered] = useState<PerformanceScore | null>(null);
+  const rubricScore = hovered ?? selected;
+
   return (
     <div className="score-picker">
       <div className="score-picker__options">
@@ -52,6 +55,8 @@ export function ScorePicker({
               disabled={disabled}
               ref={score === focusOption ? focusOptionRef : undefined}
               onClick={() => onSelect(score)}
+              onMouseEnter={() => setHovered(score)}
+              onMouseLeave={() => setHovered(null)}
             >
               <span className="score-picker__score">{score}</span>
               <span className="score-picker__label">{SCORE_LABELS[score]}</span>
@@ -60,7 +65,9 @@ export function ScorePicker({
         })}
       </div>
       <p className="score-picker__rubric" aria-live="polite">
-        {selected !== null ? `${selected} — ${SCORE_RUBRIC[selected]}` : "Rate your recall: 0–5."}
+        {rubricScore !== null
+          ? `${rubricScore} — ${SCORE_RUBRIC[rubricScore]}`
+          : "Rate your recall: 0–5."}
       </p>
     </div>
   );

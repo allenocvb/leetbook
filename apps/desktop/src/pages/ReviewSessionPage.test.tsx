@@ -24,21 +24,39 @@ async function setup(problems = 2) {
   ].slice(0, problems);
   await seed(db, specs);
   const onExit = vi.fn();
+  const onShowNotes = vi.fn();
   render(
     <DbProvider db={db}>
-      <ReviewSessionPage onExit={onExit} />
+      <ReviewSessionPage onExit={onExit} onShowNotes={onShowNotes} />
     </DbProvider>,
   );
-  return { db, onExit };
+  return { db, onExit, onShowNotes };
 }
 
 describe("ReviewSessionPage", () => {
   it("shows one due problem at a time with progress", async () => {
     await setup();
     await waitFor(() => expect(screen.getByText("1 of 2")).toBeInTheDocument());
+    expect(screen.getByRole("progressbar", { name: "Review progress" })).toHaveAttribute(
+      "aria-valuenow",
+      "1",
+    );
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     expect(screen.getByText("How well did you recall it?")).toBeInTheDocument();
     // rubric prompt visible before any selection
+    expect(screen.getByText("Rate your recall: 0–5.")).toBeInTheDocument();
+  });
+
+  it("previews the full rubric on hover without selecting the score", async () => {
+    await setup();
+    await waitFor(() => expect(screen.getByText("1 of 2")).toBeInTheDocument());
+    const perfect = screen.getByRole("button", { name: /5 Perfect/ });
+
+    await userEvent.hover(perfect);
+    expect(screen.getByText(/5 — Perfect recall/)).toBeInTheDocument();
+    expect(perfect).toHaveAttribute("aria-pressed", "false");
+
+    await userEvent.unhover(perfect);
     expect(screen.getByText("Rate your recall: 0–5.")).toBeInTheDocument();
   });
 
@@ -52,6 +70,15 @@ describe("ReviewSessionPage", () => {
         screen.getByText(/Struggled → Good · due in \d+ days? · Enter to confirm/),
       ).toBeInTheDocument(),
     );
+  });
+
+  it("opens notes for the current review problem", async () => {
+    const { onShowNotes } = await setup(1);
+    await waitFor(() => expect(screen.getByText("1 of 1")).toBeInTheDocument());
+
+    await userEvent.click(screen.getByRole("button", { name: "Show my notes" }));
+
+    expect(onShowNotes).toHaveBeenCalledWith(expect.any(String));
   });
 
   it("opens the current problem through the browser fallback outside Tauri", async () => {
@@ -102,6 +129,24 @@ describe("ReviewSessionPage", () => {
     await waitFor(() => expect(screen.getByText("1 of 2")).toBeInTheDocument());
     await userEvent.keyboard("{Enter}");
     expect(screen.getByText("1 of 2")).toBeInTheDocument();
+  });
+
+  it("selects 0–5 from the keyboard and ignores unrelated keys", async () => {
+    await setup();
+    await waitFor(() => expect(screen.getByText("1 of 2")).toBeInTheDocument());
+
+    await userEvent.keyboard(" ");
+    expect(screen.getByRole("button", { name: /0 Blackout/ })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+
+    await userEvent.keyboard("5");
+    expect(screen.getByRole("button", { name: /5 Perfect/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await waitFor(() => expect(screen.getByText(/Perfect → Easy/)).toBeInTheDocument());
   });
 
   it("Escape exits the session", async () => {

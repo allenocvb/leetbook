@@ -121,6 +121,20 @@ describe("App shell", () => {
     await userEvent.click(screen.getByRole("button", { name: /Review Session/ }));
     await waitFor(() => expect(screen.getByText("1 of 1")).toBeInTheDocument());
     expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument();
+    expect(document.querySelector(".app-layout__main")).toHaveClass("app-layout__main--flush");
+  });
+
+  it("opens the current problem notes from the review session", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /Review Session/ }));
+    await waitFor(() => expect(screen.getByText("1 of 1")).toBeInTheDocument());
+
+    await userEvent.click(screen.getByRole("button", { name: "Show my notes" }));
+
+    await waitFor(() =>
+      expect(document.querySelector(".problem-notes-page__content")).toBeVisible(),
+    );
+    expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument();
   });
 
   it("navigates to placeholder pages", async () => {

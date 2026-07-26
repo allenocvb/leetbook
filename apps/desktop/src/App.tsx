@@ -78,7 +78,10 @@ function Shell() {
       onPickCategory={pickCategory}
       listener={listener}
       flushMain={
-        route.view === "all-problems" || route.view === "due-today" || route.view === "problem"
+        route.view === "all-problems" ||
+        route.view === "due-today" ||
+        route.view === "problem" ||
+        route.view === "review"
       }
     >
       <Page
@@ -133,7 +136,7 @@ function Page({
         />
       );
     case "review":
-      return <ReviewSessionPage onExit={onExitReview} />;
+      return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
     case "capture":
       return <PagePlaceholder title="Capture" hint="Extension capture arrives in Phase 7." />;
     case "settings":

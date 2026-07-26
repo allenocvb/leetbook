@@ -117,7 +117,7 @@ no editor embeds/databases. Local-first is a feature.
       recompute FSRS, and refresh all derived fields
 - [x] 9.13 Review correction and history: show review history and safely correct the latest
       mistaken review by replaying derived scheduling; never overwrite a redundant score field
-- [ ] 9.14 Review session fidelity: final top progress bar, 620px content, score hover/selection
+- [x] 9.14 Review session fidelity: final top progress bar, 620px content, score hover/selection
       rubric, FSRS preview, working `Show my notes`, keyboard flow, and summary
 - [ ] 9.15 Extension capture fidelity: final bottom-right toast, queued state/count, dismiss,
       skip-as-Good behavior, offline flush feedback, and fixture-page verification

@@ -14,15 +14,19 @@
   transition:
     color 100ms ease,
     background-color 100ms ease,
-    border-color 100ms ease,
-    transform 100ms ease;
+    border-color 100ms ease;
 }
 
 .score-picker__option:hover {
   color: var(--lb-accent-text);
   background: var(--lb-tint);
   border-color: var(--lb-accent);
-  transform: translateY(-1px);
+}
+
+.score-picker__option:focus-visible {
+  border-color: var(--lb-accent);
+  outline: 2px solid var(--lb-tint);
+  outline-offset: 2px;
 }
 
 .score-picker__option[aria-pressed="true"] {
@@ -37,9 +41,9 @@
 }
 
 .score-picker__score {
-  font-family: var(--lb-font-mono);
-  font-size: 17px;
-  font-weight: 600;
+  font-family: var(--lb-font-display);
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .score-picker__label {
