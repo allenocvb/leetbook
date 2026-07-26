@@ -1,0 +1,10 @@
+.external-link-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.external-link-control__error {
+  color: var(--lb-red);
+  font-size: 11.5px;
+}

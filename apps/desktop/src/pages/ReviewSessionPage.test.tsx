@@ -54,6 +54,20 @@ describe("ReviewSessionPage", () => {
     );
   });
 
+  it("opens the current problem through the browser fallback outside Tauri", async () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    await setup(1);
+    await waitFor(() => expect(screen.getByText("1 of 1")).toBeInTheDocument());
+    await userEvent.click(screen.getByRole("button", { name: /Open on LeetCode/ }));
+
+    expect(open).toHaveBeenCalledWith(
+      "https://leetcode.com/problems/old-fail/",
+      "_blank",
+      "noopener,noreferrer",
+    );
+    open.mockRestore();
+  });
+
   it("confirming applies the review and advances; finishing shows the summary", async () => {
     const { db } = await setup();
     await waitFor(() => expect(screen.getByText("1 of 2")).toBeInTheDocument());

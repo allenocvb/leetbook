@@ -51,10 +51,20 @@ describe("ProblemNotesPage", () => {
     expect(screen.getByText("Easy")).toBeInTheDocument();
     expect(screen.getByText("Array, Hash Table")).toBeInTheDocument();
     expect(screen.getByText(/1 reps/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Open on LeetCode/ })).toHaveAttribute(
-      "href",
+    expect(screen.getByRole("button", { name: /Open on LeetCode/ })).toBeInTheDocument();
+  });
+
+  it("opens LeetCode through the browser fallback outside Tauri", async () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    await setup();
+    await userEvent.click(screen.getByRole("button", { name: /Open on LeetCode/ }));
+
+    expect(open).toHaveBeenCalledWith(
       "https://leetcode.com/problems/two-sum/",
+      "_blank",
+      "noopener,noreferrer",
     );
+    open.mockRestore();
   });
 
   it("loads an existing note into the editor", async () => {

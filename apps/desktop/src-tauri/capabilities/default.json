@@ -13,6 +13,10 @@
     "sql:allow-select",
     "dialog:default",
     {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://leetcode.com/**" }, { "url": "https://www.leetcode.com/**" }]
+    },
+    {
       "identifier": "fs:allow-write-text-file",
       "allow": [{ "path": "**" }]
     }

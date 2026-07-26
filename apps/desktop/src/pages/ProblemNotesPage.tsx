@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { DifficultyText } from "../components/table/pills.js";
+import { ExternalLinkButton } from "../components/ui/ExternalLinkButton.js";
 import { useDb } from "../db/DbContext.js";
 import { formatShortDate } from "../lib/format.js";
 
@@ -79,14 +80,12 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
 
       <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <h1 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>{problem.title}</h1>
-        <a
-          href={problem.url}
-          target="_blank"
-          rel="noreferrer"
+        <ExternalLinkButton
+          url={problem.url}
           style={{ fontSize: 12, color: "var(--text-secondary)" }}
         >
           Open on LeetCode ↗
-        </a>
+        </ExternalLinkButton>
       </div>
 
       <dl

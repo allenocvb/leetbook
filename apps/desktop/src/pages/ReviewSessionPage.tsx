@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { SCORE_LABELS, ScorePicker } from "../components/review/ScorePicker.js";
 import { DifficultyText } from "../components/table/pills.js";
+import { ExternalLinkButton } from "../components/ui/ExternalLinkButton.js";
 import { useDb } from "../db/DbContext.js";
 
 export interface ReviewSessionPageProps {
@@ -146,10 +147,8 @@ export function ReviewSessionPage({ onExit }: ReviewSessionPageProps) {
           {` · ${current.reviewCount} reps`}
         </p>
         <p style={{ margin: "16px 0 40px" }}>
-          <a
-            href={current.url}
-            target="_blank"
-            rel="noreferrer"
+          <ExternalLinkButton
+            url={current.url}
             style={{
               fontSize: 13,
               background: "var(--text)",
@@ -160,7 +159,7 @@ export function ReviewSessionPage({ onExit }: ReviewSessionPageProps) {
             }}
           >
             Open on LeetCode ↗
-          </a>
+          </ExternalLinkButton>
         </p>
 
         <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 14 }}>
