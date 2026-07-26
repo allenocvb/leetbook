@@ -139,7 +139,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.21 Scroll and editor interaction fixes: give the problems page an explicit height so
       the table scrolls under its sticky header, sync slash-menu hover with the active index,
       stop the menu from scrolling the notes page, and drop the full-document focus ring
-- [ ] 9.22 Code block authoring: replace the React code-block node view with a plain DOM one so
+- [x] 9.22 Code block authoring: replace the React code-block node view with a plain DOM one so
       a newly inserted block can hold the caret, keep Tab in the block as indentation, add
       Shift-Tab outdent and indentation-preserving Enter, and stop `/` opening the slash menu
       inside code

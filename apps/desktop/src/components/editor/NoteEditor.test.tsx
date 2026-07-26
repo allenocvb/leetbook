@@ -5,6 +5,19 @@ import { describe, expect, it, vi } from "vitest";
 import { NOTE_PLACEHOLDER, NoteEditor } from "./NoteEditor.js";
 import { SLASH_COMMANDS } from "./slashCommands.js";
 
+/**
+ * Text of every code block in the document. Assertions read the editor state rather than
+ * the rendered DOM: the React node view's content element does not flush synchronously
+ * under jsdom, so a freshly typed block still looks empty in the markup.
+ */
+function codeBlockTexts(editor: Editor): string[] {
+  const texts: string[] = [];
+  editor.state.doc.descendants((node) => {
+    if (node.type.name === "codeBlock") texts.push(node.textContent);
+  });
+  return texts;
+}
+
 const SAMPLE = JSON.stringify({
   type: "doc",
   content: [
@@ -174,6 +187,89 @@ describe("NoteEditor", () => {
       expect(firstBlock).toHaveClass("note-callout");
       expect(firstBlock).toHaveTextContent("Intuition");
     });
+  });
+
+  it("puts the caret inside the code block it just inserted", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+
+    // Wait for the node view to mount and take focus, not just for the selection to move —
+    // typing before the content DOM exists silently drops the keystrokes.
+    await waitFor(() => {
+      expect(editor.state.selection.$from.parent.type.name).toBe("codeBlock");
+      expect(document.querySelector(".code-block__code")).toBeInTheDocument();
+    });
+
+    // userEvent reads "[" and "{" as key-descriptor syntax, so keep typed code free of them.
+    await userEvent.keyboard("res = 0");
+    expect(codeBlockTexts(editor)).toEqual(["res = 0"]);
+  });
+
+  it("indents with tab and carries indentation onto the next line", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+    await waitFor(() => {
+      expect(editor.isActive("codeBlock")).toBe(true);
+      expect(document.querySelector(".code-block__code")).toBeInTheDocument();
+    });
+
+    await userEvent.keyboard("for i in range(100):{Enter}total += i{Enter}done");
+
+    // A single block, not one per line: Enter adds a line rather than splitting the block.
+    // The opener steps in, and the line after it holds that indent rather than resetting.
+    expect(codeBlockTexts(editor)).toEqual(["for i in range(100):\n  total += i\n  done"]);
+    expect(editor.isActive("codeBlock")).toBe(true);
+  });
+
+  it("turns off text correction inside the code block", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+    await waitFor(() => {
+      expect(editor.isActive("codeBlock")).toBe(true);
+    });
+
+    // Autocapitalising line starts or smart-quoting a string silently corrupts code.
+    const code = document.querySelector(".code-block__code");
+    expect(code).toHaveAttribute("autocapitalize", "off");
+    expect(code).toHaveAttribute("autocorrect", "off");
+    expect(code).toHaveAttribute("spellcheck", "false");
+    // The surrounding prose keeps spellchecking.
+    expect(surface).toHaveAttribute("spellcheck", "true");
+  });
+
+  it("keeps tab inside the code block instead of moving focus to the language picker", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+    await waitFor(() => {
+      expect(editor.isActive("codeBlock")).toBe(true);
+    });
+
+    await userEvent.keyboard("{Tab}x");
+
+    expect(editor.state.selection.$from.parent.textContent).toBe("  x");
+    expect(screen.getByRole("combobox", { name: "Code language" })).not.toHaveFocus();
+  });
+
+  it("leaves the slash menu closed inside a code block", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+    await waitFor(() => {
+      expect(editor.isActive("codeBlock")).toBe(true);
+    });
+
+    await userEvent.keyboard("a / b");
+
+    expect(screen.queryByRole("listbox", { name: "Block types" })).not.toBeInTheDocument();
   });
 
   it("selects the slash command the pointer is actually over", async () => {

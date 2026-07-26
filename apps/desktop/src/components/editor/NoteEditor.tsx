@@ -1,19 +1,87 @@
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
-import { type Editor, EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
+import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Callout } from "./Callout.js";
-import { CodeBlockNodeView } from "./CodeBlockNodeView.js";
+import { codeBlockNodeView } from "./codeBlockNodeView.js";
+import { INDENT_UNIT, indentAfterNewline, lineStart, outdentWidth } from "./codeIndent.js";
 import { codeLowlight } from "./codeLanguages.js";
 import { SlashCommandMenu, type SlashMenuState } from "./SlashCommandMenu.js";
 import { filterSlashCommands, type SlashCommand } from "./slashCommands.js";
 import "./CodeBlock.css";
 import "./NoteEditor.css";
 
+/** Everything in the current code block before the caret. Code blocks hold plain text. */
+function codeTextBefore(editor: Editor): string {
+  const { $from } = editor.state.selection;
+  return $from.parent.textBetween(0, $from.parentOffset);
+}
+
+/**
+ * A code block should behave like a code editor: Tab indents instead of escaping to the
+ * language picker, and Enter carries the current indentation forward, stepping in after
+ * a line that opens a block.
+ */
 const EditorCodeBlock = CodeBlockLowlight.extend({
+  /*
+   * Above every other extension so these shortcuts are consulted first. At the default
+   * priority ProseMirror's base keymap sees Enter ahead of us and happily splits the code
+   * block in two, so the indentation handler below never runs.
+   */
+  priority: 1000,
+
   addNodeView() {
-    return ReactNodeViewRenderer(CodeBlockNodeView);
+    return codeBlockNodeView;
+  },
+
+  addKeyboardShortcuts() {
+    const inCodeBlock = () => this.editor.isActive("codeBlock");
+
+    /*
+     * Written as a text transaction rather than insertContent, which parses strings as
+     * HTML — that collapses the leading spaces and newlines this whole feature is made of.
+     */
+    const insertText = (text: string) =>
+      this.editor.commands.command(({ tr, state }) => {
+        const { from, to } = state.selection;
+        tr.insertText(text, from, to);
+        return true;
+      });
+
+    return {
+      ...this.parent?.(),
+
+      // Returning true stops the browser moving focus to the language select.
+      Tab: () => inCodeBlock() && insertText(INDENT_UNIT),
+
+      "Shift-Tab": () => {
+        if (!inCodeBlock()) return false;
+
+        const { $from } = this.editor.state.selection;
+        const textBefore = codeTextBefore(this.editor);
+        const width = outdentWidth(textBefore);
+        if (width === 0) return true;
+
+        const from = lineStart($from.start(), textBefore);
+        return this.editor.commands.deleteRange({ from, to: from + width });
+      },
+
+      // Delegate the line break to newlineInCode, then apply the indent to the new line.
+      Enter: () => {
+        if (!inCodeBlock()) return false;
+
+        const indent = indentAfterNewline(codeTextBefore(this.editor));
+        return this.editor
+          .chain()
+          .newlineInCode()
+          .command(({ tr }) => {
+            if (indent) tr.insertText(indent, tr.selection.from);
+            return true;
+          })
+          .run();
+      },
+    };
   },
 }).configure({ lowlight: codeLowlight });
 
@@ -46,6 +114,8 @@ function parseInitialContent(json: string | null): object {
 function findSlashMenu(editor: Editor, container: HTMLElement | null): SlashMenuState | null {
   const { selection } = editor.state;
   if (!selection.empty || !selection.$from.parent.isTextblock) return null;
+  // A code block is a textblock too, but `/` there is division or a comment, not a command.
+  if (editor.isActive("codeBlock")) return null;
 
   const textBefore = selection.$from.parent.textBetween(0, selection.$from.parentOffset);
   const match = textBefore.match(/(?:^|\s)\/([a-z0-9-]*)$/i);
@@ -149,24 +219,30 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
     const items = filterSlashCommands(slashMenu.query);
     if (items.length === 0) return;
 
-    if (event.key === "ArrowDown") {
+    // While the menu is open its keys belong to the menu, not the document.
+    const claim = () => {
       event.preventDefault();
+      event.stopPropagation();
+    };
+
+    if (event.key === "ArrowDown") {
+      claim();
       setActiveIndex((current) => (current + 1) % items.length);
     } else if (event.key === "ArrowUp") {
-      event.preventDefault();
+      claim();
       setActiveIndex((current) => (current - 1 + items.length) % items.length);
     } else if (event.key === "Home") {
-      event.preventDefault();
+      claim();
       setActiveIndex(0);
     } else if (event.key === "End") {
-      event.preventDefault();
+      claim();
       setActiveIndex(items.length - 1);
     } else if (event.key === "Enter") {
-      event.preventDefault();
+      claim();
       const command = items[activeIndex] ?? items[0];
       if (command) selectCommand(command);
     } else if (event.key === "Escape") {
-      event.preventDefault();
+      claim();
       setSlashMenu(null);
     }
   };

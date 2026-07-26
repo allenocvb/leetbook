@@ -196,6 +196,18 @@ Editor:
   text field. Discrete controls inside the editor keep their own focus styles.
 - Code blocks show a `surf2` header with language on the left and optional snapshot date on the
   right, followed by a `code` body using JetBrains Mono 12.5px.
+- Inserting a code block leaves the caret **inside** it, ready to type.
+- The editable code block uses a plain DOM node view whose `contentDOM` is the `<code>` element.
+  It must not be a React node view: React's renderer nests its own managed element inside the
+  content element, and an empty code block built that way cannot receive a DOM selection — the
+  caret lands in the paragraph after the block and typing goes underneath it. Block types with
+  no node view are unaffected, which is how the fault was isolated.
+- An editable code block behaves like a code editor: Tab inserts two spaces rather than moving
+  focus to the language picker, Shift-Tab removes one level, and Enter carries the current
+  indentation onto the next line, stepping in once after a line ending in `:`, `{`, `(`, or `[`.
+  Tab is therefore captured while the caret is in code; the language picker stays reachable by
+  pointer and from adjacent focus stops.
+- `/` inside a code block is division or a comment, never a command — the slash menu stays shut.
 - Captured code snapshots are read-only and visually consistent with editable code blocks.
 - Autosave reports Saving/Saved without moving content.
 

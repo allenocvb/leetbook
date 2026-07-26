@@ -67,7 +67,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     },
   ),
   command("code", "Code block", "Add a highlighted snippet", "</>", "snippet", (editor, range) => {
-    editor.chain().focus().deleteRange(range).clearNodes().setCodeBlock().run();
+    // Focus last so it applies to the converted block rather than the old "/" position.
+    editor.chain().deleteRange(range).clearNodes().setCodeBlock().focus().run();
   }),
 ];
 
