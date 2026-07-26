@@ -1,20 +1,17 @@
-.window-stage {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  display: grid;
-  place-items: center;
-  padding: 40px;
-  overflow: auto;
-  background: var(--lb-bg);
-}
-
+/*
+ * The OS window is the app window: Tauri runs undecorated at 1280x820 and draws its
+ * own titlebar below, so the shell fills its container edge to edge — never a
+ * simulated desk or a second window inside the real one.
+ *
+ * The window is transparent (`transparent: true`), which is the only way to round an
+ * undecorated window on macOS — so this element paints the surface and owns the
+ * corner radius. It is also the only element allowed to paint an opaque background;
+ * html/body/#root stay transparent or they square the corners off again. The drop
+ * shadow still comes from the OS, never from CSS.
+ */
 .app-window {
   width: 100%;
-  max-width: 1280px;
   height: 100%;
-  max-height: 820px;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -23,7 +20,11 @@
   color: var(--lb-ink);
   background: var(--lb-surf);
   border-radius: var(--lb-radius-7);
-  box-shadow: var(--lb-shadow-window);
+}
+
+/* Rounded corners in fullscreen would show as transparent notches at the screen edge. */
+.app-window[data-fullscreen="true"] {
+  border-radius: 0;
 }
 
 .app-window__content {
@@ -56,10 +57,28 @@
   height: 11px;
   background: var(--lb-bd-2);
   border-radius: 50%;
+  transition: background-color 120ms ease;
 }
 
-.titlebar__traffic-lights button:hover {
-  background: var(--lb-muted-3);
+/*
+ * Resting state is neutral; hovering or keyboard-focusing anywhere in the cluster
+ * reveals all three at once, the way macOS does. The colors are the palette's own
+ * semantic red/amber/green — desaturated by design — not the bright system hues.
+ * The mapping follows DOM order: close, minimize, maximize.
+ */
+.titlebar__traffic-lights:hover button:nth-child(1),
+.titlebar__traffic-lights:focus-within button:nth-child(1) {
+  background: var(--lb-red);
+}
+
+.titlebar__traffic-lights:hover button:nth-child(2),
+.titlebar__traffic-lights:focus-within button:nth-child(2) {
+  background: var(--lb-amber);
+}
+
+.titlebar__traffic-lights:hover button:nth-child(3),
+.titlebar__traffic-lights:focus-within button:nth-child(3) {
+  background: var(--lb-green);
 }
 
 .titlebar__name {
@@ -123,25 +142,4 @@
   color: var(--lb-muted-3);
   font-family: var(--lb-font-mono);
   font-size: 11px;
-}
-
-@media (max-width: 900px), (max-height: 700px) {
-  .window-stage {
-    padding: 12px;
-  }
-
-  .app-window {
-    border-radius: var(--lb-radius-5);
-  }
-}
-
-@media (max-width: 620px), (max-height: 520px) {
-  .window-stage {
-    padding: 0;
-  }
-
-  .app-window {
-    border-radius: 0;
-    box-shadow: none;
-  }
 }

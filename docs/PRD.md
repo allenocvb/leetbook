@@ -130,7 +130,20 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.19 Full visual and integration QA: every view in light/dark at 1280×820, keyboard and
       focus audit, real Tauri external links/file operations, real extension capture path,
       and regression fixes
-- [ ] 9.20 UI acceptance evidence: capture final reference screenshots, record known limitations,
+- [x] 9.20 Window shell correction: remove the simulated desk frame so the app fills the OS
+      window edge to edge, grant `core:window:allow-start-dragging` so the titlebar actually
+      drags, round the window via a transparent Tauri window, make the green control enter
+      real fullscreen so the menu bar hides, give the traffic lights a muted red/amber/green
+      hover, and fix the `docs/UI_SPEC.md` line that described the handoff deck's slide
+      framing as app layout
+- [ ] 9.21 Scroll and editor interaction fixes: give the problems page an explicit height so
+      the table scrolls under its sticky header, sync slash-menu hover with the active index,
+      stop the menu from scrolling the notes page, and drop the full-document focus ring
+- [ ] 9.22 Code block authoring: replace the React code-block node view with a plain DOM one so
+      a newly inserted block can hold the caret, keep Tab in the block as indentation, add
+      Shift-Tab outdent and indentation-preserving Enter, and stop `/` opening the slash menu
+      inside code
+- [ ] 9.23 UI acceptance evidence: capture final reference screenshots, record known limitations,
       and verify every Phase 9 item against the final visual contract
 
 ## Phase 10 — Packaging

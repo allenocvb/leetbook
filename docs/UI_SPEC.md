@@ -31,7 +31,7 @@ hex values for an existing semantic role.
 
 | Token | Value | Use |
 |---|---|---|
-| `bg` | `#efedf3` | Desk behind the app window |
+| `bg` | `#efedf3` | Reserved. Defined for palette completeness only — the app fills the OS window, so nothing paints a backdrop behind it. Do not reintroduce it as a desk. |
 | `surf` | `#ffffff` | Main app surface |
 | `surf2` | `#fbfafc` | Titlebar, sidebar, row hover |
 | `surf3` | `#f7f6fa` | Muted panels and middle score chips |
@@ -89,8 +89,8 @@ Dark status pills:
 - Never bold Chewy or use it below 16px.
 - Radius scale: 5, 6, 7, 8, 9, 11, 12, 14, and 20px for pills.
 - Spacing scale: 4, 6, 9, 12, 16, 22, 26, and 34px.
-- Window shadow:
-  `0 24px 60px rgba(25,23,32,.18), 0 2px 6px rgba(25,23,32,.08)`.
+- Window shadow: `0 24px 60px rgba(25,23,32,.18), 0 2px 6px rgba(25,23,32,.08)`. Reserved for
+  large floating panels only. The app shell must not use it — the OS draws the window's shadow.
 - Floating shadow: `0 18px 40px rgba(25,23,32,.16)`.
 - Transitions are optional and limited to 120ms on background and border colors.
 
@@ -108,9 +108,33 @@ Dark status pills:
 
 ### Window shell and intro
 
-- Reference viewport: 1280×820, 12px radius, centered on `bg` with 40px desk padding.
-- Titlebar: 38px high, `surf2`, 1px `bd` bottom border, three 11px neutral circles, app name,
-  and a right-aligned theme toggle.
+- Reference viewport: 1280×820. **The OS window is the app window.** Tauri runs undecorated at
+  that size, so the shell fills the viewport edge to edge. Never render a desk background or
+  outer padding around the shell — drawing a second window inside the real one is the defect
+  this rule exists to prevent. The handoff deck shows the app flush to every edge; earlier
+  revisions of this file described the deck's *slide framing* as if it were app layout.
+- The window is rounded at 12px. macOS will not round an undecorated window, so the window is
+  configured `transparent: true` (with `macOSPrivateApi`) and the shell element paints the
+  surface and owns the radius. It is therefore the **only** element allowed an opaque
+  background — `html`, `body`, and `#root` must stay transparent or the corners fill back in
+  and the window squares off. The drop shadow comes from the OS; never add one in CSS.
+  The radius drops to 0 in fullscreen, where rounded corners would notch the display edge.
+- The green control enters **fullscreen**, not zoom. Maximizing merely grows the window and
+  leaves the macOS menu bar and Dock visible; only fullscreen hides them. This needs
+  `core:window:allow-set-fullscreen`.
+- Titlebar: 38px high, `surf2`, 1px `bd` bottom border, flush against the top edge of the OS
+  window, three 11px circles wired to close/minimize/maximize, app name, and a right-aligned
+  theme toggle. The circles are drawn by the app, not by macOS, so the treatment is identical
+  on every platform.
+- Traffic lights rest neutral on `bd2`. Hovering or keyboard-focusing anywhere in the cluster
+  reveals all three at once — `red`, `amber`, `green` in that order — using the palette's own
+  desaturated semantic colors. Never the bright macOS system hues; the cluster should read as
+  quiet until touched.
+- The titlebar is a drag region. Dragging must actually move the window: `data-tauri-drag-region`
+  calls `startDragging()`, which is **not** covered by `core:window:default` (a getters-only set),
+  so `core:window:allow-start-dragging` has to be granted in the Tauri capability file alongside
+  close/minimize/toggle-maximize. Without it the drag fails silently while resizing still works,
+  because resizing is handled by the window manager rather than the permission system.
 - Intro: centered 54px logo, Chewy 46px title, 13.5px tagline, `Le(e)t's Code` primary button,
   and an 11px mono problem/due count.
 - Intro is first-run/launch behavior; the button opens All Problems.
