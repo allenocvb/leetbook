@@ -1,13 +1,7 @@
 /*
- * The OS window is the app window: Tauri runs undecorated at 1280x820 and draws its
- * own titlebar below, so the shell fills its container edge to edge — never a
- * simulated desk or a second window inside the real one.
- *
- * The window is transparent (`transparent: true`), which is the only way to round an
- * undecorated window on macOS — so this element paints the surface and owns the
- * corner radius. It is also the only element allowed to paint an opaque background;
- * html/body/#root stay transparent or they square the corners off again. The drop
- * shadow still comes from the OS, never from CSS.
+ * The window is decorated with macOS's own controls (`titleBarStyle: "Overlay"`), so the
+ * OS supplies the corners, the shadow and the traffic lights. Nothing here draws window
+ * chrome: no radius, no shadow, no simulated desk. The shell just fills the window.
  */
 .app-window {
   width: 100%;
@@ -19,12 +13,6 @@
   overflow: hidden;
   color: var(--lb-ink);
   background: var(--lb-surf);
-  border-radius: var(--lb-radius-7);
-}
-
-/* Rounded corners in fullscreen would show as transparent notches at the screen edge. */
-.app-window[data-fullscreen="true"] {
-  border-radius: 0;
 }
 
 .app-window__content {
@@ -41,48 +29,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
+  /* Left inset clears the traffic lights macOS paints over our content. */
+  padding: 0 14px 0 78px;
   background: var(--lb-surf-2);
   border-bottom: 1px solid var(--lb-bd);
   user-select: none;
 }
 
-.titlebar__traffic-lights {
-  display: inline-flex;
-  gap: 8px;
-}
-
-.titlebar__traffic-lights button {
-  width: 11px;
-  height: 11px;
-  background: var(--lb-bd-2);
-  border-radius: 50%;
-  transition: background-color 120ms ease;
-}
-
-/*
- * Resting state is neutral; hovering or keyboard-focusing anywhere in the cluster
- * reveals all three at once, the way macOS does. The colors are the palette's own
- * semantic red/amber/green — desaturated by design — not the bright system hues.
- * The mapping follows DOM order: close, minimize, maximize.
- */
-.titlebar__traffic-lights:hover button:nth-child(1),
-.titlebar__traffic-lights:focus-within button:nth-child(1) {
-  background: var(--lb-red);
-}
-
-.titlebar__traffic-lights:hover button:nth-child(2),
-.titlebar__traffic-lights:focus-within button:nth-child(2) {
-  background: var(--lb-amber);
-}
-
-.titlebar__traffic-lights:hover button:nth-child(3),
-.titlebar__traffic-lights:focus-within button:nth-child(3) {
-  background: var(--lb-green);
-}
-
 .titlebar__name {
-  margin-left: 12px;
   color: var(--lb-muted);
   font-size: 11.5px;
 }

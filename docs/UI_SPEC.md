@@ -80,13 +80,14 @@ Dark status pills:
 
 ### Typography and geometry
 
-- Display: Chewy, one weight only. Use for logo, screen titles, note headings, and score numerals.
-- Body/UI: Quicksand 400/500/600/700.
+- Chewy is the interface typeface: logo, screen titles, note headings, score numerals and
+  all body/UI text. It has one weight, so `font-synthesis-weight: none` is set globally —
+  otherwise every 500/600/700 in the UI renders as a smeared synthetic bold.
+- Quicksand remains the fallback behind Chewy.
 - Mono: JetBrains Mono 400/500.
 - Self-host WOFF2 files so the Tauri app remains fully local and works offline.
 - Type scale: 10.5, 11, 11.5, 12, 12.5, 13.5, 14.5, 16, 19, 20, 22, 24, 29, 34,
   38, and 46px.
-- Never bold Chewy or use it below 16px.
 - Radius scale: 5, 6, 7, 8, 9, 11, 12, 14, and 20px for pills.
 - Spacing scale: 4, 6, 9, 12, 16, 22, 26, and 34px.
 - Window shadow: `0 24px 60px rgba(25,23,32,.18), 0 2px 6px rgba(25,23,32,.08)`. Reserved for
@@ -108,36 +109,26 @@ Dark status pills:
 
 ### Window shell and intro
 
-- Reference viewport: 1280×820. **The OS window is the app window.** Tauri runs undecorated at
-  that size, so the shell fills the viewport edge to edge. Never render a desk background or
-  outer padding around the shell — drawing a second window inside the real one is the defect
-  this rule exists to prevent. The handoff deck shows the app flush to every edge; earlier
-  revisions of this file described the deck's *slide framing* as if it were app layout.
-- The window is rounded at 12px. macOS will not round an undecorated window, so the window is
-  configured `transparent: true` (with `macOSPrivateApi`) and the shell element paints the
-  surface and owns the radius. It is therefore the **only** element allowed an opaque
-  background — `html`, `body`, and `#root` must stay transparent or the corners fill back in
-  and the window squares off. The drop shadow comes from the OS; never add one in CSS.
-  The radius drops to 0 in fullscreen, where rounded corners would notch the display edge.
-- The green control enters **fullscreen**, not zoom. Maximizing merely grows the window and
-  leaves the macOS menu bar and Dock visible; only fullscreen hides them. This needs
-  `core:window:allow-set-fullscreen`.
-- Titlebar: 38px high, `surf2`, 1px `bd` bottom border, flush against the top edge of the OS
-  window, three 11px circles wired to close/minimize/maximize, app name, and a right-aligned
-  theme toggle. The circles are drawn by the app, not by macOS, so the treatment is identical
-  on every platform.
-- Traffic lights rest neutral on `bd2`. Hovering or keyboard-focusing anywhere in the cluster
-  reveals all three at once — `red`, `amber`, `green` in that order — using the palette's own
-  desaturated semantic colors. Never the bright macOS system hues; the cluster should read as
-  quiet until touched.
-- The titlebar is a drag region. Dragging must actually move the window: `data-tauri-drag-region`
-  calls `startDragging()`, which is **not** covered by `core:window:default` (a getters-only set),
-  so `core:window:allow-start-dragging` has to be granted in the Tauri capability file alongside
-  close/minimize/toggle-maximize. Without it the drag fails silently while resizing still works,
-  because resizing is handled by the window manager rather than the permission system.
+- Reference viewport: 1280×820. **The OS window is the app window.** The shell fills it
+  edge to edge — never a desk background or outer padding, which would draw a second window
+  inside the real one.
+- The window is **decorated** and uses macOS's own controls via `titleBarStyle: "Overlay"`.
+  The OS therefore supplies the corners, the shadow and the traffic lights, and the green
+  button's Move/Resize/Tile menu works because those buttons are real. Do not draw window
+  controls in the app: a drawn circle cannot offer that menu, and imitating it was what
+  forced the earlier transparent-window workaround. Nothing in CSS sets a window radius or
+  shadow.
+- Titlebar: 38px high, `surf2`, 1px `bd` bottom border, with a **78px left inset** so app
+  content clears the overlaid system buttons. It carries the app name and a right-aligned
+  theme toggle only.
+- The titlebar is a drag region. `data-tauri-drag-region` calls `startDragging()`, which
+  `core:window:default` does not cover, so `core:window:allow-start-dragging` must be
+  granted. Without it dragging fails silently while resizing still works, because resizing
+  is handled by the window manager rather than the permission system.
 - Intro: centered 54px logo, Chewy 46px title, 13.5px tagline, `Le(e)t's Code` primary button,
   and an 11px mono problem/due count.
-- Intro is first-run/launch behavior; the button opens All Problems.
+- The intro opens on **every launch**, not just the first. Nothing is persisted about
+  having seen it; the button opens All Problems and it does not reappear until relaunch.
 
 ### Sidebar
 

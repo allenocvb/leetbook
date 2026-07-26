@@ -22,42 +22,29 @@ export function App({ db }: { db: SqlExecutor }) {
   );
 }
 
-export const FIRST_RUN_STORAGE_KEY = "leetbook.intro.complete";
-
-/** Either the first-run intro, a sidebar view, or a specific problem's notes page. */
+/** Either the launch intro, a sidebar view, or a specific problem's notes page. */
 type Route =
   | { view: "intro" }
   | { view: ViewId }
   | { view: "problem"; problemId: string; from: ViewId };
 
-function readInitialRoute(): Route {
-  try {
-    return window.localStorage.getItem(FIRST_RUN_STORAGE_KEY) === "true"
-      ? { view: "all-problems" }
-      : { view: "intro" };
-  } catch {
-    return { view: "intro" };
-  }
-}
-
 function Shell() {
-  const [route, setRoute] = useState<Route>(readInitialRoute);
+  // The intro is launch behaviour, not first-run: every start lands here, and nothing is
+  // persisted. Navigating away within a session does not bring it back.
+  const [route, setRoute] = useState<Route>({ view: "intro" });
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [captureTick, setCaptureTick] = useState(0);
   const capture = useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
   const counts = useCounts({ route, captureTick });
 
   if (route.view === "intro") {
-    const start = () => {
-      try {
-        window.localStorage.setItem(FIRST_RUN_STORAGE_KEY, "true");
-      } catch {
-        // Opening the app still works when storage is unavailable.
-      }
-      setRoute({ view: "all-problems" });
-    };
-
-    return <IntroScreen problemCount={counts.all} dueCount={counts.due} onStart={start} />;
+    return (
+      <IntroScreen
+        problemCount={counts.all}
+        dueCount={counts.due}
+        onStart={() => setRoute({ view: "all-problems" })}
+      />
+    );
   }
 
   const activeView = route.view === "problem" ? route.from : route.view;

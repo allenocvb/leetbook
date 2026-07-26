@@ -5,22 +5,29 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "core:window:allow-close",
-    "core:window:allow-minimize",
-    "core:window:allow-toggle-maximize",
     "core:window:allow-start-dragging",
-    "core:window:allow-set-fullscreen",
     "sql:default",
     "sql:allow-execute",
     "sql:allow-select",
     "dialog:default",
     {
       "identifier": "opener:allow-open-url",
-      "allow": [{ "url": "https://leetcode.com/**" }, { "url": "https://www.leetcode.com/**" }]
+      "allow": [
+        {
+          "url": "https://leetcode.com/**"
+        },
+        {
+          "url": "https://www.leetcode.com/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-write-text-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     }
   ]
 }

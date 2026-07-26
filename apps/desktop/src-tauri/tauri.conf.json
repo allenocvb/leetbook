@@ -10,7 +10,6 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "LeetBook",
@@ -19,9 +18,8 @@
         "minWidth": 800,
         "minHeight": 600,
         "center": true,
-        "decorations": false,
-        "transparent": true,
-        "shadow": true
+        "decorations": true,
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {

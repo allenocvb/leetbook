@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
-import { App, FIRST_RUN_STORAGE_KEY } from "../App.js";
+import { App } from "../App.js";
 import { makeDb, seed } from "../test-utils.js";
 import { NAV_ITEMS } from "./Sidebar.js";
 
-async function renderApp({ introComplete = true }: { introComplete?: boolean } = {}) {
+async function renderApp({ skipIntro = true }: { skipIntro?: boolean } = {}) {
   const db = await makeDb();
   await seed(db, [
     // reviewed long ago with a failing score → due now
@@ -18,9 +18,10 @@ async function renderApp({ introComplete = true }: { introComplete?: boolean } =
     },
     { slug: "untouched", title: "Untouched", tags: ["Graphs"] },
   ]);
-  if (introComplete) window.localStorage.setItem(FIRST_RUN_STORAGE_KEY, "true");
   render(<App db={db} />);
-  if (introComplete) {
+  // The intro now opens on every launch, so tests that need a view click through it.
+  if (skipIntro) {
+    await userEvent.click(await screen.findByRole("button", { name: "Le(e)t's Code" }));
     await waitFor(() => expect(screen.getByText("Old Fail")).toBeInTheDocument());
   }
 }
@@ -30,16 +31,19 @@ describe("App shell", () => {
     window.localStorage.clear();
   });
 
-  it("shows the first-run intro with live counts and remembers completion", async () => {
-    await renderApp({ introComplete: false });
+  it("opens the intro on every launch with live counts", async () => {
+    await renderApp({ skipIntro: false });
 
     expect(screen.getByRole("heading", { name: "LeetBook" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText("2 problems · 1 due today")).toBeInTheDocument());
 
     await userEvent.click(screen.getByRole("button", { name: "Le(e)t's Code" }));
-
-    expect(window.localStorage.getItem(FIRST_RUN_STORAGE_KEY)).toBe("true");
     expect(screen.getByRole("heading", { name: "All Problems" })).toBeInTheDocument();
+
+    // Nothing is persisted: a fresh launch shows it again rather than remembering.
+    cleanup();
+    await renderApp({ skipIntro: false });
+    expect(screen.getByRole("button", { name: "Le(e)t's Code" })).toBeInTheDocument();
   });
 
   it("renders the sidebar with every nav item", async () => {

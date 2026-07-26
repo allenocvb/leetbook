@@ -146,7 +146,13 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.23 Problem deletion: remove a problem and all derived records from the notes page with
       an inline confirm, cancel autosave first so the note is not recreated, and delete children
       explicitly rather than relying on a foreign-key cascade the app connection does not enable
-- [ ] 9.24 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.24 Launch intro: show the intro on every launch instead of only the first, and stop
+      persisting a seen-it flag
+- [x] 9.25 Native macOS window controls: switch to a decorated window with
+      `titleBarStyle: "Overlay"` so the green button offers Move/Resize/Tile, remove the drawn
+      traffic lights, and drop the transparent-window workaround they made necessary
+- [x] 9.26 Chewy across the interface, with synthetic bold disabled
+- [ ] 9.27 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.

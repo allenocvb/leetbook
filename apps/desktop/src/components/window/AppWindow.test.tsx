@@ -21,10 +21,9 @@ describe("AppWindow", () => {
 
     expect(screen.getByText("LeetBook")).toBeInTheDocument();
     expect(screen.getByText("Notebook content")).toBeInTheDocument();
-    expect(container.querySelectorAll(".titlebar__traffic-lights button")).toHaveLength(3);
-    expect(screen.getByRole("button", { name: "Close window" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Minimize window" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Toggle full screen" })).toBeInTheDocument();
+    // macOS draws the window controls itself; the app must not render its own.
+    expect(container.querySelector(".titlebar__traffic-lights")).toBeNull();
+    expect(screen.queryByRole("button", { name: /window|full screen/i })).toBeNull();
     expect(container.querySelector(".titlebar")).toHaveAttribute("data-tauri-drag-region");
   });
 
@@ -39,20 +38,6 @@ describe("AppWindow", () => {
     // so a desk-stage wrapper would render a second window inside the real one.
     expect(container.querySelector(".window-stage")).toBeNull();
     expect(container.firstElementChild).toHaveClass("app-window");
-  });
-
-  it("orders the traffic lights close, minimize, maximize", () => {
-    const { container } = render(
-      <ThemeProvider>
-        <AppWindow>Content</AppWindow>
-      </ThemeProvider>,
-    );
-
-    // The hover colors are assigned by :nth-child, so this order is load-bearing.
-    const labels = [...container.querySelectorAll(".titlebar__traffic-lights button")].map(
-      (button) => button.getAttribute("aria-label"),
-    );
-    expect(labels).toEqual(["Close window", "Minimize window", "Toggle full screen"]);
   });
 
   it("keeps the persisted theme control in the titlebar", async () => {

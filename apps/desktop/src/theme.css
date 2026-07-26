@@ -38,7 +38,7 @@
   --lb-status-new-fg: #57545f;
 
   --lb-font-display: "Chewy", cursive;
-  --lb-font-body: "Quicksand", "Helvetica Neue", sans-serif;
+  --lb-font-body: "Chewy", "Quicksand", "Helvetica Neue", sans-serif;
   --lb-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --lb-radius-1: 5px;
@@ -127,22 +127,21 @@ body,
   height: 100%;
 }
 
-/*
- * Transparent on purpose. The window itself is transparent so its corners can be
- * rounded, and `.app-window` is the single layer that paints the surface. Painting
- * a background on any of these fills the rounded corners back in and squares the
- * window off.
- */
 html,
 body,
 #root {
-  background: transparent;
+  background: var(--lb-surf);
 }
 
 body {
   font-family: var(--lb-font-body);
   font-size: 14px;
   font-weight: 400;
+  /*
+   * Chewy ships a single weight. Without this, every 500/600/700 in the UI gets a
+   * synthesised bold that thickens and smears the letterforms.
+   */
+  font-synthesis-weight: none;
   color: var(--lb-ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
