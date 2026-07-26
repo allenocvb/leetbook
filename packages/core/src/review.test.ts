@@ -189,3 +189,28 @@ describe("reviseLatestReview", () => {
     await expect(reviseLatestReview(db, problemId, { reviewCount: 2.5 })).rejects.toThrow(/whole/);
   });
 });
+
+describe("reviseLatestReview rep-count preservation", () => {
+  it("keeps an imported rep count when only the score changes", async () => {
+    // Stands in for a Notion import: six claimed reps, one actual review row.
+    await applyReview(db, { problemId, score: 3 }, new Date("2026-07-01T00:00:00.000Z"));
+    const imported = await createSchedulingRepo(db).get(problemId);
+    if (!imported) throw new Error("seed failed");
+    await createSchedulingRepo(db).put({ ...imported, reviewCount: 6 });
+
+    const { state } = await reviseLatestReview(db, problemId, { score: 5 });
+
+    expect(state.reviewCount).toBe(6);
+    expect(await createReviewsRepo(db).listByProblem(problemId)).toHaveLength(1);
+  });
+
+  it("still lets an explicit override win", async () => {
+    await applyReview(db, { problemId, score: 3 }, new Date("2026-07-01T00:00:00.000Z"));
+    const imported = await createSchedulingRepo(db).get(problemId);
+    if (!imported) throw new Error("seed failed");
+    await createSchedulingRepo(db).put({ ...imported, reviewCount: 6 });
+
+    const { state } = await reviseLatestReview(db, problemId, { score: 5, reviewCount: 2 });
+    expect(state.reviewCount).toBe(2);
+  });
+});

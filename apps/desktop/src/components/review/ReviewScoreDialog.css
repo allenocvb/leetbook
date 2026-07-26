@@ -55,3 +55,10 @@
 .review-score-dialog__fields .problem-form__label {
   margin-top: 0;
 }
+
+.review-score-dialog__note {
+  margin: var(--lb-space-3) 0 0;
+  color: var(--lb-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}

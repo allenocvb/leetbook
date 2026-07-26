@@ -123,8 +123,16 @@ export async function reviseLatestReview(
     a.reviewedAt.localeCompare(b.reviewedAt),
   );
   const replayed = replayScheduling(problemId, revised);
-  const state =
-    input.reviewCount === undefined ? replayed : { ...replayed, reviewCount: input.reviewCount };
+
+  /*
+   * Keep the stored rep count unless the user overrode it. The replay derives reps from the
+   * number of review rows, which is wrong whenever the two legitimately differ — an imported
+   * Notion problem carries six reps and one review, so correcting its score used to silently
+   * reset it to one. FSRS state (interval, difficulty, due date) still comes from the replay.
+   */
+  const existing = await createSchedulingRepo(db).get(problemId);
+  const reviewCount = input.reviewCount ?? existing?.reviewCount ?? replayed.reviewCount;
+  const state = { ...replayed, reviewCount };
 
   await reviews.revise(latest.id, { score: input.score, reviewedAt: input.reviewedAt });
   await createSchedulingRepo(db).put(state);

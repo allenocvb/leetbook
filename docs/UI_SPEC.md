@@ -191,7 +191,11 @@ Dark status pills:
   then replays FSRS over the full history. Changing the date may reorder history, so the
   replay sorts chronologically first. Rep count is an explicit override of stored FSRS state,
   not a count of rows — the Notion import already sets it independently — so correcting an
-  imported total does not fabricate review records.
+  imported total does not fabricate review records. A replay must **preserve** the stored rep
+  count unless explicitly overridden: it derives reps from the number of review rows, which is
+  wrong whenever the two legitimately differ, and silently reset imported problems to 1.
+  The dialog states that reps drives status (Mastered needs three), not the schedule — the
+  next review date comes from FSRS stability, so editing reps deliberately leaves it alone.
 - Deleting a problem lives here, not in the table: a table row is a single button that opens
   notes, so a second control inside it would compete with that contract. The action is a ghost
   `Delete` that swaps in place for a `Delete for good?` label plus Cancel/Delete, matching the

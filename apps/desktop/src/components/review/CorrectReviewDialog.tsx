@@ -145,6 +145,11 @@ export function CorrectReviewDialog({
           </span>
         </div>
 
+        <p className="review-score-dialog__note">
+          The next review date comes from the score and FSRS history, not from reps. Reps only
+          affects status — Mastered needs at least three.
+        </p>
+
         {error && (
           <p className="review-score-dialog__error" role="alert">
             {error}
