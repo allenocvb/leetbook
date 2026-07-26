@@ -151,6 +151,10 @@ no editor embeds/databases. Local-first is a feature.
 
 ## Phase 10 — Packaging
 
+> **Sequencing open.** If the web build (Phase 12) becomes the primary surface, macOS
+> notarization ($99/yr) and Chrome Web Store submission may be money and effort spent on a
+> secondary target. Decide whether to defer this phase behind Phase 12 before starting it.
+
 - [ ] 10.1 tauri-action release builds + auto-update
 - [ ] 10.2 macOS signing/notarization; Chrome Web Store submission
 
@@ -158,3 +162,44 @@ no editor embeds/databases. Local-first is a feature.
 
 - [ ] 11.1 Launch README with demo GIF, extension setup, CONTRIBUTING.md, and issue templates
 - [ ] 11.2 v0.1.0 release
+
+## Phase 12 — Web app (local-first in the browser)
+
+> Feasible because the architecture held: `packages/core` is 1,330 lines with one
+> dependency (`ts-fsrs`) and reaches storage only through `SqlExecutor`, and just six
+> modules in `apps/desktop` touch Tauri. Everything else ports unchanged.
+>
+> Stays local-first — no accounts, no server, `$0` hosting. Phase 13 keeps the door open
+> for sync without committing to it. Desktop remains the better capture path meanwhile,
+> so both ship from this monorepo against the same core.
+
+- [ ] 12.1 `importDatabaseJson` in core, matching the existing versioned
+      `exportDatabaseJson`. Export was written for migration; the other half never was,
+      and it is the only way to move existing desktop data into the web build.
+- [ ] 12.2 `apps/web` scaffold: Vite + React, shared tsconfig/Biome/Vitest, Turbo wiring.
+      Do **not** extract `packages/ui` yet — a shared UI package needs two real consumers
+      to pay for itself; revisit once web ships and desktop is still maintained.
+- [ ] 12.3 Browser `SqlExecutor` over OPFS (wa-sqlite/sqlocal in a worker), running the same
+      core migrations on boot. Call `navigator.storage.persist()`; browser storage is
+      evictable, which is a real durability regression from a SQLite file on disk.
+- [ ] 12.4 Port the platform-agnostic views and replace the six Tauri seams: external links
+      → `window.open` (the browser fallback already exists), file dialogs → File System
+      Access API with a download fallback, window chrome → deleted (the browser is the
+      window), capture listener → message ingress, `db/init` → the browser executor.
+- [ ] 12.5 Extension capture for web: a content script on the LeetBook origin relays payloads
+      to an open tab, queueing in extension storage when no tab is open and flushing on the
+      next visit. Both ingress paths share one ingest function. Note this is *worse* than the
+      desktop bridge — a background app beats a tab the user has to remember to open.
+- [ ] 12.6 Import/export parity plus a first-run "bring my data" flow built on 12.1.
+- [ ] 12.7 Static deploy (no server), offline/PWA shell, and an honest storage-eviction
+      warning with a backup prompt.
+- [ ] 12.8 Web acceptance against `docs/UI_SPEC.md`, excluding the desktop-only window shell.
+
+## Phase 13 — Sync (only if multi-device is actually wanted)
+
+> Deliberately deferred. The append-only review log and the explicit latest-score
+> correction path were designed to make this possible later; adding accounts and a server
+> reverses `docs/DESIGN.md` §2 and introduces hosting cost, so it needs a real reason.
+
+- [ ] 13.1 Decide the model (own server vs. user-supplied storage) and rewrite DESIGN.md §2
+      before writing any code.
