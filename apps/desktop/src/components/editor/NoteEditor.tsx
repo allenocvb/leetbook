@@ -175,7 +175,12 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
     <div ref={container} className="note-editor" onKeyDownCapture={handleKeyDown}>
       <EditorContent editor={editor} />
       {slashMenu && (
-        <SlashCommandMenu state={slashMenu} activeIndex={activeIndex} onSelect={selectCommand} />
+        <SlashCommandMenu
+          state={slashMenu}
+          activeIndex={activeIndex}
+          onSelect={selectCommand}
+          onHover={setActiveIndex}
+        />
       )}
     </div>
   );

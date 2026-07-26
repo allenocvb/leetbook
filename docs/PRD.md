@@ -136,7 +136,7 @@ no editor embeds/databases. Local-first is a feature.
       real fullscreen so the menu bar hides, give the traffic lights a muted red/amber/green
       hover, and fix the `docs/UI_SPEC.md` line that described the handoff deck's slide
       framing as app layout
-- [ ] 9.21 Scroll and editor interaction fixes: give the problems page an explicit height so
+- [x] 9.21 Scroll and editor interaction fixes: give the problems page an explicit height so
       the table scrolls under its sticky header, sync slash-menu hover with the active index,
       stop the menu from scrolling the notes page, and drop the full-document focus ring
 - [ ] 9.22 Code block authoring: replace the React code-block node view with a plain DOM one so

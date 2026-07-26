@@ -11,10 +11,14 @@
   text-wrap: pretty;
 }
 
+/*
+ * No focus ring on the document surface. `:focus-visible` matches while typing, so a ring
+ * here drew a 240px purple box around the note on every keystroke. The caret is the focus
+ * indicator for a text surface — the same convention Notion and every text field use.
+ * Discrete controls inside the editor keep their own rings.
+ */
 .note-editor .ProseMirror:focus-visible {
-  outline: 2px solid var(--lb-accent);
-  outline-offset: 6px;
-  border-radius: var(--lb-radius-1);
+  outline: none;
 }
 
 .note-editor .ProseMirror .is-editor-empty:first-child::before {
@@ -154,8 +158,12 @@
   cursor: pointer;
 }
 
-.slash-command-menu__item[data-active="true"],
-.slash-command-menu__item:hover {
+/*
+ * Selection is expressed by `data-active` alone. Hovering syncs the active index in
+ * JS, so a separate `:hover` rule would let two rows look chosen at once — the mouse
+ * highlighting one while Enter inserts another.
+ */
+.slash-command-menu__item[data-active="true"] {
   color: var(--lb-accent-text);
   background: var(--lb-tint);
 }
@@ -181,8 +189,7 @@
   font-weight: 500;
 }
 
-.slash-command-menu__item[data-active="true"] .slash-command-menu__badge,
-.slash-command-menu__item:hover .slash-command-menu__badge {
+.slash-command-menu__item[data-active="true"] .slash-command-menu__badge {
   color: var(--lb-accent-text);
   border-color: var(--lb-accent);
 }

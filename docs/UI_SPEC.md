@@ -164,6 +164,9 @@ Dark status pills:
 - Score chip: 19×19px. Scores 0–1 use `softRed/red`, 2–3 use `surf3/txt3`, 4–5 use
   `tint/accTxt`, and missing uses `surf3/mut4`.
 - Provide sort, search, category filtering, filter clearing, empty state, and `+ New`.
+- The row area scrolls under a sticky header. The page must take its height explicitly
+  (`height: 100%`); the flush main pane is a block container, so relying on `flex: 1` collapses
+  the page to content height and the table is clipped instead of scrolled.
 
 ### Problem notes
 
@@ -183,7 +186,14 @@ Editor:
 - Support headings, paragraphs, bold, italic, inline code, bullets, numbered lists, blockquote,
   callout, and syntax-highlighted code blocks.
 - Empty editor placeholder: `Type “/” for commands…`.
-- Slash menu exposes the supported block types and is fully keyboard operable.
+- Slash menu exposes the supported block types and is fully keyboard operable. Exactly one item
+  is ever highlighted: hovering adopts the active index rather than styling a second row, so the
+  item under the pointer is always the one Enter will insert. Keeping the active item in view
+  must scroll the menu only — `scrollIntoView` walks every scrollable ancestor and drags the
+  notes page with it.
+- The document surface takes no focus ring. `:focus-visible` matches while typing, so a ring
+  there boxes the whole note on every keystroke; the caret is the focus indicator, as in any
+  text field. Discrete controls inside the editor keep their own focus styles.
 - Code blocks show a `surf2` header with language on the left and optional snapshot date on the
   right, followed by a `code` body using JetBrains Mono 12.5px.
 - Captured code snapshots are read-only and visually consistent with editable code blocks.

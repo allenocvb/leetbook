@@ -176,6 +176,24 @@ describe("NoteEditor", () => {
     });
   });
 
+  it("selects the slash command the pointer is actually over", async () => {
+    await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/{ArrowDown}");
+
+    // Keyboard moved the selection; hovering a different row must take it over, or the
+    // mouse highlights one command while Enter inserts another.
+    const codeBlock = screen.getByRole("option", { name: /Code block/ });
+    await userEvent.hover(codeBlock);
+
+    expect(codeBlock).toHaveAttribute("aria-selected", "true");
+    expect(surface).toHaveAttribute("aria-activedescendant", "slash-command-code");
+    expect(screen.getAllByRole("option").filter((o) => o.dataset.active === "true")).toHaveLength(
+      1,
+    );
+  });
+
   it("moves through slash commands with arrows and closes with escape", async () => {
     await renderEditor(null);
     const surface = screen.getByRole("textbox", { name: "Problem notes" });
