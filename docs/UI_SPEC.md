@@ -167,6 +167,11 @@ Dark status pills:
   chips, next review, last review with latest score and reps, and latest runtime when present.
 - Allow editing title, URL, difficulty, and categories without making derived scheduling fields
   directly editable.
+- Categories are a **closed set**, picked from a dropdown of LeetCode's topic list and shown as
+  removable chips — never free text. Typed categories produced near-duplicates that fragmented
+  the sidebar (a Notion export said "HashTable" while capture supplied "Hash Table"). Every
+  write path normalizes through the canonical list, and existing rows are folded together on
+  boot.
 - Review history rows reserve the correct-score column at a fixed width. Each row is its own
   grid and only the latest row carries that button, so an `auto` track collapses to zero
   elsewhere and knocks the score labels out of alignment.

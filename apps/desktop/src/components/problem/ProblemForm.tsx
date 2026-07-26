@@ -1,4 +1,4 @@
-import type { Difficulty, ProblemInput } from "@leetbook/core";
+import { CATEGORIES, type Difficulty, type ProblemInput } from "@leetbook/core";
 import { type FormEvent, useId, useState } from "react";
 import { Button } from "../ui/Button.js";
 import "./ProblemForm.css";
@@ -34,25 +34,12 @@ export function resolveSlug(input: string): string | null {
   }
 }
 
-export function parseCategories(input: string): string[] {
-  const seen = new Set<string>();
-  return input
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter((tag) => {
-      const key = tag.toLocaleLowerCase();
-      if (!tag || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-}
-
 export function ProblemForm({ initialValue, submitLabel, onSubmit, onCancel }: ProblemFormProps) {
   const fieldId = useId();
   const [url, setUrl] = useState(initialValue?.url ?? "");
   const [title, setTitle] = useState(initialValue?.title ?? "");
   const [difficulty, setDifficulty] = useState<Difficulty>(initialValue?.difficulty ?? "easy");
-  const [categories, setCategories] = useState(initialValue?.tags.join(", ") ?? "");
+  const [categories, setCategories] = useState<string[]>(initialValue?.tags ?? []);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -72,7 +59,7 @@ export function ProblemForm({ initialValue, submitLabel, onSubmit, onCancel }: P
         title: title.trim() || titleFromSlug(slug),
         url: `https://leetcode.com/problems/${slug}/`,
         difficulty,
-        tags: parseCategories(categories),
+        tags: categories,
       });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -124,16 +111,40 @@ export function ProblemForm({ initialValue, submitLabel, onSubmit, onCancel }: P
       </select>
 
       <label className="problem-form__label" htmlFor={`${fieldId}-categories`}>
-        Categories <span className="problem-form__hint">(comma separated)</span>
+        Categories <span className="problem-form__hint">(pick from the list)</span>
       </label>
-      <input
+      <select
         id={`${fieldId}-categories`}
         className="problem-form__control"
-        value={categories}
-        onChange={(event) => setCategories(event.target.value)}
-        placeholder="Array, Hash Table"
-        autoComplete="off"
-      />
+        value=""
+        onChange={(event) => {
+          const picked = event.target.value;
+          if (picked) setCategories((current) => [...current, picked]);
+        }}
+      >
+        <option value="">Add a category…</option>
+        {CATEGORIES.filter((name) => !categories.includes(name)).map((name) => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+      {categories.length > 0 && (
+        <ul className="problem-form__chips">
+          {categories.map((name) => (
+            <li key={name}>
+              <button
+                type="button"
+                className="problem-form__chip"
+                aria-label={`Remove ${name}`}
+                onClick={() => setCategories((current) => current.filter((c) => c !== name))}
+              >
+                {name} <span aria-hidden="true">×</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {error && (
         <p className="problem-form__error" role="alert">

@@ -1,7 +1,9 @@
+import { normalizeCategories } from "../../categories.js";
 import type { Problem } from "../../types.js";
 import type { SqlExecutor } from "../executor.js";
 import { type ProblemRow, toProblem } from "../rows.js";
 
+/** Categories are normalized on write, so every path (manual, import, capture) agrees. */
 export interface ProblemInput {
   slug: string;
   title: string;
@@ -39,7 +41,7 @@ export function createProblemsRepo(db: SqlExecutor): ProblemsRepo {
           input.title,
           input.url,
           input.difficulty,
-          JSON.stringify(input.tags),
+          JSON.stringify(normalizeCategories(input.tags)),
           now.toISOString(),
         ],
       );
@@ -53,7 +55,14 @@ export function createProblemsRepo(db: SqlExecutor): ProblemsRepo {
         `UPDATE problems
          SET slug = ?, title = ?, url = ?, difficulty = ?, tags = ?
          WHERE id = ?`,
-        [input.slug, input.title, input.url, input.difficulty, JSON.stringify(input.tags), id],
+        [
+          input.slug,
+          input.title,
+          input.url,
+          input.difficulty,
+          JSON.stringify(normalizeCategories(input.tags)),
+          id,
+        ],
       );
       const stored = await this.getById(id);
       if (!stored) throw new Error(`problem "${id}" was not found`);

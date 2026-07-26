@@ -1,3 +1,11 @@
+export {
+  CATEGORIES,
+  type Category,
+  isKnownCategory,
+  normalizeCategories,
+  normalizeCategory,
+  normalizeStoredCategories,
+} from "./categories.js";
 export type { SqlExecutor } from "./db/executor.js";
 export { migrate } from "./db/migrate.js";
 export { MIGRATIONS, type Migration } from "./db/migrations.js";

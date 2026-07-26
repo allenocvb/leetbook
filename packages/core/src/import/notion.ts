@@ -1,3 +1,4 @@
+import { normalizeCategories } from "../categories.js";
 import type { SqlExecutor } from "../db/executor.js";
 import { createProblemsRepo } from "../db/repositories/problems.js";
 import { createReviewsRepo } from "../db/repositories/reviews.js";
@@ -67,13 +68,16 @@ function sameProblemMetadata(
   problem: Problem,
   input: Pick<Problem, "slug" | "title" | "url" | "difficulty" | "tags">,
 ): boolean {
+  // Compare against the normalized form the repo will store, or a re-import of the same
+  // file reports every row as updated purely because the CSV spells a category differently.
+  const incomingTags = normalizeCategories(input.tags);
   return (
     problem.slug === input.slug &&
     problem.title === input.title &&
     problem.url === input.url &&
     problem.difficulty === input.difficulty &&
-    problem.tags.length === input.tags.length &&
-    problem.tags.every((tag, index) => tag === input.tags[index])
+    problem.tags.length === incomingTags.length &&
+    problem.tags.every((tag, index) => tag === incomingTags[index])
   );
 }
 

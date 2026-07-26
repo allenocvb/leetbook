@@ -5,7 +5,6 @@ import { DbProvider } from "../db/DbContext.js";
 import { AllProblemsPage } from "../pages/AllProblemsPage.js";
 import { makeDb } from "../test-utils.js";
 import { resolveSlug, titleFromSlug } from "./AddProblemDialog.js";
-import { parseCategories } from "./problem/ProblemForm.js";
 
 describe("resolveSlug", () => {
   it("accepts full URLs, description URLs, and bare slugs", () => {
@@ -31,16 +30,6 @@ describe("titleFromSlug", () => {
   });
 });
 
-describe("parseCategories", () => {
-  it("trims empty values and removes case-insensitive duplicates", () => {
-    expect(parseCategories(" Array, Hash Table, array, , Two Pointers ")).toEqual([
-      "Array",
-      "Hash Table",
-      "Two Pointers",
-    ]);
-  });
-});
-
 describe("AddProblemDialog on the All Problems page", () => {
   async function renderEmptyPage() {
     const db = await makeDb();
@@ -63,7 +52,9 @@ describe("AddProblemDialog on the All Problems page", () => {
       "https://leetcode.com/problems/two-sum/",
     );
     await userEvent.selectOptions(screen.getByLabelText("Difficulty"), "easy");
-    await userEvent.type(screen.getByLabelText(/Categories/), "Array, Hash Table");
+    // Categories are picked from the canonical list rather than typed.
+    await userEvent.selectOptions(screen.getByLabelText(/Categories/), "Array");
+    await userEvent.selectOptions(screen.getByLabelText(/Categories/), "Hash Table");
     await userEvent.click(screen.getByRole("button", { name: "Add problem" }));
 
     // dialog closes, table refreshes with derived title

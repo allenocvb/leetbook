@@ -175,9 +175,12 @@ describe("ProblemNotesPage", () => {
     await userEvent.clear(title);
     await userEvent.type(title, "Two Sum II");
     await userEvent.selectOptions(screen.getByLabelText("Difficulty"), "medium");
+    // Remove the seeded chips, then pick replacements from the canonical list.
+    await userEvent.click(screen.getByRole("button", { name: "Remove Array" }));
+    await userEvent.click(screen.getByRole("button", { name: "Remove Hash Table" }));
     const categories = screen.getByLabelText(/Categories/);
-    await userEvent.clear(categories);
-    await userEvent.type(categories, "Array, Two Pointers");
+    await userEvent.selectOptions(categories, "Array");
+    await userEvent.selectOptions(categories, "Two Pointers");
     await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
 
     await waitFor(() =>

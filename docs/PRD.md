@@ -152,7 +152,9 @@ no editor embeds/databases. Local-first is a feature.
       `titleBarStyle: "Overlay"` so the green button offers Move/Resize/Tile, remove the drawn
       traffic lights, and drop the transparent-window workaround they made necessary
 - [x] 9.26 Chewy across the interface, with synthetic bold disabled
-- [ ] 9.27 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.27 Canonical categories: closed LeetCode topic list picked from a dropdown, normalized
+      on every write path, with existing variant spellings folded together on boot
+- [ ] 9.28 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.
