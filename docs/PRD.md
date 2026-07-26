@@ -76,10 +76,10 @@ no editor embeds/databases. Local-first is a feature.
 - [ ] 7.4 Offline queue in extension storage, flush on reconnect
 - [ ] 7.5 Settings & Pairing screen in app
 
-## Phase 8 — Import/export UI
+## Phase 8 — Import/export UI ✅ (done before Phase 7 to unlock real data)
 
-- [ ] 8.1 Notion CSV import flow (file picker + preview + result)
-- [ ] 8.2 JSON/Markdown export buttons
+- [x] 8.1 Notion CSV import flow (file picker + result summary with skipped reasons)
+- [x] 8.2 JSON/Markdown export buttons (tauri dialog + fs)
 
 ## Phase 9 — Packaging
 

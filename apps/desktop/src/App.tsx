@@ -9,6 +9,7 @@ import { AllProblemsPage } from "./pages/AllProblemsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
+import { SettingsPage } from "./pages/SettingsPage.js";
 
 export function App({ db }: { db: SqlExecutor }) {
   return (
@@ -68,6 +69,6 @@ function Page({
     case "capture":
       return <PagePlaceholder title="Capture" hint="Extension capture arrives in Phase 7." />;
     case "settings":
-      return <PagePlaceholder title="Settings & Pairing" hint="Pairing arrives in Phase 7." />;
+      return <SettingsPage />;
   }
 }
