@@ -1,11 +1,26 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ProblemTable } from "../components/table/ProblemTable.js";
-import { type SortKey, type SortState, sortRows } from "../components/table/rowLogic.js";
+import {
+  filterRows,
+  type SortKey,
+  type SortState,
+  sortRows,
+} from "../components/table/rowLogic.js";
 import { useTableRows } from "../hooks/useTableRows.js";
 
-export function DueTodayPage({ onOpenProblem }: { onOpenProblem: (id: string) => void }) {
+export function DueTodayPage({
+  onOpenProblem,
+  category = null,
+}: {
+  onOpenProblem: (id: string) => void;
+  category?: string | null;
+}) {
   const { rows, loading, error } = useTableRows("due");
   const [sort, setSort] = useState<SortState>({ key: "nextReview", dir: "asc" });
+  const visible = useMemo(
+    () => sortRows(filterRows(rows, { query: "", category }), sort),
+    [rows, category, sort],
+  );
 
   const handleSort = (key: SortKey) =>
     setSort((prev) =>
@@ -19,21 +34,18 @@ export function DueTodayPage({ onOpenProblem }: { onOpenProblem: (id: string) =>
       <header style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, margin: "0 0 4px" }}>Due Today</h1>
         <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: 13 }}>
-          {loading ? "Loading…" : `${rows.length} due`}
+          {loading ? "Loading…" : `${visible.length} due`}
         </p>
       </header>
 
-      {!loading && rows.length === 0 ? (
+      {!loading && visible.length === 0 ? (
         <p style={{ color: "var(--text-secondary)" }}>
-          Nothing due. Nice work — come back tomorrow.
+          {category
+            ? "Nothing due in this category."
+            : "Nothing due. Nice work — come back tomorrow."}
         </p>
       ) : (
-        <ProblemTable
-          rows={sortRows(rows, sort)}
-          sort={sort}
-          onSort={handleSort}
-          onOpen={onOpenProblem}
-        />
+        <ProblemTable rows={visible} sort={sort} onSort={handleSort} onOpen={onOpenProblem} />
       )}
     </div>
   );

@@ -41,8 +41,9 @@ function readInitialRoute(): Route {
 
 function Shell() {
   const [route, setRoute] = useState<Route>(readInitialRoute);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [captureTick, setCaptureTick] = useState(0);
-  useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
+  const listener = useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
   const counts = useCounts({ route, captureTick });
 
   if (route.view === "intro") {
@@ -61,15 +62,25 @@ function Shell() {
   const activeView = route.view === "problem" ? route.from : route.view;
   const openProblem = (problemId: string) =>
     setRoute({ view: "problem", problemId, from: activeView });
+  const pickCategory = (category: string) => {
+    setActiveCategory((current) => (current === category ? null : category));
+    setRoute({ view: activeView === "due-today" ? "due-today" : "all-problems" });
+  };
 
   return (
     <AppLayout
       activeView={activeView}
       onNavigate={(view) => setRoute({ view })}
       counts={{ "all-problems": counts.all, "due-today": counts.due }}
+      categories={counts.categories}
+      activeCategory={activeCategory}
+      onPickCategory={pickCategory}
+      listener={listener}
     >
       <Page
         route={route}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
         onOpenProblem={openProblem}
         onBack={() => setRoute({ view: activeView })}
         onExitReview={() => setRoute({ view: "due-today" })}
@@ -80,11 +91,15 @@ function Shell() {
 
 function Page({
   route,
+  activeCategory,
+  onCategoryChange,
   onOpenProblem,
   onBack,
   onExitReview,
 }: {
   route: Route;
+  activeCategory: string | null;
+  onCategoryChange: (category: string | null) => void;
   onOpenProblem: (id: string) => void;
   onBack: () => void;
   onExitReview: () => void;
@@ -93,9 +108,15 @@ function Page({
     case "problem":
       return <ProblemNotesPage problemId={route.problemId} onBack={onBack} />;
     case "all-problems":
-      return <AllProblemsPage onOpenProblem={onOpenProblem} />;
+      return (
+        <AllProblemsPage
+          onOpenProblem={onOpenProblem}
+          category={activeCategory}
+          onCategoryChange={onCategoryChange}
+        />
+      );
     case "due-today":
-      return <DueTodayPage onOpenProblem={onOpenProblem} />;
+      return <DueTodayPage onOpenProblem={onOpenProblem} category={activeCategory} />;
     case "review":
       return <ReviewSessionPage onExit={onExitReview} />;
     case "capture":

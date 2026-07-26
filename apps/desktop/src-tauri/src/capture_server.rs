@@ -4,9 +4,14 @@
 //! are forwarded to the webview as a `leetbook://capture` event; all business
 //! logic stays in TypeScript (packages/core).
 
-use std::{fs, io::Read as _, path::PathBuf, thread};
+use std::{
+    fs,
+    path::PathBuf,
+    sync::atomic::{AtomicBool, Ordering},
+    thread,
+};
 
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tiny_http::{Header, Method, Response, Server};
 
 pub const PORT: u16 = 7749;
@@ -16,19 +21,30 @@ const TOKEN_HEADER: &str = "x-leetbook-token";
 pub struct PairingInfo {
     pub port: u16,
     pub token: String,
+    pub listening: bool,
 }
 
+#[derive(Default)]
+pub struct ListenerState(AtomicBool);
+
 #[tauri::command]
-pub fn get_pairing_info(app: AppHandle) -> Result<PairingInfo, String> {
+pub fn get_pairing_info(
+    app: AppHandle,
+    state: State<'_, ListenerState>,
+) -> Result<PairingInfo, String> {
     Ok(PairingInfo {
         port: PORT,
         token: load_or_create_token(&app)?,
+        listening: state.0.load(Ordering::Relaxed),
     })
 }
 
 pub fn start(app: AppHandle) -> Result<(), String> {
     let token = load_or_create_token(&app)?;
     let server = Server::http(("127.0.0.1", PORT)).map_err(|e| e.to_string())?;
+    app.state::<ListenerState>()
+        .0
+        .store(true, Ordering::Relaxed);
     thread::spawn(move || {
         for mut request in server.incoming_requests() {
             let response = handle(&app, &token, &mut request);
@@ -59,7 +75,10 @@ fn handle(
 
             let mut body = String::new();
             if request.as_reader().read_to_string(&mut body).is_err() {
-                return cors(json_response(400, r#"{"ok":false,"error":"unreadable body"}"#));
+                return cors(json_response(
+                    400,
+                    r#"{"ok":false,"error":"unreadable body"}"#,
+                ));
             }
             if serde_json::from_str::<serde_json::Value>(&body).is_err() {
                 return cors(json_response(400, r#"{"ok":false,"error":"invalid json"}"#));
@@ -83,7 +102,9 @@ fn json_response(status: u16, body: &str) -> Response<std::io::Cursor<Vec<u8>>> 
 fn cors(response: Response<std::io::Cursor<Vec<u8>>>) -> Response<std::io::Cursor<Vec<u8>>> {
     response
         .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap())
-        .with_header(Header::from_bytes("Access-Control-Allow-Methods", "GET, POST, OPTIONS").unwrap())
+        .with_header(
+            Header::from_bytes("Access-Control-Allow-Methods", "GET, POST, OPTIONS").unwrap(),
+        )
         .with_header(
             Header::from_bytes(
                 "Access-Control-Allow-Headers",

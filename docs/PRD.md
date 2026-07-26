@@ -96,7 +96,7 @@ no editor embeds/databases. Local-first is a feature.
       JetBrains Mono fonts, persisted theme, focus styles, and shared primitives
 - [x] 9.3 Window shell and intro: final titlebar/window treatment, theme toggle, first-run
       intro, and flexible behavior beyond the 1280×820 reference size
-- [ ] 9.4 Sidebar: final 236px layout, nav states/counts, category counts/filtering, version,
+- [x] 9.4 Sidebar: final 236px layout, nav states/counts, category counts/filtering, version,
       and truthful extension/listener footer
 - [ ] 9.5 Problem table: final header/tabs/grid/rows/chips, full-row navigation, search,
       sorting, category/filter states, density, empty state, and new-problem affordances

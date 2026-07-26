@@ -10,12 +10,24 @@ import {
 } from "../components/table/rowLogic.js";
 import { useTableRows } from "../hooks/useTableRows.js";
 
-export function AllProblemsPage({ onOpenProblem }: { onOpenProblem: (id: string) => void }) {
+export interface AllProblemsPageProps {
+  onOpenProblem: (id: string) => void;
+  category?: string | null;
+  onCategoryChange?: (category: string | null) => void;
+}
+
+export function AllProblemsPage({
+  onOpenProblem,
+  category: controlledCategory,
+  onCategoryChange,
+}: AllProblemsPageProps) {
   const { rows, loading, error, refresh } = useTableRows("all");
   const [sort, setSort] = useState<SortState>({ key: "title", dir: "asc" });
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
+  const [localCategory, setLocalCategory] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const category = controlledCategory === undefined ? localCategory : controlledCategory;
+  const setCategory = onCategoryChange ?? setLocalCategory;
 
   const categories = useMemo(() => collectCategories(rows), [rows]);
   const visible = useMemo(
