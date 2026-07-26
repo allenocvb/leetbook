@@ -76,22 +76,6 @@
   font-size: 12.5px;
 }
 
-.note-editor .ProseMirror pre {
-  padding: 12px 14px;
-  overflow-x: auto;
-  background: var(--lb-code);
-  border: 1px solid var(--lb-bd);
-  border-radius: var(--lb-radius-4);
-  font-family: var(--lb-font-mono);
-  font-size: 12.5px;
-}
-
-.note-editor .ProseMirror pre code {
-  color: inherit;
-  background: none;
-  padding: 0;
-}
-
 .note-editor .ProseMirror blockquote {
   margin: 16px 0;
   padding: 1px 0 1px 14px;
@@ -131,32 +115,6 @@
   margin: 22px 0;
   border: 0;
   border-top: 1px solid var(--lb-bd);
-}
-
-/* lowlight token colors — muted, consistent with the grayscale-plus-one-accent theme */
-.note-editor .hljs-keyword,
-.note-editor .hljs-built_in {
-  color: var(--lb-keyword);
-}
-
-.note-editor .hljs-string {
-  color: var(--lb-green);
-}
-
-.note-editor .hljs-number,
-.note-editor .hljs-literal {
-  color: var(--lb-amber);
-}
-
-.note-editor .hljs-comment {
-  color: var(--lb-muted);
-  font-style: italic;
-}
-
-.note-editor .hljs-title,
-.note-editor .hljs-function {
-  color: var(--lb-ink);
-  font-weight: 500;
 }
 
 .slash-command-menu {

@@ -95,6 +95,7 @@ describe("NoteEditor", () => {
     expect(screen.getByText("Intuition")).toBeInTheDocument();
     expect(screen.getByText("Use a hash map.")).toBeInTheDocument();
     expect(screen.getByText(/seen = \{\}/)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Code language" })).toHaveValue("python");
   });
 
   it("renders marks, lists, and blockquotes from stored JSON", async () => {
@@ -196,6 +197,31 @@ describe("NoteEditor", () => {
     await renderEditor(CALLOUT);
     const callout = document.querySelector('.note-callout[data-type="callout"]');
     expect(callout).toHaveTextContent("Recall the shrinking-window invariant.");
+  });
+
+  it("inserts a discoverable code block and persists its selected language", async () => {
+    const { editor, onChange } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+
+    const language = screen.getByRole("combobox", { name: "Code language" });
+    expect(language).toHaveValue("");
+    editor.view.focus();
+    await userEvent.keyboard("const answer = 42");
+    await userEvent.selectOptions(language, "javascript");
+
+    await waitFor(() => {
+      expect(document.querySelector(".code-block .hljs-keyword")).toHaveTextContent("const");
+      const saved = onChange.mock.calls.at(-1)?.[0] as string;
+      const documentJson = JSON.parse(saved) as {
+        content: { type: string; attrs?: { language?: string } }[];
+      };
+      expect(documentJson.content[0]).toMatchObject({
+        type: "codeBlock",
+        attrs: { language: "javascript" },
+      });
+    });
   });
 
   it("emits serialized JSON on content changes", async () => {

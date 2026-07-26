@@ -111,7 +111,7 @@ no editor embeds/databases. Local-first is a feature.
       paragraphs, marks, lists, blockquote, keyboard behavior, autosave, and tests
 - [x] 9.10 Slash commands and callouts: keyboard-operable `/` menu for every supported block
       type, including the final purple-rule recall callout
-- [ ] 9.11 Code authoring and snapshots: discoverable code-block insertion, language selection,
+- [x] 9.11 Code authoring and snapshots: discoverable code-block insertion, language selection,
       lowlight highlighting, final header/body styling, and consistent read-only snapshots
 - [ ] 9.12 Manual review entry: add a 0–5 `Log review` flow from any problem, append the review,
       recompute FSRS, and refresh all derived fields

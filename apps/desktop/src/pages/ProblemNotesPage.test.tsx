@@ -193,8 +193,12 @@ describe("code snapshot", () => {
     await waitFor(() =>
       expect(screen.getByRole("region", { name: "Latest solution snapshot" })).toBeInTheDocument(),
     );
-    expect(screen.getByText("def twoSum(self, nums, target): ...")).toBeInTheDocument();
-    expect(screen.getByText(/python3 · snapshot · Jul 21 · 61 ms · 18.4 MB/)).toBeInTheDocument();
+    const snapshot = screen.getByRole("region", { name: "Latest solution snapshot" });
+    expect(snapshot.querySelector("code")).toHaveTextContent("def twoSum(self, nums, target): ...");
+    expect(screen.getByText("Python")).toBeInTheDocument();
+    expect(screen.getByText("snapshot · Jul 21")).toBeInTheDocument();
+    expect(snapshot.querySelector(".hljs-keyword")).toHaveTextContent("def");
+    expect(snapshot).not.toContainElement(screen.queryByRole("combobox"));
     expect(screen.getByText("61 ms · 18.4 MB")).toBeInTheDocument();
     expect(screen.getByText("Jul 22, 2026 · scored 5 · 2 reps")).toBeInTheDocument();
   });

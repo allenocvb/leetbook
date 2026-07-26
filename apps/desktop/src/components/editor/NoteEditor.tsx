@@ -1,15 +1,22 @@
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
-import { type Editor, EditorContent, useEditor } from "@tiptap/react";
+import { type Editor, EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { common, createLowlight } from "lowlight";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Callout } from "./Callout.js";
+import { CodeBlockNodeView } from "./CodeBlockNodeView.js";
+import { codeLowlight } from "./codeLanguages.js";
 import { SlashCommandMenu, type SlashMenuState } from "./SlashCommandMenu.js";
 import { filterSlashCommands, type SlashCommand } from "./slashCommands.js";
+import "./CodeBlock.css";
 import "./NoteEditor.css";
 
-const lowlight = createLowlight(common);
+const EditorCodeBlock = CodeBlockLowlight.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(CodeBlockNodeView);
+  },
+}).configure({ lowlight: codeLowlight });
+
 export const NOTE_PLACEHOLDER = "Type “/” for commands…";
 
 export interface NoteEditorProps {
@@ -87,7 +94,7 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
-      CodeBlockLowlight.configure({ lowlight }),
+      EditorCodeBlock,
       Placeholder.configure({ placeholder: NOTE_PLACEHOLDER }),
       Callout,
     ],
