@@ -1,12 +1,15 @@
 import {
   createNotesRepo,
   createProblemsRepo,
+  createReviewsRepo,
   createSchedulingRepo,
   type Note,
   type Problem,
+  type Review,
   type SchedulingState,
 } from "@leetbook/core";
 import { useEffect, useRef, useState } from "react";
+import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { DifficultyText } from "../components/table/pills.js";
 import { useDb } from "../db/DbContext.js";
@@ -26,21 +29,24 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [problem, setProblem] = useState<Problem | null>(null);
   const [scheduling, setScheduling] = useState<SchedulingState | null>(null);
   const [note, setNote] = useState<Note | null | "loading">("loading");
+  const [snapshot, setSnapshot] = useState<Review | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [p, s, n] = await Promise.all([
+      const [p, s, n, reviews] = await Promise.all([
         createProblemsRepo(db).getById(problemId),
         createSchedulingRepo(db).get(problemId),
         createNotesRepo(db).get(problemId),
+        createReviewsRepo(db).listByProblem(problemId),
       ]);
       if (cancelled) return;
       setProblem(p);
       setScheduling(s);
       setNote(n);
+      setSnapshot(reviews.filter((r) => r.codeSnapshot !== null).at(-1) ?? null);
     })();
     return () => {
       cancelled = true;
@@ -111,6 +117,8 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
       </dl>
 
       <hr style={{ border: "none", borderTop: "1px solid var(--border)", margin: "20px 0" }} />
+
+      {snapshot && <CodeSnapshot review={snapshot} />}
 
       <div style={{ position: "relative" }}>
         <span
