@@ -66,6 +66,10 @@ importers:
         version: 0.20.27(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.33.0)(rolldown@1.1.5)(rollup@4.62.2)
 
   packages/core:
+    dependencies:
+      ts-fsrs:
+        specifier: ^5.0.0
+        version: 5.4.1
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -2278,6 +2282,10 @@ packages:
   tmp@0.2.5:
     resolution: {integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==}
     engines: {node: '>=14.14'}
+
+  ts-fsrs@5.4.1:
+    resolution: {integrity: sha512-mOp9+oexJexBTkwjg/jQI1aSUQRLIAvbimeKHLSmVdNJPwObugFNKmZkoggH5d6kZ0uaWLboP1Al1DnXAfIb9w==}
+    engines: {node: '>=20.0.0'}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -4504,6 +4512,8 @@ snapshots:
   tinyspy@4.0.4: {}
 
   tmp@0.2.5: {}
+
+  ts-fsrs@5.4.1: {}
 
   tslib@2.8.1: {}
 

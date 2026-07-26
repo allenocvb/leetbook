@@ -42,7 +42,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 3.1 Domain types: `Problem`, `Review`, `SchedulingState`, `Note` (+ `PerformanceScore` exists)
 - [x] 3.2 SQL schema + migration runner (versioned, forward-only migrations; raw SQL strings
       executed through an injected `SqlExecutor` interface so core stays platform-free)
-- [ ] 3.3 FSRS wrapper around `ts-fsrs`: `scheduleReview(state, score, now) → next state + due date`
+- [x] 3.3 FSRS wrapper around `ts-fsrs`: `scheduleReview(state, score, now) → next state + due date`
 - [ ] 3.4 Repository layer: problems (upsert by slug), reviews (append-only log), scheduling, notes
 - [ ] 3.5 Derived views: status (New/Learning/Mastered/Leech), due-today query, table row model
 - [ ] 3.6 Import: Notion CSV → problems + reviews (use the real 47-problem export as test fixture)
