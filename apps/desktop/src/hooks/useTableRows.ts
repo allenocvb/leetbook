@@ -10,7 +10,7 @@ export interface TableRowsState {
 }
 
 /** Loads table rows for the All Problems ("all") or Due Today ("due") view. */
-export function useTableRows(view: "all" | "due"): TableRowsState {
+export function useTableRows(view: "all" | "due", refreshKey?: unknown): TableRowsState {
   const db = useDb();
   const [rows, setRows] = useState<TableRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,9 +30,11 @@ export function useTableRows(view: "all" | "due"): TableRowsState {
     }
   }, [db, view]);
 
+  // `refreshKey` lets external database writes (such as extension capture) reload visible rows.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKey is an intentional external-write trigger
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+  }, [refresh, refreshKey]);
 
   return { rows, loading, error, refresh };
 }

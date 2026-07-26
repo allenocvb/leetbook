@@ -20,6 +20,7 @@ export interface ProblemsPageProps {
   onOpenProblem: (id: string) => void;
   category: string | null;
   onCategoryChange: (category: string | null) => void;
+  refreshKey?: unknown;
 }
 
 function emptyMessage(view: ProblemsView, filtered: boolean, category: string | null) {
@@ -35,8 +36,9 @@ export function ProblemsPage({
   onOpenProblem,
   category,
   onCategoryChange,
+  refreshKey,
 }: ProblemsPageProps) {
-  const { rows, loading, error, refresh } = useTableRows(view);
+  const { rows, loading, error, refresh } = useTableRows(view, refreshKey);
   const [sort, setSort] = useState<SortState>({
     key: view === "all" ? "title" : "nextReview",
     dir: "asc",

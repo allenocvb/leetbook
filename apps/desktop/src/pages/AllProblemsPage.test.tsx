@@ -19,7 +19,7 @@ async function renderPage({
     { slug: "two-sum", title: "Two Sum", difficulty: "easy", tags: ["Array"], scores: [3, 5] },
     { slug: "word-ladder", title: "Word Ladder", difficulty: "hard", tags: ["Graphs"] },
   ]);
-  render(
+  const view = render(
     <DbProvider db={db}>
       <AllProblemsPage
         onOpenProblem={onOpenProblem}
@@ -29,7 +29,7 @@ async function renderPage({
     </DbProvider>,
   );
   await waitFor(() => expect(screen.getByText("Two Sum")).toBeInTheDocument());
-  return { onOpenProblem, onCategoryChange };
+  return { db, onOpenProblem, onCategoryChange, ...view };
 }
 
 describe("AllProblemsPage", () => {
@@ -40,6 +40,18 @@ describe("AllProblemsPage", () => {
     expect(screen.getByText("Hard")).toBeInTheDocument();
     expect(screen.getByText("2 problems")).toBeInTheDocument();
     expect(screen.getByText("5")).toHaveClass("score-chip--high");
+  });
+
+  it("refreshes visible rows after an external database write", async () => {
+    const { db, rerender } = await renderPage();
+    await seed(db, [{ slug: "captured", title: "Captured Problem", tags: ["Array"] }]);
+    rerender(
+      <DbProvider db={db}>
+        <AllProblemsPage onOpenProblem={vi.fn()} refreshKey={1} />
+      </DbProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByText("Captured Problem")).toBeInTheDocument());
   });
 
   it("opens notes from the full row and keeps the arrow decorative", async () => {

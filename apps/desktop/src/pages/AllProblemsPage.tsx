@@ -6,6 +6,7 @@ export interface AllProblemsPageProps {
   onViewChange?: (view: ProblemsView) => void;
   category?: string | null;
   onCategoryChange?: (category: string | null) => void;
+  refreshKey?: unknown;
 }
 
 export function AllProblemsPage({
@@ -13,6 +14,7 @@ export function AllProblemsPage({
   onViewChange = () => undefined,
   category = null,
   onCategoryChange = () => undefined,
+  refreshKey,
 }: AllProblemsPageProps) {
   return (
     <ProblemsPage
@@ -21,6 +23,7 @@ export function AllProblemsPage({
       onOpenProblem={onOpenProblem}
       category={category}
       onCategoryChange={onCategoryChange}
+      refreshKey={refreshKey}
     />
   );
 }

@@ -127,7 +127,7 @@ no editor embeds/databases. Local-first is a feature.
       last capture, token regeneration, queued count, daily limit, stats, import, and exports
 - [x] 9.18 Import follow-through: clearer import limitations/results, duplicate handling,
       skipped-row details, and a direct action to view and work with imported problems
-- [ ] 9.19 Full visual and integration QA: every view in light/dark at 1280×820, keyboard and
+- [x] 9.19 Full visual and integration QA: every view in light/dark at 1280×820, keyboard and
       focus audit, real Tauri external links/file operations, real extension capture path,
       and regression fixes
 - [ ] 9.20 UI acceptance evidence: capture final reference screenshots, record known limitations,

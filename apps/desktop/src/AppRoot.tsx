@@ -3,15 +3,30 @@ import { useEffect, useState } from "react";
 import { App } from "./App.js";
 import { initDatabase } from "./db/init.js";
 
+let databasePromise: Promise<SqlExecutor> | null = null;
+
+function openDatabaseOnce() {
+  databasePromise ??= initDatabase();
+  return databasePromise;
+}
+
 /** Boots the database, then renders the app. Rendered only in the real Tauri shell. */
 export function AppRoot() {
   const [db, setDb] = useState<SqlExecutor | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    initDatabase()
-      .then(setDb)
-      .catch((cause) => setError(cause instanceof Error ? cause.message : String(cause)));
+    let active = true;
+    openDatabaseOnce()
+      .then((database) => {
+        if (active) setDb(database);
+      })
+      .catch((cause) => {
+        if (active) setError(cause instanceof Error ? cause.message : String(cause));
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (error) {

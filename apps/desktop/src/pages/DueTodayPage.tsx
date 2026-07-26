@@ -6,11 +6,13 @@ export function DueTodayPage({
   onViewChange = () => undefined,
   category = null,
   onCategoryChange = () => undefined,
+  refreshKey,
 }: {
   onOpenProblem: (id: string) => void;
   onViewChange?: (view: ProblemsView) => void;
   category?: string | null;
   onCategoryChange?: (category: string | null) => void;
+  refreshKey?: unknown;
 }) {
   return (
     <ProblemsPage
@@ -19,6 +21,7 @@ export function DueTodayPage({
       onOpenProblem={onOpenProblem}
       category={category}
       onCategoryChange={onCategoryChange}
+      refreshKey={refreshKey}
     />
   );
 }
