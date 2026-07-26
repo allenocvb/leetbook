@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { listTableRows } from "@leetbook/core";
-import { render, screen, waitFor } from "@testing-library/react";
+import { createProblemsRepo, createReviewsRepo, listTableRows } from "@leetbook/core";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CaptureRuntime } from "../capture/useCaptureListener.js";
@@ -66,6 +66,9 @@ describe("SettingsPage", () => {
     expect(screen.getByText("0 payloads")).toBeInTheDocument();
     expect(screen.getByText("FSRS · ts-fsrs")).toBeInTheDocument();
     expect(screen.getByText("Local SQLite · 0 problems · 0 reviews · 0 notes")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Notes, code, and full review history are not included/),
+    ).toBeInTheDocument();
   });
 
   it("persists changes to the daily new limit", async () => {
@@ -103,8 +106,12 @@ describe("SettingsPage", () => {
     const file = new File([FIXTURE], "notion-export.csv", { type: "text/csv" });
     await userEvent.upload(screen.getByLabelText("Notion CSV file"), file);
 
-    await waitFor(() => expect(screen.getByText("47 imported")).toBeInTheDocument());
-    expect(screen.getByText(/· 0 skipped/)).toBeInTheDocument();
+    const result = await screen.findByRole("region", { name: "Import result" });
+    expect(within(result).getByText("Import complete")).toBeInTheDocument();
+    expect(within(result).getByText("47 rows read")).toBeInTheDocument();
+    expect(within(result).getByText("Added")).toBeInTheDocument();
+    expect(within(result).getByText("47")).toBeInTheDocument();
+    expect(within(result).getByText("Skipped")).toBeInTheDocument();
     expect(screen.getByText(/47 problems/)).toBeInTheDocument();
     expect(await listTableRows(db)).toHaveLength(47);
 
@@ -121,10 +128,42 @@ describe("SettingsPage", () => {
       screen.getByLabelText("Notion CSV file"),
       new File([csv], "bad.csv", { type: "text/csv" }),
     );
-    await waitFor(() => expect(screen.getByText("0 imported")).toBeInTheDocument());
-    expect(
-      screen.getByText(/line 2 \(Broken\): missing or invalid LeetCode URL/),
-    ).toBeInTheDocument();
+    const result = await screen.findByRole("region", { name: "Import result" });
+    expect(within(result).getByText("Skipped rows (1)")).toBeInTheDocument();
+    expect(within(result).getByText("Line 2 · Broken")).toBeInTheDocument();
+    expect(within(result).getByText("missing or invalid LeetCode URL")).toBeInTheDocument();
+  });
+
+  it("reports repeated imports as unchanged without duplicating review snapshots", async () => {
+    const { db } = await setup();
+    const input = screen.getByLabelText("Notion CSV file");
+    const file = () => new File([FIXTURE], "notion-export.csv", { type: "text/csv" });
+
+    await userEvent.upload(input, file());
+    await screen.findByText("47 rows read");
+    await userEvent.upload(input, file());
+
+    const result = await screen.findByRole("region", { name: "Import result" });
+    await waitFor(() => expect(within(result).getByText("Unchanged")).toBeInTheDocument());
+    expect(within(result).getByText("47")).toBeInTheDocument();
+    const problem = await createProblemsRepo(db).getBySlug("contains-duplicate");
+    expect(await createReviewsRepo(db).listByProblem(problem?.id ?? "")).toHaveLength(1);
+  });
+
+  it("shows non-blocking review snapshot warnings with row details", async () => {
+    await setup();
+    const csv =
+      "Name,Status,Next Review,Last Review Date,Performance Score,Review Count,Category,Difficulty,URL\n" +
+      "Two Sum,todo,,not-a-date,8,,Array,Easy,https://leetcode.com/problems/two-sum/\n";
+    await userEvent.upload(
+      screen.getByLabelText("Notion CSV file"),
+      new File([csv], "warning.csv", { type: "text/csv" }),
+    );
+
+    const result = await screen.findByRole("region", { name: "Import result" });
+    expect(within(result).getByText("Warnings (1)")).toBeInTheDocument();
+    expect(within(result).getByText("Line 2 · Two Sum")).toBeInTheDocument();
+    expect(within(result).getByText(/review snapshot ignored/)).toBeInTheDocument();
   });
 
   it("exports the database as JSON via the save dialog", async () => {

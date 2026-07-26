@@ -58,6 +58,7 @@ export function SettingsPage({ capture, onViewProblems }: SettingsPageProps) {
 
   const handleImport = async (file: File) => {
     setMessage(null);
+    setImportResult(null);
     try {
       const result = await importNotionCsv(db, await readFileText(file), new Date());
       setImportResult(result);

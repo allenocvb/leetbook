@@ -1,6 +1,7 @@
 import type { NotionImportResult } from "@leetbook/core";
 import { useRef } from "react";
 import { Button } from "../ui/Button.js";
+import { ImportResultPanel } from "./ImportResultPanel.js";
 
 export interface DataStats {
   problems: number;
@@ -37,6 +38,10 @@ export function DataCard({
           ? `Local SQLite · ${stats.problems} problems · ${stats.reviews} reviews · ${stats.notes} notes`
           : "Reading local database…"}
       </p>
+      <p className="settings-data__import-note">
+        Notion CSV brings over problems and the latest score/schedule snapshot. Notes, code, and
+        full review history are not included; status is recalculated by LeetBook.
+      </p>
       <div className="settings-data__actions">
         <Button onClick={() => fileInput.current?.click()}>Import Notion CSV</Button>
         <input
@@ -59,28 +64,7 @@ export function DataCard({
         </Button>
       </div>
 
-      {importResult && (
-        <div className="settings-import" role="status">
-          <div>
-            <strong>{importResult.imported} imported</strong>
-            {` · ${importResult.skipped.length} skipped`}
-          </div>
-          {importResult.skipped.length > 0 && (
-            <ul>
-              {importResult.skipped.map((skip) => (
-                <li key={skip.line}>
-                  line {skip.line} ({skip.title || "untitled"}): {skip.reason}
-                </li>
-              ))}
-            </ul>
-          )}
-          {importResult.imported > 0 && (
-            <Button variant="ghost" onClick={onViewProblems}>
-              View imported problems
-            </Button>
-          )}
-        </div>
-      )}
+      {importResult && <ImportResultPanel result={importResult} onViewProblems={onViewProblems} />}
       {message && (
         <p className="settings-card__message" role="status">
           {message}
