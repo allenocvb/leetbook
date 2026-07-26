@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { pingApp, sendCapture, sendQueueStatus } from "./client.js";
+import { checkPairing, pingApp, requestPairing, sendCapture, sendQueueStatus } from "./client.js";
 import { deliverCapture, isCaptureDeliveryResult } from "./delivery.js";
 import type { CapturePayload } from "./payload.js";
 import { createQueue, type KvStorage } from "./queue.js";
 import { showCaptureToast } from "./toast.js";
+
+/** Minimal stand-in for a fetch Response carrying a JSON body. */
+function jsonResponse(body: unknown, ok = true) {
+  return { ok, json: async () => body } as unknown as Response;
+}
 
 const SETTINGS = { port: 7749, token: "7F2K91QD" };
 
@@ -238,3 +243,50 @@ function memoryStorage(): KvStorage {
     set: async (key, value) => void data.set(key, value),
   };
 }
+
+describe("pairing handshake", () => {
+  it("starts a request and returns the code to show the user", async () => {
+    const fetchFn = vi.fn(async () =>
+      jsonResponse({ ok: true, requestId: "req-1", code: "K4TQ", expiresInMs: 120000 }),
+    );
+
+    const started = await requestPairing(7749, fetchFn as unknown as typeof fetch);
+
+    expect(started).toEqual({ requestId: "req-1", code: "K4TQ", expiresInMs: 120000 });
+    // No token is sent — asking for one is the entire point.
+    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://127.0.0.1:7749/pair/request");
+    expect(init.method).toBe("POST");
+    expect(JSON.stringify(init.headers ?? {})).not.toContain("x-leetbook-token");
+  });
+
+  it("returns null when the app is not running", async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error("connection refused");
+    });
+    expect(await requestPairing(7749, fetchFn as unknown as typeof fetch)).toBeNull();
+  });
+
+  it("withholds the token until the user approves", async () => {
+    const pending = vi.fn(async () => jsonResponse({ ok: true, status: "pending" }));
+    expect(await checkPairing(7749, "req-1", pending as unknown as typeof fetch)).toEqual({
+      status: "pending",
+      token: undefined,
+    });
+
+    const approved = vi.fn(async () =>
+      jsonResponse({ ok: true, status: "approved", token: "7F2K91QD" }),
+    );
+    expect(await checkPairing(7749, "req-1", approved as unknown as typeof fetch)).toEqual({
+      status: "approved",
+      token: "7F2K91QD",
+    });
+  });
+
+  it("reports a denial rather than retrying forever", async () => {
+    const denied = vi.fn(async () => jsonResponse({ ok: true, status: "denied" }));
+    const result = await checkPairing(7749, "req-1", denied as unknown as typeof fetch);
+    expect(result.status).toBe("denied");
+    expect(result.token).toBeUndefined();
+  });
+});

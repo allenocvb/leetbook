@@ -1,0 +1,18 @@
+.pair-approval__body {
+  margin: 0;
+  color: var(--lb-text-3);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pair-approval__code {
+  margin: var(--lb-space-5) 0;
+  padding: var(--lb-space-4);
+  color: var(--lb-ink);
+  background: var(--lb-chip);
+  border-radius: var(--lb-radius-3);
+  font-family: var(--lb-font-mono);
+  font-size: 29px;
+  letter-spacing: 0.22em;
+  text-align: center;
+}

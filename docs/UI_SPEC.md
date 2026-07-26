@@ -247,6 +247,13 @@ Editor:
 
 - Desktop Capture view explains pairing and shows current listener/queue state; it must not contain
   stale phase-placeholder copy.
+- Pairing is a **handshake, not a shared secret**. The extension asks the listener to pair, the app
+  raises an approval dialog showing a short code, and the token is handed over only once the user
+  approves. The code exists for recognition — it lets the user confirm this is the request they
+  just made — not for secrecy. Requests expire after two minutes and a newer request supersedes an
+  older one, so a stale prompt can never be approved into a live pairing.
+- The approval dialog is global: it appears over whatever view is open, because the user will be in
+  the browser when it fires. Dismissing it counts as a denial; nothing pairs by default.
 - Extension toast is fixed bottom-right with 22px inset, 320px width, 11px radius, `surf`,
   `bd2`, and the floating shadow.
 - Header shows logo, “Accepted · captured” or “Queued — N waiting,” and dismiss.
@@ -258,8 +265,9 @@ Editor:
 
 - Content has `28px 34px` padding and a 600px maximum width.
 - Three cards use `bd2`, 9px radius, 18px padding, and 14px gaps.
-- Connection card: truthful connection state, last capture, listener, pairing token, regenerate,
-  and queued count.
+- Connection card: truthful connection state, last capture, listener, paired-extension state,
+  Disconnect, and queued count. The pairing token is **never displayed**. Showing it invites
+  the copy-paste flow the approval handshake replaced.
 - Scheduling card: FSRS identity, daily new limit, and score mapping.
 - Data card: database stats, Import Notion CSV, Export JSON, and Export Markdown.
 - Import result explains imported/skipped rows and offers an immediate route to imported problems.

@@ -10,7 +10,9 @@ pub fn run() {
         .manage(capture_server::ListenerState::default())
         .invoke_handler(tauri::generate_handler![
             capture_server::get_pairing_info,
-            capture_server::regenerate_pairing_token
+            capture_server::regenerate_pairing_token,
+            capture_server::pending_pair_request,
+            capture_server::resolve_pair_request
         ])
         .setup(|app| {
             if let Err(error) = capture_server::start(app.handle().clone()) {

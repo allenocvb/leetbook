@@ -37,6 +37,8 @@ const READY_CAPTURE: CaptureRuntime = {
     reviewedAt: "2026-07-25T12:00:00.000Z",
   },
   regenerateToken,
+  pairPrompt: null,
+  resolvePairing: async () => {},
 };
 
 beforeEach(() => {
@@ -62,7 +64,10 @@ describe("SettingsPage", () => {
 
     expect(screen.getByText("Extension connected")).toBeInTheDocument();
     expect(screen.getByText("http://127.0.0.1:7749")).toBeInTheDocument();
-    expect(screen.getByText("7F2K91QD")).toBeInTheDocument();
+    // The token is deliberately not shown: it is exchanged through the approval handshake,
+    // so surfacing it would only invite the copy-paste flow this replaced.
+    expect(screen.queryByText("7F2K91QD")).not.toBeInTheDocument();
+    expect(screen.getByText("Approve requests when they appear")).toBeInTheDocument();
     expect(screen.getByText("0 payloads")).toBeInTheDocument();
     expect(screen.getByText("FSRS · ts-fsrs")).toBeInTheDocument();
     expect(screen.getByText("Local SQLite · 0 problems · 0 reviews · 0 notes")).toBeInTheDocument();
@@ -81,16 +86,16 @@ describe("SettingsPage", () => {
     expect(window.localStorage.getItem(DAILY_NEW_LIMIT_KEY)).toBe("6");
   });
 
-  it("regenerates the active pairing token only after confirmation", async () => {
+  it("disconnects the paired extension only after confirmation", async () => {
     await setup();
-    await userEvent.click(screen.getByRole("button", { name: "Regenerate" }));
+    await userEvent.click(screen.getByRole("button", { name: "Disconnect" }));
     expect(regenerateToken).not.toHaveBeenCalled();
 
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => expect(regenerateToken).toHaveBeenCalledTimes(1));
     expect(
-      screen.getByText("Token regenerated. Update it in the extension Options page."),
+      screen.getByText("Disconnected. Press Connect in the extension to pair again."),
     ).toBeInTheDocument();
   });
 

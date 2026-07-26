@@ -1,6 +1,4 @@
-import { useState } from "react";
 import type { CaptureRuntime } from "../capture/useCaptureListener.js";
-import { Button } from "../components/ui/Button.js";
 import "./CapturePage.css";
 
 export interface CapturePageProps {
@@ -38,23 +36,12 @@ function formatCaptureTime(value: string) {
 }
 
 export function CapturePage({ runtime }: CapturePageProps) {
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const status = listenerCopy(runtime);
   const listenerAddress = runtime.pairing
     ? `http://127.0.0.1:${runtime.pairing.port}`
     : runtime.listener.port
       ? `http://127.0.0.1:${runtime.listener.port}`
       : "Unavailable";
-
-  const copyToken = async () => {
-    if (!runtime.pairing) return;
-    try {
-      await navigator.clipboard.writeText(runtime.pairing.token);
-      setCopyState("copied");
-    } catch {
-      setCopyState("failed");
-    }
-  };
 
   return (
     <div className="capture-page">
@@ -113,22 +100,10 @@ export function CapturePage({ runtime }: CapturePageProps) {
               </dd>
             </div>
             <div>
-              <dt>Pairing token</dt>
-              <dd className="capture-pairing__token">
-                <code>{runtime.pairing?.token ?? "Desktop app only"}</code>
-                {runtime.pairing && (
-                  <Button variant="ghost" onClick={() => void copyToken()}>
-                    {copyState === "copied" ? "Copied" : "Copy"}
-                  </Button>
-                )}
-              </dd>
+              <dt>Extension</dt>
+              <dd>{runtime.pairing ? "Approve requests when they appear" : "Desktop app only"}</dd>
             </div>
           </dl>
-          {copyState === "failed" && (
-            <p className="capture-card__message" role="status">
-              Copy failed. Select the token and copy it manually.
-            </p>
-          )}
         </section>
       </div>
 
@@ -149,8 +124,8 @@ export function CapturePage({ runtime }: CapturePageProps) {
           <li>
             <span>2</span>
             <div>
-              <strong>Enter this port and token</strong>
-              <p>Use port {runtime.pairing?.port ?? 7749} and the pairing token shown above.</p>
+              <strong>Press Connect to LeetBook</strong>
+              <p>LeetBook asks you to approve it. Check the code matches, then approve.</p>
             </div>
           </li>
           <li>

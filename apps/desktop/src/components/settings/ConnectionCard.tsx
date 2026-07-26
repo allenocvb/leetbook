@@ -44,8 +44,8 @@ export function ConnectionCard({ capture }: ConnectionCardProps) {
     setConfirming(false);
     setMessage(
       succeeded
-        ? "Token regenerated. Update it in the extension Options page."
-        : "The token could not be regenerated.",
+        ? "Disconnected. Press Connect in the extension to pair again."
+        : "The extension could not be disconnected.",
     );
   };
 
@@ -67,9 +67,9 @@ export function ConnectionCard({ capture }: ConnectionCardProps) {
       <dl className="settings-grid">
         <dt>Listener</dt>
         <dd className="settings-mono">{listener}</dd>
-        <dt>Pairing token</dt>
+        <dt>Paired extension</dt>
         <dd className="settings-token">
-          <code>{capture.pairing?.token ?? "Desktop app only"}</code>
+          <span>{capture.pairing ? "Approve requests when they appear" : "Desktop app only"}</span>
           {!confirming ? (
             <button
               type="button"
@@ -77,7 +77,7 @@ export function ConnectionCard({ capture }: ConnectionCardProps) {
               disabled={!capture.pairing}
               onClick={() => setConfirming(true)}
             >
-              Regenerate
+              Disconnect
             </button>
           ) : (
             <span className="settings-token__confirm">
@@ -85,7 +85,7 @@ export function ConnectionCard({ capture }: ConnectionCardProps) {
                 Cancel
               </Button>
               <Button variant="outline" onClick={() => void regenerate()} disabled={pending}>
-                {pending ? "Regenerating…" : "Confirm"}
+                {pending ? "Disconnecting…" : "Confirm"}
               </Button>
             </span>
           )}

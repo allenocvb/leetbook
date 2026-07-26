@@ -14,6 +14,8 @@ const READY: CaptureRuntime = {
     reviewedAt: "2026-07-25T12:00:00.000Z",
   },
   regenerateToken: async () => true,
+  pairPrompt: null,
+  resolvePairing: async () => {},
 };
 
 describe("CapturePage", () => {
@@ -25,7 +27,10 @@ describe("CapturePage", () => {
     expect(screen.getByText("2 captures waiting in the extension")).toBeInTheDocument();
     expect(screen.getByText(/Two Sum/)).toBeInTheDocument();
     expect(screen.getByText("http://127.0.0.1:7749")).toBeInTheDocument();
-    expect(screen.getByText("7F2K91QD")).toBeInTheDocument();
+    // The token is deliberately not shown: it is exchanged through the approval handshake,
+    // so surfacing it would only invite the copy-paste flow this replaced.
+    expect(screen.queryByText("7F2K91QD")).not.toBeInTheDocument();
+    expect(screen.getByText("Approve requests when they appear")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Set up automatic capture" })).toBeInTheDocument();
   });
 
@@ -39,6 +44,8 @@ describe("CapturePage", () => {
           queued: null,
           lastCapture: null,
           regenerateToken: async () => false,
+          pairPrompt: null,
+          resolvePairing: async () => {},
         }}
       />,
     );

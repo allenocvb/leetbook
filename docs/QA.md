@@ -101,8 +101,13 @@ that matters most for the automated workflow.
 pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
 ```
 
-- [ ] Paste the pairing token from Settings into the extension options page; it reports the
-      app is reachable.
+- [ ] Open the extension's Options page and press **Connect to LeetBook**. A four-character
+      code appears there, LeetBook raises "Allow LeetBook Capture to connect?" showing the
+      **same** code, and approving completes the pairing. No token is copied anywhere.
+- [ ] Deny once: the extension reports the refusal and does not pair.
+- [ ] Press Connect with the app closed: it says LeetBook isn't running rather than hanging.
+- [ ] Settings & Pairing shows a paired extension and no token. Disconnect, then confirm the
+      extension has to pair again before the next capture lands.
 - [ ] Sidebar footer shows `Listener ready :7749`.
 - [ ] Submit a real Accepted solution on leetcode.com. **A toast appears bottom-right.**
 - [ ] Toast shows the real title, difficulty, runtime/memory, and code status.

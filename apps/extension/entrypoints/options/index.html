@@ -15,16 +15,6 @@
       }
       h1 { font-size: 18px; font-weight: 600; }
       p { color: #666666; font-size: 13px; }
-      label { display: block; font-size: 12px; color: #666666; margin: 14px 0 4px; }
-      input {
-        font: inherit;
-        font-family: ui-monospace, Menlo, monospace;
-        width: 100%;
-        padding: 7px 10px;
-        border: 1px solid #ebebea;
-        border-radius: 6px;
-        box-sizing: border-box;
-      }
       button {
         font: inherit;
         margin-top: 16px;
@@ -35,21 +25,28 @@
         color: #ffffff;
         cursor: pointer;
       }
+      button:disabled { opacity: 0.55; cursor: default; }
+      #code {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 28px;
+        letter-spacing: 0.18em;
+        color: #111111;
+        margin: 18px 0 0;
+      }
+      #code:empty { display: none; }
       #status { margin-top: 12px; font-size: 13px; color: #666666; min-height: 18px; }
+      #status.paired { color: #1d7a4c; }
+      #status.failed { color: #a63b4c; }
     </style>
   </head>
   <body>
     <h1>LeetBook Capture</h1>
     <p>
-      Open the LeetBook desktop app → Settings &amp; Pairing, and copy the pairing token here.
+      Open the LeetBook desktop app, then connect below. LeetBook will ask you to approve
+      this extension — there is no token to copy.
     </p>
-    <form id="pairing-form">
-      <label for="token">Pairing token</label>
-      <input id="token" name="token" placeholder="7F2K91QD" autocomplete="off" />
-      <label for="port">Port</label>
-      <input id="port" name="port" value="7749" inputmode="numeric" />
-      <button type="submit">Save &amp; test connection</button>
-    </form>
+    <button id="connect" type="button">Connect to LeetBook</button>
+    <p id="code"></p>
     <p id="status"></p>
     <script type="module" src="./main.ts"></script>
   </body>

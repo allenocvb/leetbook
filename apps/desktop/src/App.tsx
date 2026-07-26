@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { type CaptureRuntime, useCaptureListener } from "./capture/useCaptureListener.js";
 import { AppLayout } from "./components/AppLayout.js";
 import type { ViewId } from "./components/Sidebar.js";
+import { PairApprovalDialog } from "./components/settings/PairApprovalDialog.js";
 import type { ProblemsView } from "./components/table/ProblemsHeader.js";
 import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
@@ -72,6 +73,9 @@ function Shell() {
         route.view === "settings"
       }
     >
+      {capture.pairPrompt && (
+        <PairApprovalDialog prompt={capture.pairPrompt} onResolve={capture.resolvePairing} />
+      )}
       <Page
         route={route}
         refreshKey={captureTick}
