@@ -49,9 +49,16 @@ describe("App shell", () => {
     expect(screen.queryByText("Untouched")).not.toBeInTheDocument();
   });
 
-  it("navigates to placeholder pages", async () => {
+  it("navigates to the review session, which picks up the due problem", async () => {
     await renderApp();
     await userEvent.click(screen.getByRole("button", { name: /Review Session/ }));
-    expect(screen.getByRole("heading", { name: "Review Session" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("1 of 1")).toBeInTheDocument());
+    expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument();
+  });
+
+  it("navigates to placeholder pages", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /Capture/ }));
+    expect(screen.getByRole("heading", { name: "Capture" })).toBeInTheDocument();
   });
 });

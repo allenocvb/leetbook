@@ -8,6 +8,7 @@ import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
+import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
 
 export function App({ db }: { db: SqlExecutor }) {
   return (
@@ -38,6 +39,7 @@ function Shell() {
         route={route}
         onOpenProblem={openProblem}
         onBack={() => setRoute({ view: activeView })}
+        onExitReview={() => setRoute({ view: "due-today" })}
       />
     </AppLayout>
   );
@@ -47,10 +49,12 @@ function Page({
   route,
   onOpenProblem,
   onBack,
+  onExitReview,
 }: {
   route: Route;
   onOpenProblem: (id: string) => void;
   onBack: () => void;
+  onExitReview: () => void;
 }) {
   switch (route.view) {
     case "problem":
@@ -60,7 +64,7 @@ function Page({
     case "due-today":
       return <DueTodayPage onOpenProblem={onOpenProblem} />;
     case "review":
-      return <PagePlaceholder title="Review Session" hint="Review queue arrives in Phase 6." />;
+      return <ReviewSessionPage onExit={onExitReview} />;
     case "capture":
       return <PagePlaceholder title="Capture" hint="Extension capture arrives in Phase 7." />;
     case "settings":

@@ -17,6 +17,12 @@ export { type DatabaseExport, exportDatabaseJson } from "./export/json.js";
 export { exportNotesMarkdown, type NoteExport, tiptapToMarkdown } from "./export/markdown.js";
 export { scheduleReview } from "./fsrs.js";
 export { importNotionCsv, type NotionImportResult, slugFromUrl } from "./import/notion.js";
+export {
+  type ApplyReviewInput,
+  type ApplyReviewResult,
+  applyReview,
+  previewReview,
+} from "./review.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {
   type Difficulty,

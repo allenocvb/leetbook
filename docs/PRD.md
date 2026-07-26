@@ -62,11 +62,11 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 5.2 Problem notes page: metadata header + editor, autosave to `notes`
 - [x] 5.3 Code snapshot block (from captured submissions)
 
-## Phase 6 — Review queue ⭐ first shippable
+## Phase 6 — Review queue ⭐ first shippable ✅
 
-- [ ] 6.1 Review session UI: one problem at a time, 0–5 rating, rubric visible
-- [ ] 6.2 Rating applies `scheduleReview`; progress + session summary
-- [ ] 6.3 Keyboard shortcuts (0–5, enter, esc)
+- [x] 6.1 Review session UI: one problem at a time, 0–5 rating, rubric visible
+- [x] 6.2 Rating applies `scheduleReview` via core `applyReview`; progress + session summary
+- [x] 6.3 Keyboard shortcuts (0–5, enter, esc)
 
 ## Phase 7 — Extension capture
 
