@@ -10,8 +10,10 @@ import {
 } from "@leetbook/core";
 import { useEffect, useRef, useState } from "react";
 import { CodeSnapshot } from "../components/CodeSnapshot.js";
+import { EditProblemDialog } from "../components/EditProblemDialog.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { DifficultyText } from "../components/table/pills.js";
+import { Button } from "../components/ui/Button.js";
 import { ExternalLinkButton } from "../components/ui/ExternalLinkButton.js";
 import { useDb } from "../db/DbContext.js";
 import { formatShortDate } from "../lib/format.js";
@@ -32,6 +34,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [note, setNote] = useState<Note | null | "loading">("loading");
   const [snapshot, setSnapshot] = useState<Review | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [editing, setEditing] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -78,8 +81,11 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
         ← All Problems
       </button>
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <h1 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>{problem.title}</h1>
+        <Button variant="outline" onClick={() => setEditing(true)}>
+          Edit problem
+        </Button>
         <ExternalLinkButton
           url={problem.url}
           style={{ fontSize: 12, color: "var(--text-secondary)" }}
@@ -134,6 +140,15 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
         </span>
         <NoteEditor initialContentJson={note?.contentJson ?? null} onChange={handleChange} />
       </div>
+
+      {editing && (
+        <EditProblemDialog
+          key={problem.id}
+          problem={problem}
+          onClose={() => setEditing(false)}
+          onSaved={setProblem}
+        />
+      )}
     </div>
   );
 }

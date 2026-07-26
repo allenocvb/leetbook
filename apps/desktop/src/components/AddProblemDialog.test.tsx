@@ -5,6 +5,7 @@ import { DbProvider } from "../db/DbContext.js";
 import { AllProblemsPage } from "../pages/AllProblemsPage.js";
 import { makeDb } from "../test-utils.js";
 import { resolveSlug, titleFromSlug } from "./AddProblemDialog.js";
+import { parseCategories } from "./problem/ProblemForm.js";
 
 describe("resolveSlug", () => {
   it("accepts full URLs, description URLs, and bare slugs", () => {
@@ -16,6 +17,8 @@ describe("resolveSlug", () => {
   it("rejects empty and unusable input", () => {
     expect(resolveSlug("")).toBeNull();
     expect(resolveSlug("https://example.com/problems/x/")).toBeNull();
+    expect(resolveSlug("http://leetcode.com/problems/two-sum/")).toBeNull();
+    expect(resolveSlug("https://example.com/?next=leetcode.com/problems/two-sum/")).toBeNull();
     expect(resolveSlug("not a slug!")).toBeNull();
   });
 });
@@ -25,6 +28,16 @@ describe("titleFromSlug", () => {
     expect(titleFromSlug("longest-substring-without-repeating-characters")).toBe(
       "Longest Substring Without Repeating Characters",
     );
+  });
+});
+
+describe("parseCategories", () => {
+  it("trims empty values and removes case-insensitive duplicates", () => {
+    expect(parseCategories(" Array, Hash Table, array, , Two Pointers ")).toEqual([
+      "Array",
+      "Hash Table",
+      "Two Pointers",
+    ]);
   });
 });
 

@@ -2,6 +2,7 @@ import {
   createNotesRepo,
   createProblemsRepo,
   createReviewsRepo,
+  createSchedulingRepo,
   type SqlExecutor,
 } from "@leetbook/core";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -70,6 +71,48 @@ describe("ProblemNotesPage", () => {
   it("loads an existing note into the editor", async () => {
     await setup(true);
     expect(screen.getByText("existing note")).toBeInTheDocument();
+  });
+
+  it("edits metadata in place while preserving notes and derived review data", async () => {
+    const { db, problem } = await setup(true);
+    const scheduleBefore = await createSchedulingRepo(db).get(problem.id);
+    const reviewsBefore = await createReviewsRepo(db).listByProblem(problem.id);
+    const noteBefore = await createNotesRepo(db).get(problem.id);
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit problem" }));
+    expect(screen.getByRole("dialog", { name: "Edit problem" })).toBeInTheDocument();
+
+    const url = screen.getByLabelText("LeetCode URL or slug");
+    await userEvent.clear(url);
+    await userEvent.type(url, "two-sum-ii");
+    const title = screen.getByLabelText(/Title/);
+    await userEvent.clear(title);
+    await userEvent.type(title, "Two Sum II");
+    await userEvent.selectOptions(screen.getByLabelText("Difficulty"), "medium");
+    const categories = screen.getByLabelText(/Categories/);
+    await userEvent.clear(categories);
+    await userEvent.type(categories, "Array, Two Pointers");
+    await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Two Sum II" })).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByText("Medium")).toBeInTheDocument();
+    expect(screen.getByText("Array, Two Pointers")).toBeInTheDocument();
+
+    expect(await createProblemsRepo(db).getById(problem.id)).toMatchObject({
+      id: problem.id,
+      slug: "two-sum-ii",
+      title: "Two Sum II",
+      url: "https://leetcode.com/problems/two-sum-ii/",
+      difficulty: "medium",
+      tags: ["Array", "Two Pointers"],
+    });
+    expect(await createProblemsRepo(db).getBySlug("two-sum")).toBeNull();
+    expect(await createSchedulingRepo(db).get(problem.id)).toEqual(scheduleBefore);
+    expect(await createReviewsRepo(db).listByProblem(problem.id)).toEqual(reviewsBefore);
+    expect(await createNotesRepo(db).get(problem.id)).toEqual(noteBefore);
   });
 
   it("autosaves edits to the notes repo", async () => {

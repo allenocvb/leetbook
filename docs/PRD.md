@@ -103,7 +103,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.6 External links: shared Tauri opener integration for notes and review-session
       LeetCode actions, with browser/test fallback and desktop-shell verification; table rows
       remain notes navigation with decorative arrows per the UI contract
-- [ ] 9.7 Problem editing: reuse the problem form to edit title, URL, difficulty, and
+- [x] 9.7 Problem editing: reuse the problem form to edit title, URL, difficulty, and
       categories from the notes page; keep scheduling fields derived
 - [ ] 9.8 Notes page shell: final 720px layout, title and metadata treatment, category chips,
       latest score/reps/runtime, save status, and action placement

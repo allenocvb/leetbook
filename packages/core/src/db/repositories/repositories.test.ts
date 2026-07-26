@@ -47,6 +47,70 @@ describe("problems repo", () => {
     expect(await repo.listAll()).toHaveLength(1);
   });
 
+  it("updates editable metadata by id without detaching derived history", async () => {
+    const problems = createProblemsRepo(db);
+    const reviews = createReviewsRepo(db);
+    const scheduling = createSchedulingRepo(db);
+    const notes = createNotesRepo(db);
+    const original = await problems.upsertBySlug(TWO_SUM, NOW);
+    const review = await reviews.add({
+      problemId: original.id,
+      score: 4,
+      reviewedAt: NOW.toISOString(),
+      runtimeMs: null,
+      memoryMb: null,
+      language: null,
+      codeSnapshot: null,
+    });
+    const schedule = scheduleReview(null, original.id, 4, NOW);
+    await scheduling.put(schedule);
+    const note = await notes.put(original.id, '{"type":"doc","content":[]}', NOW);
+
+    const updated = await problems.update(original.id, {
+      slug: "two-sum-ii",
+      title: "Two Sum II",
+      url: "https://leetcode.com/problems/two-sum-ii/",
+      difficulty: "medium",
+      tags: ["Array", "Two Pointers"],
+    });
+
+    expect(updated).toMatchObject({
+      id: original.id,
+      slug: "two-sum-ii",
+      title: "Two Sum II",
+      difficulty: "medium",
+      tags: ["Array", "Two Pointers"],
+      createdAt: original.createdAt,
+    });
+    expect(await problems.getBySlug("two-sum")).toBeNull();
+    expect(await reviews.listByProblem(original.id)).toEqual([review]);
+    expect(await scheduling.get(original.id)).toEqual(schedule);
+    expect(await notes.get(original.id)).toEqual(note);
+  });
+
+  it("rejects an edit that would duplicate another problem slug", async () => {
+    const repo = createProblemsRepo(db);
+    const first = await repo.upsertBySlug(TWO_SUM, NOW);
+    await repo.upsertBySlug(
+      {
+        ...TWO_SUM,
+        slug: "three-sum",
+        title: "3Sum",
+        url: "https://leetcode.com/problems/3sum/",
+      },
+      NOW,
+    );
+
+    await expect(
+      repo.update(first.id, {
+        ...TWO_SUM,
+        slug: "three-sum",
+        url: "https://leetcode.com/problems/three-sum/",
+      }),
+    ).rejects.toThrow();
+    expect(await repo.getById(first.id)).toEqual(first);
+  });
+
   it("listAll orders by title", async () => {
     const repo = createProblemsRepo(db);
     await repo.upsertBySlug({ ...TWO_SUM, slug: "zigzag", title: "Zigzag Conversion" }, NOW);

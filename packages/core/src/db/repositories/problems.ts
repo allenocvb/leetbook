@@ -13,6 +13,8 @@ export interface ProblemInput {
 export interface ProblemsRepo {
   /** Insert, or update metadata if the slug already exists. Returns the stored problem. */
   upsertBySlug(input: ProblemInput, now: Date): Promise<Problem>;
+  /** Update editable metadata while preserving the problem id and all related history. */
+  update(id: string, input: ProblemInput): Promise<Problem>;
   getBySlug(slug: string): Promise<Problem | null>;
   getById(id: string): Promise<Problem | null>;
   listAll(): Promise<Problem[]>;
@@ -41,6 +43,18 @@ export function createProblemsRepo(db: SqlExecutor): ProblemsRepo {
       );
       const stored = await this.getBySlug(input.slug);
       if (!stored) throw new Error(`upsert failed for slug "${input.slug}"`);
+      return stored;
+    },
+
+    async update(id, input) {
+      await db.execute(
+        `UPDATE problems
+         SET slug = ?, title = ?, url = ?, difficulty = ?, tags = ?
+         WHERE id = ?`,
+        [input.slug, input.title, input.url, input.difficulty, JSON.stringify(input.tags), id],
+      );
+      const stored = await this.getById(id);
+      if (!stored) throw new Error(`problem "${id}" was not found`);
       return stored;
     },
 

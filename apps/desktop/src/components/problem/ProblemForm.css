@@ -1,0 +1,52 @@
+.problem-form {
+  display: grid;
+}
+
+.problem-form__label {
+  margin: var(--lb-space-4) 0 var(--lb-space-2);
+  color: var(--lb-text-3);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.problem-form__label:first-child {
+  margin-top: 0;
+}
+
+.problem-form__hint {
+  color: var(--lb-muted);
+  font-weight: 400;
+}
+
+.problem-form__control {
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  color: var(--lb-ink);
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-3);
+}
+
+.problem-form__control::placeholder {
+  color: var(--lb-muted-2);
+}
+
+.problem-form__control:hover {
+  border-color: var(--lb-muted-3);
+}
+
+.problem-form__error {
+  margin: var(--lb-space-4) 0 0;
+  color: var(--lb-red);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.problem-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lb-space-3);
+  margin-top: var(--lb-space-6);
+}
