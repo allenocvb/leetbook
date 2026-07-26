@@ -8,13 +8,14 @@ import {
   type Review,
   type SchedulingState,
 } from "@leetbook/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { EditProblemDialog } from "../components/EditProblemDialog.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { ProblemNotesHeader } from "../components/notes/ProblemNotesHeader.js";
 import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
+import { useNoteAutosave } from "../hooks/useNoteAutosave.js";
 import "./ProblemNotesPage.css";
 
 export interface ProblemNotesPageProps {
@@ -24,17 +25,14 @@ export interface ProblemNotesPageProps {
   saveDelayMs?: number;
 }
 
-type SaveState = "idle" | "pending" | "saved";
-
 export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: ProblemNotesPageProps) {
   const db = useDb();
   const [problem, setProblem] = useState<Problem | null>(null);
   const [scheduling, setScheduling] = useState<SchedulingState | null>(null);
   const [note, setNote] = useState<Note | null | "loading">("loading");
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
   const [editing, setEditing] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { saveState, handleChange } = useNoteAutosave(db, problemId, saveDelayMs);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,19 +51,8 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
     })();
     return () => {
       cancelled = true;
-      if (timer.current) clearTimeout(timer.current);
     };
   }, [db, problemId]);
-
-  const handleChange = (contentJson: string) => {
-    setSaveState("pending");
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      void createNotesRepo(db)
-        .put(problemId, contentJson, new Date())
-        .then(() => setSaveState("saved"));
-    }, saveDelayMs);
-  };
 
   if (note === "loading") return null;
   if (!problem) return <p className="problem-notes-page__error">Problem not found.</p>;
@@ -86,8 +73,18 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
         <Divider className="problem-notes-page__divider" />
 
         <div className="problem-notes-page__document">
-          <span className="problem-notes-page__save-status" aria-live="polite">
-            {saveState === "pending" ? "Saving…" : saveState === "saved" ? "Saved" : ""}
+          <span
+            className="problem-notes-page__save-status"
+            data-state={saveState}
+            aria-live="polite"
+          >
+            {saveState === "pending"
+              ? "Saving…"
+              : saveState === "saved"
+                ? "Saved"
+                : saveState === "error"
+                  ? "Save failed"
+                  : ""}
           </span>
           {snapshot && <CodeSnapshot review={snapshot} />}
           <NoteEditor initialContentJson={note?.contentJson ?? null} onChange={handleChange} />

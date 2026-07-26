@@ -31,6 +31,10 @@
   line-height: 1;
 }
 
+.problem-notes-page__save-status[data-state="error"] {
+  color: var(--lb-red);
+}
+
 .problem-notes-page__error {
   max-width: 720px;
   margin: 0 auto;

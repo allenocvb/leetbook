@@ -13,7 +13,7 @@ import { DbProvider } from "../db/DbContext.js";
 import { makeDb, seed } from "../test-utils.js";
 import { ProblemNotesPage } from "./ProblemNotesPage.js";
 
-async function setup(withNote = false) {
+async function setup(withNote = false, saveDelayMs = 0) {
   const db = await makeDb();
   await seed(db, [
     {
@@ -38,13 +38,13 @@ async function setup(withNote = false) {
     );
   }
   const onBack = vi.fn();
-  render(
+  const view = render(
     <DbProvider db={db}>
-      <ProblemNotesPage problemId={problem.id} onBack={onBack} saveDelayMs={0} />
+      <ProblemNotesPage problemId={problem.id} onBack={onBack} saveDelayMs={saveDelayMs} />
     </DbProvider>,
   );
   await waitFor(() => expect(screen.getByRole("heading", { name: "Two Sum" })).toBeInTheDocument());
-  return { db, problem, onBack };
+  return { db, problem, onBack, ...view };
 }
 
 describe("ProblemNotesPage", () => {
@@ -126,16 +126,30 @@ describe("ProblemNotesPage", () => {
   });
 
   it("autosaves edits to the notes repo", async () => {
-    const { db, problem } = await setup();
+    const { db, problem } = await setup(false, 50);
     const editor = document.querySelector(".note-editor .ProseMirror") as HTMLElement;
     await userEvent.click(editor);
     await userEvent.keyboard("hash map trick");
 
+    expect(screen.getByText("Saving…")).toBeInTheDocument();
     await waitFor(async () => {
       const saved = await createNotesRepo(db as SqlExecutor).get(problem.id);
       expect(saved?.contentJson).toContain("hash map trick");
     });
     expect(screen.getByText("Saved")).toBeInTheDocument();
+  });
+
+  it("flushes the latest pending note when navigating away", async () => {
+    const { db, problem, unmount } = await setup(false, 60_000);
+    const editor = document.querySelector(".note-editor .ProseMirror") as HTMLElement;
+    await userEvent.click(editor);
+    await userEvent.keyboard("leave safely");
+    unmount();
+
+    await waitFor(async () => {
+      const saved = await createNotesRepo(db as SqlExecutor).get(problem.id);
+      expect(saved?.contentJson).toContain("leave safely");
+    });
   });
 
   it("back button returns to the table", async () => {

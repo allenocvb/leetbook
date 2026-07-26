@@ -1,10 +1,12 @@
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Placeholder from "@tiptap/extension-placeholder";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
 import "./NoteEditor.css";
 
 const lowlight = createLowlight(common);
+export const NOTE_PLACEHOLDER = "Type “/” for commands…";
 
 export interface NoteEditorProps {
   /** Serialized TipTap document, or null for an empty note. */
@@ -40,8 +42,17 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
     extensions: [
       StarterKit.configure({ codeBlock: false }),
       CodeBlockLowlight.configure({ lowlight }),
+      Placeholder.configure({ placeholder: NOTE_PLACEHOLDER }),
     ],
     content: parseInitialContent(initialContentJson),
+    editorProps: {
+      attributes: {
+        "aria-label": "Problem notes",
+        "aria-multiline": "true",
+        role: "textbox",
+        spellcheck: "true",
+      },
+    },
     onUpdate: ({ editor: instance }) => {
       onChange(JSON.stringify(instance.getJSON()));
     },

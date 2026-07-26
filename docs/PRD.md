@@ -107,7 +107,7 @@ no editor embeds/databases. Local-first is a feature.
       categories from the notes page; keep scheduling fields derived
 - [x] 9.8 Notes page shell: final 720px layout, title and metadata treatment, category chips,
       latest score/reps/runtime, save status, and action placement
-- [ ] 9.9 Editor fundamentals: final document typography and spacing, placeholder, headings,
+- [x] 9.9 Editor fundamentals: final document typography and spacing, placeholder, headings,
       paragraphs, marks, lists, blockquote, keyboard behavior, autosave, and tests
 - [ ] 9.10 Slash commands and callouts: keyboard-operable `/` menu for every supported block
       type, including the final purple-rule recall callout
