@@ -94,7 +94,7 @@ no editor embeds/databases. Local-first is a feature.
       then verify `pnpm lint && pnpm typecheck && pnpm test`
 - [x] 9.2 Design foundation: semantic light/dark CSS tokens, self-hosted Chewy/Quicksand/
       JetBrains Mono fonts, persisted theme, focus styles, and shared primitives
-- [ ] 9.3 Window shell and intro: final titlebar/window treatment, theme toggle, first-run
+- [x] 9.3 Window shell and intro: final titlebar/window treatment, theme toggle, first-run
       intro, and flexible behavior beyond the 1280×820 reference size
 - [ ] 9.4 Sidebar: final 236px layout, nav states/counts, category counts/filtering, version,
       and truthful extension/listener footer

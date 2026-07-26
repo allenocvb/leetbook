@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
-import { App } from "../App.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { App, FIRST_RUN_STORAGE_KEY } from "../App.js";
 import { makeDb, seed } from "../test-utils.js";
 import { NAV_ITEMS } from "./Sidebar.js";
 
-async function renderApp() {
+async function renderApp({ introComplete = true }: { introComplete?: boolean } = {}) {
   const db = await makeDb();
   await seed(db, [
     // reviewed long ago with a failing score → due now
@@ -17,11 +17,30 @@ async function renderApp() {
     },
     { slug: "untouched", title: "Untouched" },
   ]);
+  if (introComplete) window.localStorage.setItem(FIRST_RUN_STORAGE_KEY, "true");
   render(<App db={db} />);
-  await waitFor(() => expect(screen.getByText("Old Fail")).toBeInTheDocument());
+  if (introComplete) {
+    await waitFor(() => expect(screen.getByText("Old Fail")).toBeInTheDocument());
+  }
 }
 
 describe("App shell", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("shows the first-run intro with live counts and remembers completion", async () => {
+    await renderApp({ introComplete: false });
+
+    expect(screen.getByRole("heading", { name: "LeetBook" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("2 problems · 1 due today")).toBeInTheDocument());
+
+    await userEvent.click(screen.getByRole("button", { name: "Le(e)t's Code" }));
+
+    expect(window.localStorage.getItem(FIRST_RUN_STORAGE_KEY)).toBe("true");
+    expect(screen.getByRole("heading", { name: "All Problems" })).toBeInTheDocument();
+  });
+
   it("renders the sidebar with every nav item", async () => {
     await renderApp();
     for (const item of NAV_ITEMS) {

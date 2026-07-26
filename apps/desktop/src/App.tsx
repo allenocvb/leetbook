@@ -4,6 +4,7 @@ import { useCaptureListener } from "./capture/useCaptureListener.js";
 import { AppLayout } from "./components/AppLayout.js";
 import { PagePlaceholder } from "./components/PagePlaceholder.js";
 import type { ViewId } from "./components/Sidebar.js";
+import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
@@ -20,14 +21,42 @@ export function App({ db }: { db: SqlExecutor }) {
   );
 }
 
-/** Either a sidebar view or a specific problem's notes page. */
-type Route = { view: ViewId } | { view: "problem"; problemId: string; from: ViewId };
+export const FIRST_RUN_STORAGE_KEY = "leetbook.intro.complete";
+
+/** Either the first-run intro, a sidebar view, or a specific problem's notes page. */
+type Route =
+  | { view: "intro" }
+  | { view: ViewId }
+  | { view: "problem"; problemId: string; from: ViewId };
+
+function readInitialRoute(): Route {
+  try {
+    return window.localStorage.getItem(FIRST_RUN_STORAGE_KEY) === "true"
+      ? { view: "all-problems" }
+      : { view: "intro" };
+  } catch {
+    return { view: "intro" };
+  }
+}
 
 function Shell() {
-  const [route, setRoute] = useState<Route>({ view: "all-problems" });
+  const [route, setRoute] = useState<Route>(readInitialRoute);
   const [captureTick, setCaptureTick] = useState(0);
   useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
   const counts = useCounts({ route, captureTick });
+
+  if (route.view === "intro") {
+    const start = () => {
+      try {
+        window.localStorage.setItem(FIRST_RUN_STORAGE_KEY, "true");
+      } catch {
+        // Opening the app still works when storage is unavailable.
+      }
+      setRoute({ view: "all-problems" });
+    };
+
+    return <IntroScreen problemCount={counts.all} dueCount={counts.due} onStart={start} />;
+  }
 
   const activeView = route.view === "problem" ? route.from : route.view;
   const openProblem = (problemId: string) =>

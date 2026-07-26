@@ -8,6 +8,7 @@ import "@fontsource/jetbrains-mono/latin-500.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppRoot } from "./AppRoot.js";
+import { AppWindow } from "./components/window/AppWindow.js";
 import { ThemeProvider } from "./theme/ThemeProvider.js";
 import "./theme.css";
 
@@ -17,7 +18,9 @@ if (!root) throw new Error("missing #root element");
 createRoot(root).render(
   <StrictMode>
     <ThemeProvider>
-      <AppRoot />
+      <AppWindow>
+        <AppRoot />
+      </AppWindow>
     </ThemeProvider>
   </StrictMode>,
 );
