@@ -7,9 +7,9 @@ dist/
 .turbo/
 .wxt/
 
-# tauri / rust
-src-tauri/target/
-src-tauri/gen/
+# tauri / rust (any level — a bare "src-tauri/target/" only matches at the repo root)
+**/src-tauri/target/
+**/src-tauri/gen/
 
 # misc
 .DS_Store

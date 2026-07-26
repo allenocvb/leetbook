@@ -48,13 +48,13 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 3.6 Import: Notion CSV → problems + reviews (use the real 47-problem export as test fixture)
 - [x] 3.7 Export: JSON (full) and Markdown (notes)
 
-## Phase 4 — Desktop shell & table view
+## Phase 4 — Desktop shell & table view ✅
 
 - [x] 4.1 SQLite wiring: implement `SqlExecutor` with tauri-plugin-sql; run migrations on boot
 - [x] 4.2 App layout: sidebar + main pane (per design deck)
-- [ ] 4.3 Table view: All Problems (sort, filter, category jump)
-- [ ] 4.4 Manual problem add/edit dialog
-- [ ] 4.5 Due Today view
+- [x] 4.3 Table view: All Problems (sort, filter, category jump)
+- [x] 4.4 Manual problem add/edit dialog (add; editing lands with the notes page header in 5.2)
+- [x] 4.5 Due Today view
 
 ## Phase 5 — Notes editor
 

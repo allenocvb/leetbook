@@ -1,23 +1,47 @@
+import type { SqlExecutor } from "@leetbook/core";
 import { useState } from "react";
 import { AppLayout } from "./components/AppLayout.js";
 import { PagePlaceholder } from "./components/PagePlaceholder.js";
 import type { ViewId } from "./components/Sidebar.js";
+import { DbProvider } from "./db/DbContext.js";
+import { useCounts } from "./hooks/useCounts.js";
+import { AllProblemsPage } from "./pages/AllProblemsPage.js";
+import { DueTodayPage } from "./pages/DueTodayPage.js";
 
-const PAGES: Record<ViewId, { title: string; hint: string }> = {
-  "all-problems": { title: "All Problems", hint: "The table view arrives in 4.3." },
-  "due-today": { title: "Due Today", hint: "The due view arrives in 4.5." },
-  review: { title: "Review Session", hint: "Review queue arrives in Phase 6." },
-  capture: { title: "Capture", hint: "Extension capture arrives in Phase 7." },
-  settings: { title: "Settings & Pairing", hint: "Pairing arrives in Phase 7." },
-};
+export function App({ db }: { db: SqlExecutor }) {
+  return (
+    <DbProvider db={db}>
+      <Shell />
+    </DbProvider>
+  );
+}
 
-export function App() {
+function Shell() {
   const [view, setView] = useState<ViewId>("all-problems");
-  const page = PAGES[view];
+  const counts = useCounts(view);
 
   return (
-    <AppLayout activeView={view} onNavigate={setView}>
-      <PagePlaceholder title={page.title} hint={page.hint} />
+    <AppLayout
+      activeView={view}
+      onNavigate={setView}
+      counts={{ "all-problems": counts.all, "due-today": counts.due }}
+    >
+      <Page view={view} />
     </AppLayout>
   );
+}
+
+function Page({ view }: { view: ViewId }) {
+  switch (view) {
+    case "all-problems":
+      return <AllProblemsPage />;
+    case "due-today":
+      return <DueTodayPage />;
+    case "review":
+      return <PagePlaceholder title="Review Session" hint="Review queue arrives in Phase 6." />;
+    case "capture":
+      return <PagePlaceholder title="Capture" hint="Extension capture arrives in Phase 7." />;
+    case "settings":
+      return <PagePlaceholder title="Settings & Pairing" hint="Pairing arrives in Phase 7." />;
+  }
 }
