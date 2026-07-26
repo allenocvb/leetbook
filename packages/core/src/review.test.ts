@@ -5,7 +5,8 @@ import { createProblemsRepo } from "./db/repositories/problems.js";
 import { createReviewsRepo } from "./db/repositories/reviews.js";
 import { createSchedulingRepo } from "./db/repositories/scheduling.js";
 import { createTestDb } from "./db/test-helpers.js";
-import { applyReview, previewReview } from "./review.js";
+import { scheduleReview } from "./fsrs.js";
+import { applyReview, correctLatestReview, previewReview } from "./review.js";
 
 const NOW = new Date("2026-07-25T12:00:00.000Z");
 
@@ -80,5 +81,47 @@ describe("previewReview", () => {
     const preview = await previewReview(db, problemId, 4, NOW);
     const { state } = await applyReview(db, { problemId, score: 4 }, NOW);
     expect(state.dueAt).toBe(preview.dueAt);
+  });
+});
+
+describe("correctLatestReview", () => {
+  it("changes only the latest score and rebuilds scheduling from the full history", async () => {
+    const first = await applyReview(db, { problemId, score: 4 }, NOW);
+    const later = new Date(first.state.dueAt);
+    const second = await applyReview(
+      db,
+      {
+        problemId,
+        score: 5,
+        runtimeMs: 61,
+        memoryMb: 18.4,
+        language: "python3",
+        codeSnapshot: "snapshot",
+      },
+      later,
+    );
+
+    const corrected = await correctLatestReview(db, problemId, 0);
+    const history = await createReviewsRepo(db).listByProblem(problemId);
+    const expected = scheduleReview(scheduleReview(null, problemId, 4, NOW), problemId, 0, later);
+
+    expect(history.map((review) => review.score)).toEqual([4, 0]);
+    expect(history[0]?.id).toBe(first.review.id);
+    expect(history[1]).toMatchObject({
+      id: second.review.id,
+      runtimeMs: 61,
+      memoryMb: 18.4,
+      language: "python3",
+      codeSnapshot: "snapshot",
+    });
+    expect(corrected.review).toEqual(history[1]);
+    expect(corrected.state).toEqual(expected);
+    expect(corrected.state.reviewCount).toBe(2);
+    expect(await createSchedulingRepo(db).get(problemId)).toEqual(expected);
+  });
+
+  it("rejects correction when no review exists", async () => {
+    await expect(correctLatestReview(db, problemId, 3)).rejects.toThrow("without review history");
+    expect(await createSchedulingRepo(db).get(problemId)).toBeNull();
   });
 });

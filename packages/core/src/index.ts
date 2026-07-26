@@ -21,6 +21,8 @@ export {
   type ApplyReviewInput,
   type ApplyReviewResult,
   applyReview,
+  type CorrectLatestReviewResult,
+  correctLatestReview,
   previewReview,
 } from "./review.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";

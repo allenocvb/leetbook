@@ -26,7 +26,8 @@ export interface ScorePickerProps {
   selected: PerformanceScore | null;
   onSelect: (score: PerformanceScore) => void;
   disabled?: boolean;
-  firstOptionRef?: Ref<HTMLButtonElement>;
+  focusOption?: PerformanceScore;
+  focusOptionRef?: Ref<HTMLButtonElement>;
 }
 
 /** The 0–5 chip row. The rubric for the selected score stays visible below. */
@@ -34,7 +35,8 @@ export function ScorePicker({
   selected,
   onSelect,
   disabled = false,
-  firstOptionRef,
+  focusOption,
+  focusOptionRef,
 }: ScorePickerProps) {
   return (
     <div className="score-picker">
@@ -48,7 +50,7 @@ export function ScorePicker({
               className="score-picker__option"
               aria-pressed={active}
               disabled={disabled}
-              ref={score === 0 ? firstOptionRef : undefined}
+              ref={score === focusOption ? focusOptionRef : undefined}
               onClick={() => onSelect(score)}
             >
               <span className="score-picker__score">{score}</span>

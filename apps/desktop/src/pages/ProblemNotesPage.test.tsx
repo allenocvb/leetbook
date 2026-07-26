@@ -63,6 +63,10 @@ describe("ProblemNotesPage", () => {
     );
     expect(screen.getByRole("button", { name: "Edit problem" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Log review" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Review history" })).toBeInTheDocument();
+    expect(screen.getByText("1 review")).toBeInTheDocument();
+    expect(screen.getByText("Hesitant")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Correct latest score" })).toBeInTheDocument();
   });
 
   it("logs a review for an unscheduled problem and refreshes every derived field", async () => {
@@ -81,6 +85,8 @@ describe("ProblemNotesPage", () => {
       expect(screen.getByRole("heading", { name: "Valid Anagram" })).toBeInTheDocument(),
     );
     expect(screen.getByText("Not reviewed yet")).toBeInTheDocument();
+    expect(screen.getByText("No reviews logged yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Correct latest score" })).not.toBeInTheDocument();
     expect(await createSchedulingRepo(db).get(problem.id)).toBeNull();
 
     await userEvent.click(screen.getByRole("button", { name: "Log review" }));
@@ -105,6 +111,34 @@ describe("ProblemNotesPage", () => {
     expect(scheduling?.lastReviewedAt).toBe(reviews[0]?.reviewedAt);
     expect(screen.getByText(/scored 5 · 1 reps/)).toBeInTheDocument();
     expect(screen.getByText("Next review").nextElementSibling).toHaveTextContent(/in \d+ days/);
+  });
+
+  it("corrects only the latest score and refreshes history and scheduling", async () => {
+    const { db, problem } = await setup();
+    const reviewsBefore = await createReviewsRepo(db).listByProblem(problem.id);
+    const schedulingBefore = await createSchedulingRepo(db).get(problem.id);
+
+    await userEvent.click(screen.getByRole("button", { name: "Correct latest score" }));
+    const dialog = screen.getByRole("dialog", { name: "Correct latest review" });
+    expect(within(dialog).getByRole("button", { name: "4 Hesitant" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    const submit = within(dialog).getByRole("button", { name: "Save correction" });
+    expect(submit).toBeDisabled();
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "0 Blackout" }));
+    await userEvent.click(submit);
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    const reviewsAfter = await createReviewsRepo(db).listByProblem(problem.id);
+    const schedulingAfter = await createSchedulingRepo(db).get(problem.id);
+    expect(reviewsAfter).toHaveLength(1);
+    expect(reviewsAfter[0]).toMatchObject({ id: reviewsBefore[0]?.id, score: 0 });
+    expect(schedulingAfter?.reviewCount).toBe(1);
+    expect(schedulingAfter?.dueAt).not.toBe(schedulingBefore?.dueAt);
+    expect(screen.getByText(/scored 0 · 1 reps/)).toBeInTheDocument();
+    expect(screen.getByText("Blackout")).toBeInTheDocument();
   });
 
   it("opens LeetCode through the browser fallback outside Tauri", async () => {

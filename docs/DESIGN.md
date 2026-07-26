@@ -89,12 +89,14 @@ TipTap (ProseMirror) + lowlight code blocks. Notion feel without building an edi
 
 ```
 problems    (id, slug, title, url, difficulty, tags[], created_at)
-reviews     (id, problem_id, score 0–5, reviewed_at, runtime, memory, code_snapshot)   -- append-only
+reviews     (id, problem_id, score 0–5, reviewed_at, runtime, memory, code_snapshot)
 scheduling  (problem_id, fsrs_stability, fsrs_difficulty, due_at, review_count)
 notes       (problem_id, content_json, updated_at)
 ```
 
-Status and table columns are always **derived**, never stored redundantly. Append-only `reviews` gives history Notion never had, and makes future sync tractable.
+Status and table columns are always **derived**, never stored redundantly. Reviews append during
+normal use; the latest score has one explicit correction path that replays scheduling from the
+full history. This keeps mistakes recoverable without adding a redundant score field.
 
 ## 5. Open Source & Infra
 
@@ -127,7 +129,7 @@ Status and table columns are always **derived**, never stored redundantly. Appen
 | MV3 service worker limits | Capture logic in content script; localhost fetch needs host permission |
 | Chrome Web Store review delays | Ship desktop app first (usable standalone); extension follows |
 | Editor scope creep | Keep the bounded block set in `docs/UI_SPEC.md`; no databases or embeds |
-| Sync requests from users | Append-only reviews log designed for it; explicitly post-v1 |
+| Sync requests from users | Review history is retained and latest-score correction is explicit; sync remains post-v1 |
 
 ## 8. Final UI Contract
 

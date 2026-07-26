@@ -115,7 +115,7 @@ no editor embeds/databases. Local-first is a feature.
       lowlight highlighting, final header/body styling, and consistent read-only snapshots
 - [x] 9.12 Manual review entry: add a 0–5 `Log review` flow from any problem, append the review,
       recompute FSRS, and refresh all derived fields
-- [ ] 9.13 Review correction and history: show review history and safely correct the latest
+- [x] 9.13 Review correction and history: show review history and safely correct the latest
       mistaken review by replaying derived scheduling; never overwrite a redundant score field
 - [ ] 9.14 Review session fidelity: final top progress bar, 620px content, score hover/selection
       rubric, FSRS preview, working `Show my notes`, keyboard flow, and summary

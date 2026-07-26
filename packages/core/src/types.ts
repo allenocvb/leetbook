@@ -18,7 +18,7 @@ export interface Problem {
   createdAt: IsoDateTime;
 }
 
-/** One practice attempt. Append-only — reviews are never edited or deleted. */
+/** One practice attempt. Appended normally; only the latest score may be explicitly corrected. */
 export interface Review {
   id: string;
   problemId: string;

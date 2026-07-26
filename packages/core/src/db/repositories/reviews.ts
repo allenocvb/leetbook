@@ -5,8 +5,10 @@ import { type ReviewRow, toReview } from "../rows.js";
 export type ReviewInput = Omit<Review, "id">;
 
 export interface ReviewsRepo {
-  /** Append a review. The log is append-only: no update or delete exists on purpose. */
+  /** Append a review. Normal review entry never updates or deletes history. */
   add(input: ReviewInput): Promise<Review>;
+  /** Core correction path only; callers must replay scheduling after changing a score. */
+  correctScore(reviewId: string, score: Review["score"]): Promise<void>;
   listByProblem(problemId: string): Promise<Review[]>;
   /** Most recent first. */
   latestScores(problemId: string, limit: number): Promise<number[]>;
@@ -31,6 +33,10 @@ export function createReviewsRepo(db: SqlExecutor): ReviewsRepo {
         ],
       );
       return { id, ...input };
+    },
+
+    async correctScore(reviewId, score) {
+      await db.execute("UPDATE reviews SET score = ? WHERE id = ?", [score, reviewId]);
     },
 
     async listByProblem(problemId) {

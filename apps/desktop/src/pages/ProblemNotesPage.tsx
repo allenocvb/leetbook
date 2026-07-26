@@ -13,6 +13,8 @@ import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { EditProblemDialog } from "../components/EditProblemDialog.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { ProblemNotesHeader } from "../components/notes/ProblemNotesHeader.js";
+import { ReviewHistory } from "../components/notes/ReviewHistory.js";
+import { CorrectReviewDialog } from "../components/review/CorrectReviewDialog.js";
 import { LogReviewDialog } from "../components/review/LogReviewDialog.js";
 import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
@@ -34,6 +36,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [reviews, setReviews] = useState<Review[]>([]);
   const [editing, setEditing] = useState(false);
   const [loggingReview, setLoggingReview] = useState(false);
+  const [correctingReview, setCorrectingReview] = useState(false);
   const { saveState, handleChange } = useNoteAutosave(db, problemId, saveDelayMs);
 
   useEffect(() => {
@@ -60,6 +63,15 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   if (!problem) return <p className="problem-notes-page__error">Problem not found.</p>;
 
   const snapshot = reviews.filter((review) => review.codeSnapshot !== null).at(-1) ?? null;
+  const latestReview = reviews.at(-1) ?? null;
+  const refreshReviewData = async () => {
+    const [nextScheduling, nextReviews] = await Promise.all([
+      createSchedulingRepo(db).get(problem.id),
+      createReviewsRepo(db).listByProblem(problem.id),
+    ]);
+    setScheduling(nextScheduling);
+    setReviews(nextReviews);
+  };
 
   return (
     <div className="problem-notes-page">
@@ -74,6 +86,8 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
         />
 
         <Divider className="problem-notes-page__divider" />
+        <ReviewHistory reviews={reviews} onCorrectLatest={() => setCorrectingReview(true)} />
+        <Divider className="problem-notes-page__history-divider" />
 
         <div className="problem-notes-page__document">
           <span
@@ -106,14 +120,16 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
             problemId={problem.id}
             problemTitle={problem.title}
             onClose={() => setLoggingReview(false)}
-            onLogged={async () => {
-              const [nextScheduling, nextReviews] = await Promise.all([
-                createSchedulingRepo(db).get(problem.id),
-                createReviewsRepo(db).listByProblem(problem.id),
-              ]);
-              setScheduling(nextScheduling);
-              setReviews(nextReviews);
-            }}
+            onLogged={refreshReviewData}
+          />
+        )}
+        {correctingReview && latestReview && (
+          <CorrectReviewDialog
+            problemId={problem.id}
+            problemTitle={problem.title}
+            currentScore={latestReview.score}
+            onClose={() => setCorrectingReview(false)}
+            onCorrected={refreshReviewData}
           />
         )}
       </div>

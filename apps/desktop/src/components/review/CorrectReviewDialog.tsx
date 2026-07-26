@@ -1,9 +1,8 @@
 import {
-  type ApplyReviewResult,
-  applyReview,
+  type CorrectLatestReviewResult,
+  correctLatestReview,
   isPerformanceScore,
   type PerformanceScore,
-  type SqlExecutor,
 } from "@leetbook/core";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { useDb } from "../../db/DbContext.js";
@@ -12,70 +11,73 @@ import { Button } from "../ui/Button.js";
 import { ScorePicker } from "./ScorePicker.js";
 import "./ReviewScoreDialog.css";
 
-export interface LogReviewDialogProps {
+export interface CorrectReviewDialogProps {
   problemId: string;
   problemTitle: string;
+  currentScore: PerformanceScore;
   onClose: () => void;
-  onLogged: (result: ApplyReviewResult) => void | Promise<void>;
+  onCorrected: (result: CorrectLatestReviewResult) => void | Promise<void>;
 }
 
-export function LogReviewDialog({
+export function CorrectReviewDialog({
   problemId,
   problemTitle,
+  currentScore,
   onClose,
-  onLogged,
-}: LogReviewDialogProps) {
+  onCorrected,
+}: CorrectReviewDialogProps) {
   const db = useDb();
-  const [selected, setSelected] = useState<PerformanceScore | null>(null);
+  const [selected, setSelected] = useState<PerformanceScore>(currentScore);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const firstScoreRef = useRef<HTMLButtonElement>(null);
+  const selectedScoreRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    firstScoreRef.current?.focus();
+    selectedScoreRef.current?.focus();
   }, []);
 
   const submit = async () => {
-    if (selected === null || submitting) return;
+    if (selected === currentScore || submitting) return;
     setSubmitting(true);
     setError("");
     try {
-      const result = await logManualReview(db, problemId, selected);
-      await onLogged(result);
+      const result = await correctLatestReview(db, problemId, selected);
+      await onCorrected(result);
       onClose();
     } catch {
-      setError("Review could not be logged. Try again.");
+      setError("Review could not be corrected. Try again.");
       setSubmitting(false);
     }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLFieldSetElement>) => {
-    if (!/^[0-5]$/.test(event.key)) return;
+    if (!/^[0-5]$/.test(event.key) || submitting) return;
     const digit = Number(event.key);
-    if (!isPerformanceScore(digit) || submitting) return;
+    if (!isPerformanceScore(digit)) return;
     event.preventDefault();
     setSelected(digit);
   };
 
   return (
-    <ProblemDialog title="Log review" className="review-score-dialog" onClose={onClose}>
+    <ProblemDialog title="Correct latest review" className="review-score-dialog" onClose={onClose}>
       <fieldset
         className="review-score-dialog__fieldset"
-        aria-label="Review score"
+        aria-label="Corrected review score"
         onKeyDown={handleKeyDown}
       >
         <p className="review-score-dialog__intro">
-          How well did you recall{" "}
-          <span className="review-score-dialog__problem">{problemTitle}?</span>
+          Change the latest score for{" "}
+          <span className="review-score-dialog__problem">{problemTitle}</span>. Earlier reviews
+          remain unchanged and the schedule will be rebuilt.
         </p>
         <ScorePicker
           selected={selected}
           onSelect={setSelected}
           disabled={submitting}
-          focusOption={0}
-          focusOptionRef={firstScoreRef}
+          focusOption={currentScore}
+          focusOptionRef={selectedScoreRef}
         />
-        <p className="review-score-dialog__hint">Press 0–5 to choose a score</p>
+        <p className="review-score-dialog__hint">Press 0–5 to choose the corrected score</p>
         {error && (
           <p className="review-score-dialog__error" role="alert">
             {error}
@@ -85,19 +87,11 @@ export function LogReviewDialog({
           <Button variant="ghost" disabled={submitting} onClick={onClose}>
             Cancel
           </Button>
-          <Button disabled={selected === null || submitting} onClick={() => void submit()}>
-            {submitting ? "Logging…" : "Log review"}
+          <Button disabled={selected === currentScore || submitting} onClick={() => void submit()}>
+            {submitting ? "Saving…" : "Save correction"}
           </Button>
         </div>
       </fieldset>
     </ProblemDialog>
   );
-}
-
-function logManualReview(
-  db: SqlExecutor,
-  problemId: string,
-  score: PerformanceScore,
-): Promise<ApplyReviewResult> {
-  return applyReview(db, { problemId, score }, new Date());
 }

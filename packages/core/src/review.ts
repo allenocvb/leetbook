@@ -20,6 +20,11 @@ export interface ApplyReviewResult {
   state: SchedulingState;
 }
 
+export interface CorrectLatestReviewResult {
+  review: Review;
+  state: SchedulingState;
+}
+
 /**
  * The one write path for "the user reviewed a problem": appends to the
  * review log and advances FSRS scheduling. Used by the in-app review
@@ -60,4 +65,36 @@ export async function previewReview(
 ): Promise<SchedulingState> {
   const current = await createSchedulingRepo(db).get(problemId);
   return scheduleReview(current, problemId, score, now);
+}
+
+/**
+ * Corrects only the most recent review, then rebuilds FSRS from the complete
+ * chronological review history. Earlier reviews and capture metadata stay intact.
+ */
+export async function correctLatestReview(
+  db: SqlExecutor,
+  problemId: string,
+  score: PerformanceScore,
+): Promise<CorrectLatestReviewResult> {
+  const reviews = createReviewsRepo(db);
+  const history = await reviews.listByProblem(problemId);
+  const latest = history.at(-1);
+  if (!latest) throw new Error("Cannot correct a problem without review history.");
+
+  const corrected = { ...latest, score };
+  const correctedHistory = [...history.slice(0, -1), corrected];
+  const state = replayScheduling(problemId, correctedHistory);
+
+  await reviews.correctScore(latest.id, score);
+  await createSchedulingRepo(db).put(state);
+  return { review: corrected, state };
+}
+
+function replayScheduling(problemId: string, reviews: Review[]): SchedulingState {
+  let state: SchedulingState | null = null;
+  for (const review of reviews) {
+    state = scheduleReview(state, problemId, review.score, new Date(review.reviewedAt));
+  }
+  if (!state) throw new Error("Cannot replay empty review history.");
+  return state;
 }
