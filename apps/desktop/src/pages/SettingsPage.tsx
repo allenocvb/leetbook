@@ -5,6 +5,7 @@ import {
   type NotionImportResult,
 } from "@leetbook/core";
 import { useEffect, useRef, useState } from "react";
+import { PairingCard } from "../components/PairingCard.js";
 import { useDb } from "../db/DbContext.js";
 import { pickDirectory, saveTextFile, writeFileIn } from "../lib/fileio.js";
 
@@ -160,13 +161,7 @@ export function SettingsPage() {
         )}
       </section>
 
-      <section style={card} aria-label="Pairing">
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 4px" }}>Extension pairing</h2>
-        <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-          Arrives in Phase 7 — the browser extension will capture Accepted submissions
-          automatically.
-        </p>
-      </section>
+      <PairingCard />
     </div>
   );
 }

@@ -71,10 +71,10 @@ no editor embeds/databases. Local-first is a feature.
 ## Phase 7 — Extension capture
 
 - [x] 7.1 Capture adapter: detect Accepted, pull slug/title/difficulty/topics/runtime/code (isolated module + tests)
-- [ ] 7.2 Desktop listener on 127.0.0.1 (fixed port + pairing token)
+- [x] 7.2 Desktop listener on 127.0.0.1:7749 (pairing token, CORS, capture event → TS ingest)
 - [ ] 7.3 In-page 0–5 toast; post payload to app
 - [ ] 7.4 Offline queue in extension storage, flush on reconnect
-- [ ] 7.5 Settings & Pairing screen in app
+- [x] 7.5 Settings & Pairing screen in app (listener address + token card)
 
 ## Phase 8 — Import/export UI ✅ (done before Phase 7 to unlock real data)
 

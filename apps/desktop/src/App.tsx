@@ -1,5 +1,6 @@
 import type { SqlExecutor } from "@leetbook/core";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useCaptureListener } from "./capture/useCaptureListener.js";
 import { AppLayout } from "./components/AppLayout.js";
 import { PagePlaceholder } from "./components/PagePlaceholder.js";
 import type { ViewId } from "./components/Sidebar.js";
@@ -24,7 +25,9 @@ type Route = { view: ViewId } | { view: "problem"; problemId: string; from: View
 
 function Shell() {
   const [route, setRoute] = useState<Route>({ view: "all-problems" });
-  const counts = useCounts(route);
+  const [captureTick, setCaptureTick] = useState(0);
+  useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
+  const counts = useCounts({ route, captureTick });
 
   const activeView = route.view === "problem" ? route.from : route.view;
   const openProblem = (problemId: string) =>
