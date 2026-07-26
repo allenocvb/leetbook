@@ -1,0 +1,24 @@
+{
+  "name": "leetbook",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Spaced repetition and notebook-style notes for LeetCode — local-first, open source.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0"
+  },
+  "packageManager": "pnpm@11.17.0"
+}
