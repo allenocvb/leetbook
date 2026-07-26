@@ -15,6 +15,10 @@
     "@leetbook/core": "workspace:*",
     "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-sql": "^2.2.0",
+    "@tiptap/extension-code-block-lowlight": "^3.29.0",
+    "@tiptap/react": "^3.29.0",
+    "@tiptap/starter-kit": "^3.29.0",
+    "lowlight": "^3.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

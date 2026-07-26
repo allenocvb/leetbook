@@ -58,7 +58,7 @@ no editor embeds/databases. Local-first is a feature.
 
 ## Phase 5 — Notes editor
 
-- [ ] 5.1 TipTap editor component (headings, markdown shortcuts, code blocks w/ highlighting)
+- [x] 5.1 TipTap editor component (headings, markdown shortcuts, code blocks w/ highlighting)
 - [ ] 5.2 Problem notes page: metadata header + editor, autosave to `notes`
 - [ ] 5.3 Code snapshot block (from captured submissions)
 
