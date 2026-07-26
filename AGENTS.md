@@ -19,6 +19,11 @@ Read `docs/PRD.md` before writing code. Read `docs/DESIGN.md` for product/archit
    commits; a commit must never span several PRD tasks.
 4. **Before every commit:** `pnpm lint && pnpm typecheck && pnpm test`. All three green
    or no commit. CI runs the same on push — keep `main` green.
+   **Also inspect what's staged.** Run `git status` and question anything unexpected —
+   especially large counts of files. Never commit build artifacts (`target/`, `dist/`,
+   `gen/`, `.output/`, `node_modules/`); if they show up, fix `.gitignore` first.
+   Remember: a gitignore pattern with a mid-path slash (like `src-tauri/target/`) anchors
+   to the repo root — nested paths need `**/` (this bit us once; see commit f6f04f7).
 5. **Mark PRD progress.** When a task is done (implemented + tested + committed), check
    its box in `docs/PRD.md` in that same commit.
 
