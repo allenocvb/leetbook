@@ -1,0 +1,46 @@
+/* LeetBook design system — see .claude/skills/frontend-design/SKILL.md */
+
+:root {
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --text: #111111;
+  --text-secondary: #666666;
+  --border: #ebebea;
+  --accent: #5b5bd6;
+  --easy: #1a8917;
+  --medium: #b54708;
+  --hard: #c92a2a;
+  --danger: #c92a2a;
+  --danger-bg: #fdecec;
+
+  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}

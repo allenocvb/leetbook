@@ -51,7 +51,7 @@ no editor embeds/databases. Local-first is a feature.
 ## Phase 4 — Desktop shell & table view
 
 - [x] 4.1 SQLite wiring: implement `SqlExecutor` with tauri-plugin-sql; run migrations on boot
-- [ ] 4.2 App layout: sidebar + main pane (per design deck)
+- [x] 4.2 App layout: sidebar + main pane (per design deck)
 - [ ] 4.3 Table view: All Problems (sort, filter, category jump)
 - [ ] 4.4 Manual problem add/edit dialog
 - [ ] 4.5 Due Today view
