@@ -66,7 +66,9 @@ describe("SettingsPage", () => {
       new File([csv], "bad.csv", { type: "text/csv" }),
     );
     await waitFor(() => expect(screen.getByText("0 imported")).toBeInTheDocument());
-    expect(screen.getByText(/line 2 \(Broken\): missing or invalid LeetCode URL/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/line 2 \(Broken\): missing or invalid LeetCode URL/),
+    ).toBeInTheDocument();
   });
 
   it("exports the database as JSON via the save dialog", async () => {
