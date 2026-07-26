@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { pingApp, sendCapture } from "./client.js";
+import { deliverCapture, isCaptureDeliveryResult } from "./delivery.js";
 import type { CapturePayload } from "./payload.js";
 import { createQueue, type KvStorage } from "./queue.js";
 import { showCaptureToast } from "./toast.js";
@@ -104,6 +105,43 @@ describe("createQueue", () => {
   });
 });
 
+describe("deliverCapture", () => {
+  it("delivers after draining older captures in order", async () => {
+    const queue = createQueue(memoryStorage());
+    await queue.enqueue(payload("older"));
+    const sent: string[] = [];
+    const send = vi.fn(async (item: CapturePayload) => {
+      sent.push(item.slug);
+      return true;
+    });
+
+    expect(await deliverCapture(queue, SETTINGS, payload("new"), send)).toEqual({
+      status: "delivered",
+      queued: 0,
+    });
+    expect(sent).toEqual(["older", "new"]);
+  });
+
+  it("queues behind older work when the desktop app stays offline", async () => {
+    const queue = createQueue(memoryStorage());
+    await queue.enqueue(payload("older"));
+    const send = vi.fn(async () => false);
+
+    expect(await deliverCapture(queue, SETTINGS, payload("new"), send)).toEqual({
+      status: "queued",
+      queued: 2,
+    });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("validates background delivery responses", () => {
+    expect(isCaptureDeliveryResult({ status: "delivered", queued: 0 })).toBe(true);
+    expect(isCaptureDeliveryResult({ status: "queued", queued: 3 })).toBe(true);
+    expect(isCaptureDeliveryResult({ status: "queued", queued: 0 })).toBe(false);
+    expect(isCaptureDeliveryResult(undefined)).toBe(false);
+  });
+});
+
 /** Queries inside the toast's shadow root, failing loudly if absent. */
 function inShadow(host: HTMLElement, selector: string): HTMLButtonElement {
   const element = host.shadowRoot?.querySelector<HTMLButtonElement>(selector);
@@ -112,32 +150,72 @@ function inShadow(host: HTMLElement, selector: string): HTMLButtonElement {
 }
 
 describe("showCaptureToast", () => {
-  it("renders title and meta, rating removes the toast and reports the score", () => {
-    const onRate = vi.fn();
-    const host = showCaptureToast(
-      document,
-      { title: "Two Sum", meta: "Easy · 61 ms · code saved" },
-      { onRate, onSkip: vi.fn() },
-    );
+  const content = {
+    title: "Two Sum",
+    difficulty: "easy" as const,
+    runtimeMs: 61,
+    memoryMb: 18.4,
+    codeSaved: true,
+  };
 
-    const root = host.shadowRoot;
+  it("renders final metadata and delivers a chosen score", async () => {
+    const onRate = vi.fn(async () => ({ status: "delivered", queued: 0 }) as const);
+    const toast = showCaptureToast(document, content, { onRate });
+
+    const root = toast.host.shadowRoot;
     expect(root?.textContent).toContain("Two Sum");
-    expect(root?.textContent).toContain("Easy · 61 ms · code saved");
+    expect(root?.textContent).toContain("Easy · 61 ms · 18.4 MB · code saved");
 
     const buttons = root?.querySelectorAll(".scores button") ?? [];
     expect(buttons).toHaveLength(6);
     (buttons[3] as HTMLButtonElement).click();
-    expect(onRate).toHaveBeenCalledWith(3);
+    await vi.waitFor(() => expect(onRate).toHaveBeenCalledWith(3));
+    await vi.waitFor(() => expect(document.getElementById("leetbook-capture-toast")).toBeNull());
+  });
+
+  it("shows the real queued count and later flush feedback", async () => {
+    const onRate = vi.fn(async () => ({ status: "queued", queued: 2 }) as const);
+    const toast = showCaptureToast(document, content, { onRate });
+    inShadow(toast.host, '.score[aria-label="Score 5"]').click();
+
+    await vi.waitFor(() =>
+      expect(toast.host.shadowRoot?.textContent).toContain("Queued — 2 waiting"),
+    );
+    expect(toast.host.shadowRoot?.textContent).toContain("Desktop app offline");
+
+    toast.setFlushResult({ sent: 2, remaining: 0 });
+    expect(toast.host.shadowRoot?.textContent).toContain("Sent to LeetBook");
+    expect(toast.host.shadowRoot?.textContent).toContain("Queue is clear");
+  });
+
+  it("skip and dismiss both schedule as Good before closing", () => {
+    const onSkip = vi.fn(async () => ({ status: "delivered", queued: 0 }) as const);
+    const skipped = showCaptureToast(document, content, { onRate: onSkip });
+    inShadow(skipped.host, ".skip").click();
+    expect(onSkip).toHaveBeenCalledWith(4);
+    expect(document.getElementById("leetbook-capture-toast")).toBeNull();
+
+    const onDismiss = vi.fn(async () => ({ status: "delivered", queued: 0 }) as const);
+    const dismissed = showCaptureToast(document, content, { onRate: onDismiss });
+    inShadow(dismissed.host, ".dismiss").click();
+    expect(onDismiss).toHaveBeenCalledWith(4);
     expect(document.getElementById("leetbook-capture-toast")).toBeNull();
   });
 
-  it("skip removes the toast without rating", () => {
-    const onRate = vi.fn();
-    const onSkip = vi.fn();
-    const host = showCaptureToast(document, { title: "X", meta: "" }, { onRate, onSkip });
-    inShadow(host, ".skip").click();
-    expect(onSkip).toHaveBeenCalled();
-    expect(onRate).not.toHaveBeenCalled();
-    expect(document.getElementById("leetbook-capture-toast")).toBeNull();
+  it("uses the final dark tokens when the host page is dark", () => {
+    document.documentElement.dataset.theme = "dark";
+    const toast = showCaptureToast(document, content, {
+      onRate: async () => ({ status: "delivered", queued: 0 }),
+    });
+    expect(toast.host.getAttribute("data-theme")).toBe("dark");
+    document.documentElement.removeAttribute("data-theme");
   });
 });
+
+function memoryStorage(): KvStorage {
+  const data = new Map<string, unknown>();
+  return {
+    get: async (key) => data.get(key),
+    set: async (key, value) => void data.set(key, value),
+  };
+}

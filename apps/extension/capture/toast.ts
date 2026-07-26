@@ -1,103 +1,139 @@
-import type { PerformanceScore } from "@leetbook/core";
+import type { Difficulty, PerformanceScore } from "@leetbook/core";
+import type { CaptureDeliveryResult, QueueFlushResult } from "./delivery.js";
+import { detectToastTheme, formatToastMeta, toastButton, toastElement } from "./toastDom.js";
+import { CAPTURE_TOAST_STYLES } from "./toastStyles.js";
 
 export interface ToastContent {
   title: string;
-  meta: string;
+  difficulty: Difficulty;
+  runtimeMs: number | null;
+  memoryMb: number | null;
+  codeSaved: boolean;
 }
 
 export interface ToastHandlers {
-  onRate: (score: PerformanceScore) => void;
-  onSkip: () => void;
+  onRate: (score: PerformanceScore) => Promise<CaptureDeliveryResult>;
 }
 
-/**
- * The in-page capture toast: white card, top-right, 0–5 chips, skip link.
- * Rendered inside a shadow root so LeetCode's styles can't leak in.
- * Returns the host element; it removes itself after a choice.
- */
+export interface CaptureToastHandle {
+  host: HTMLElement;
+  setFlushResult: (result: QueueFlushResult) => void;
+}
+
+const SCORES: PerformanceScore[] = [0, 1, 2, 3, 4, 5];
+
+/** Final shadow-DOM capture card. Dismiss and Skip both record score 4 (FSRS Good). */
 export function showCaptureToast(
   doc: Document,
   content: ToastContent,
   handlers: ToastHandlers,
-): HTMLElement {
+): CaptureToastHandle {
+  doc.getElementById("leetbook-capture-toast")?.remove();
   const host = doc.createElement("div");
   host.id = "leetbook-capture-toast";
+  host.dataset.theme = detectToastTheme(doc);
   const root = host.attachShadow({ mode: "open" });
 
   const style = doc.createElement("style");
-  style.textContent = `
-    .card {
-      position: fixed; top: 16px; right: 16px; z-index: 2147483647;
-      width: 320px; background: #ffffff; color: #111111;
-      border: 1px solid #ebebea; border-radius: 10px;
-      box-shadow: 0 12px 32px rgba(17, 17, 17, 0.14);
-      font-family: system-ui, -apple-system, sans-serif; font-size: 13px;
-      padding: 14px 16px;
-    }
-    .kicker { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #666666; }
-    .dot { width: 7px; height: 7px; border-radius: 999px; background: #1a8917; }
-    .title { font-weight: 600; margin: 6px 0 2px; }
-    .meta { color: #666666; font-size: 12px; }
-    .prompt { margin: 12px 0 6px; font-size: 12px; }
-    .scores { display: flex; gap: 6px; }
-    .scores button {
-      flex: 1; height: 30px; font: inherit; cursor: pointer;
-      background: #ffffff; border: 1px solid #ebebea; border-radius: 6px;
-    }
-    .scores button:hover { background: #efeffb; border-color: #5b5bd6; }
-    .skip {
-      margin-top: 10px; font-size: 11px; color: #666666;
-      background: none; border: none; padding: 0; cursor: pointer;
-    }
-  `;
-
-  const card = doc.createElement("div");
-  card.className = "card";
+  style.textContent = CAPTURE_TOAST_STYLES;
+  const card = toastElement(doc, "section", "card");
   card.setAttribute("role", "dialog");
   card.setAttribute("aria-label", "LeetBook capture");
 
-  const kicker = doc.createElement("div");
-  kicker.className = "kicker";
-  const dot = doc.createElement("span");
-  dot.className = "dot";
-  kicker.append(dot, doc.createTextNode("Accepted · captured"));
+  const header = toastElement(doc, "header", "header");
+  const logo = toastElement(doc, "span", "logo", "L");
+  logo.setAttribute("aria-hidden", "true");
+  const dot = toastElement(doc, "span", "dot");
+  dot.setAttribute("aria-hidden", "true");
+  const status = toastElement(doc, "strong", "status", "Accepted · captured");
+  const dismiss = toastButton(doc, "dismiss", "Dismiss and schedule as Good", "×");
+  header.append(logo, dot, status, dismiss);
 
-  const title = doc.createElement("div");
-  title.className = "title";
-  title.textContent = content.title;
+  const title = toastElement(doc, "div", "title", content.title);
+  const meta = toastElement(doc, "div", "meta", formatToastMeta(content));
+  const prompt = toastElement(doc, "div", "prompt", "Rate your recall");
+  const scores = toastElement(doc, "div", "scores");
+  scores.setAttribute("aria-label", "Recall score");
+  const scoreButtons = SCORES.map((score) => {
+    const option = toastButton(doc, "score", `Score ${score}`, String(score));
+    option.addEventListener("click", () => void submit(score));
+    scores.append(option);
+    return option;
+  });
+  const feedback = toastElement(doc, "div", "feedback");
+  feedback.setAttribute("role", "status");
+  feedback.hidden = true;
+  const skip = toastButton(doc, "skip", "Skip and schedule as Good");
+  skip.textContent = "Skip — LeetBook will schedule it as a Good rating.";
 
-  const meta = doc.createElement("div");
-  meta.className = "meta";
-  meta.textContent = content.meta;
+  let busy = false;
+  let settled = false;
 
-  const prompt = doc.createElement("div");
-  prompt.className = "prompt";
-  prompt.textContent = "Rate your recall";
+  const disableScores = (disabled: boolean) => {
+    for (const option of scoreButtons) option.disabled = disabled;
+  };
+  const setFeedback = (message: string, tone = "") => {
+    feedback.textContent = message;
+    feedback.className = `feedback${tone ? ` feedback--${tone}` : ""}`;
+    feedback.hidden = false;
+  };
+  const setQueued = (count: number) => {
+    settled = true;
+    busy = false;
+    status.textContent = `Queued — ${count} waiting`;
+    dot.className = "dot dot--queued";
+    dismiss.setAttribute("aria-label", "Dismiss");
+    prompt.textContent = "Saved locally";
+    disableScores(true);
+    skip.hidden = true;
+    setFeedback("Desktop app offline. LeetBook will retry automatically.");
+  };
 
-  const scores = doc.createElement("div");
-  scores.className = "scores";
-  for (const score of [0, 1, 2, 3, 4, 5] as PerformanceScore[]) {
-    const button = doc.createElement("button");
-    button.type = "button";
-    button.textContent = String(score);
-    button.addEventListener("click", () => {
-      host.remove();
-      handlers.onRate(score);
-    });
-    scores.append(button);
+  async function submit(score: PerformanceScore) {
+    if (busy || settled) return;
+    busy = true;
+    disableScores(true);
+    prompt.textContent = "Saving capture…";
+    try {
+      const result = await handlers.onRate(score);
+      if (result.status === "delivered") host.remove();
+      else setQueued(result.queued);
+    } catch {
+      busy = false;
+      status.textContent = "Capture needs attention";
+      dot.className = "dot dot--error";
+      prompt.textContent = "Rate your recall";
+      disableScores(false);
+      setFeedback("Couldn’t save yet. Check the extension and try again.", "error");
+    }
   }
 
-  const skip = doc.createElement("button");
-  skip.type = "button";
-  skip.className = "skip";
-  skip.textContent = "Skip — don't record this one";
-  skip.addEventListener("click", () => {
+  const dismissAsGood = () => {
+    if (!busy && !settled) void handlers.onRate(4).catch(() => undefined);
     host.remove();
-    handlers.onSkip();
-  });
+  };
+  dismiss.addEventListener("click", dismissAsGood);
+  skip.addEventListener("click", dismissAsGood);
 
-  card.append(kicker, title, meta, prompt, scores, skip);
+  card.append(header, title, meta, prompt, scores, feedback, skip);
   root.append(style, card);
   doc.body.append(host);
-  return host;
+
+  return {
+    host,
+    setFlushResult(result) {
+      if (result.remaining > 0) {
+        setQueued(result.remaining);
+      } else if (result.sent > 0) {
+        settled = true;
+        status.textContent = "Sent to LeetBook";
+        dot.className = "dot dot--sent";
+        prompt.textContent = "Capture delivered";
+        dismiss.setAttribute("aria-label", "Dismiss");
+        disableScores(true);
+        skip.hidden = true;
+        setFeedback("Queue is clear. This capture reached the desktop app.");
+      }
+    },
+  };
 }

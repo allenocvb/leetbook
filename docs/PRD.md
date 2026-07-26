@@ -119,7 +119,7 @@ no editor embeds/databases. Local-first is a feature.
       mistaken review by replaying derived scheduling; never overwrite a redundant score field
 - [x] 9.14 Review session fidelity: final top progress bar, 620px content, score hover/selection
       rubric, FSRS preview, working `Show my notes`, keyboard flow, and summary
-- [ ] 9.15 Extension capture fidelity: final bottom-right toast, queued state/count, dismiss,
+- [x] 9.15 Extension capture fidelity: final bottom-right toast, queued state/count, dismiss,
       skip-as-Good behavior, offline flush feedback, and fixture-page verification
 - [ ] 9.16 Desktop Capture view: replace the stale Phase 7 placeholder with real pairing,
       listener, queue, capture-status, and extension-setup information

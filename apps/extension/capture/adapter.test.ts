@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import acceptedFixture from "./__fixtures__/leetcode-accepted.html?raw";
 import {
   extractCode,
   extractStats,
@@ -50,6 +51,12 @@ describe("extractStats", () => {
   it("returns nulls when stats are missing", () => {
     const doc = page('<span data-e2e-locator="submission-result">Accepted</span>');
     expect(extractStats(doc)).toEqual({ runtimeMs: null, memoryMb: null });
+  });
+
+  it("detects Accepted and reads stats from the fixture page", () => {
+    const fixture = page(acceptedFixture);
+    expect(isAcceptedResult(fixture)).toBe(true);
+    expect(extractStats(fixture)).toEqual({ runtimeMs: 78, memoryMb: 17.1 });
   });
 });
 
