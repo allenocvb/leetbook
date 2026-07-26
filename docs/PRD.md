@@ -39,7 +39,7 @@ no editor embeds/databases. Local-first is a feature.
 
 > Logic before pixels. Everything here is pure TS, fully unit-tested, no Tauri/browser deps.
 
-- [ ] 3.1 Domain types: `Problem`, `Review`, `SchedulingState`, `Note` (+ `PerformanceScore` exists)
+- [x] 3.1 Domain types: `Problem`, `Review`, `SchedulingState`, `Note` (+ `PerformanceScore` exists)
 - [ ] 3.2 SQL schema + migration runner (versioned, forward-only migrations; raw SQL strings
       executed through an injected `SqlExecutor` interface so core stays platform-free)
 - [ ] 3.3 FSRS wrapper around `ts-fsrs`: `scheduleReview(state, score, now) → next state + due date`
