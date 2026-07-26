@@ -35,7 +35,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 2.3 CI: lint/typecheck/test/build + cargo check
 - [x] 2.4 MIT license, README, GitHub repo
 
-## Phase 3 — packages/core: schema, migrations, FSRS
+## Phase 3 — packages/core: schema, migrations, FSRS ✅
 
 > Logic before pixels. Everything here is pure TS, fully unit-tested, no Tauri/browser deps.
 
@@ -46,7 +46,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 3.4 Repository layer: problems (upsert by slug), reviews (append-only log), scheduling, notes
 - [x] 3.5 Derived views: status (New/Learning/Mastered/Leech), due-today query, table row model
 - [x] 3.6 Import: Notion CSV → problems + reviews (use the real 47-problem export as test fixture)
-- [ ] 3.7 Export: JSON (full) and Markdown (notes)
+- [x] 3.7 Export: JSON (full) and Markdown (notes)
 
 ## Phase 4 — Desktop shell & table view
 

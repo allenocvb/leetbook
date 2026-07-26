@@ -13,6 +13,8 @@ export {
   type ReviewsRepo,
 } from "./db/repositories/reviews.js";
 export { createSchedulingRepo, type SchedulingRepo } from "./db/repositories/scheduling.js";
+export { type DatabaseExport, exportDatabaseJson } from "./export/json.js";
+export { exportNotesMarkdown, type NoteExport, tiptapToMarkdown } from "./export/markdown.js";
 export { scheduleReview } from "./fsrs.js";
 export { importNotionCsv, type NotionImportResult } from "./import/notion.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
