@@ -32,10 +32,16 @@
   list-style: none;
 }
 
+/*
+ * The trailing column is reserved at a fixed width, not `auto`. Every row is its own
+ * grid and only the latest one renders the correct-score button, so an `auto` track
+ * collapsed to zero on the other rows and let the details column stretch — which pushed
+ * their score label out of line with the latest row's.
+ */
 .review-history__item {
   min-height: 39px;
   display: grid;
-  grid-template-columns: 28px minmax(100px, 1fr) minmax(0, 1.4fr) auto;
+  grid-template-columns: 28px minmax(100px, 1fr) minmax(0, 1.4fr) 132px;
   align-items: center;
   gap: var(--lb-space-3);
   padding: 8px 0;
@@ -84,8 +90,10 @@
 }
 
 .review-history__correct {
+  justify-self: end;
   color: var(--lb-accent-text);
   font-size: 11.5px;
+  white-space: nowrap;
 }
 
 .review-history__correct:hover {
