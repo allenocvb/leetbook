@@ -13,31 +13,26 @@ pnpm lint && pnpm typecheck && pnpm test   # must be green first
 pnpm --filter desktop tauri dev
 ```
 
-## 1. Window shell — highest risk
+## 1. Window shell
 
-These depend on `transparent: true` + `macOSPrivateApi` and the Tauri capability list.
-The config validates against the Tauri 2 schema, but only a build proves the behaviour.
+The window is decorated with `titleBarStyle: "Overlay"`, so macOS supplies corners, shadow
+and controls. The config validates against the Tauri 2 schema, but only a build proves it.
 
-- [ ] Window has **rounded corners** when not fullscreen. If corners are square or show
-      black/white notches, back out `transparent`/`shadow`/`macOSPrivateApi` from
-      `tauri.conf.json` and the radius from `.app-window` — that change is self-contained.
-- [ ] Window has a **drop shadow** against the desktop.
-- [ ] **No desk border.** The app content reaches every edge; there is no lavender frame
-      and no second window inside the window.
+- [ ] Real macOS traffic lights appear, correctly positioned, and the app draws none of its
+      own. `LeetBook` in the titlebar clears them — adjust the 78px inset if it looks off.
+- [ ] **Hovering green shows the Move/Resize/Tile menu**, and tiling to half the screen works.
+      This is the whole reason for the switch away from drawn buttons.
+- [ ] Rounded corners and a drop shadow, supplied by the OS.
+- [ ] **No desk border.** Content reaches every edge; no second window inside the window.
 - [ ] **Dragging the titlebar moves the window** (needs `core:window:allow-start-dragging`;
-      this failed silently before, while resizing still worked).
-- [ ] Resize from an edge still works, down to the 800×600 minimum.
-- [ ] **Green control enters fullscreen** and the macOS menu bar and Dock hide. Corners go
-      square in fullscreen. Exiting restores the rounded window.
-- [ ] Red closes, amber minimises.
-- [ ] Traffic lights are neutral grey at rest; hovering anywhere in the cluster reveals all
-      three in muted red/amber/green — not the bright macOS hues.
+      this failed silently once before, while resizing still worked).
+- [ ] Resize from an edge, down to the 800×600 minimum.
 - [ ] Theme toggle switches light/dark and **survives a restart**.
 
 ## 2. Data and persistence
 
-- [ ] First launch shows the intro; `Le(e)t's Code` opens All Problems; the intro does not
-      reappear on the next launch.
+- [ ] The intro shows on **every** launch; `Le(e)t's Code` opens All Problems and it does not
+      come back until the next launch.
 - [ ] Problems added in one session are still there after quitting and reopening.
 - [ ] Import the real Notion CSV from Settings. Counts match; skipped rows explain why;
       "view imported problems" lands on the table.
@@ -56,6 +51,10 @@ The config validates against the Tauri 2 schema, but only a build proves the beh
 - [ ] The table **scrolls** with more rows than fit, under a sticky header. (Regression:
       it used to clip instead.)
 - [ ] Search, sort by each column, category filter from the sidebar, clear filter.
+- [ ] The sidebar lists each category once — no `Hash Table` / `HashTable` split. Existing
+      rows are folded together on boot.
+- [ ] Adding or editing a problem offers categories as a dropdown with removable chips,
+      never a free-text field.
 - [ ] Clicking anywhere in a row opens notes; the arrow is decorative, not a second target.
 - [ ] Comfortable/compact density.
 
@@ -84,7 +83,7 @@ The config validates against the Tauri 2 schema, but only a build proves the beh
       summary appears at the end.
 - [ ] `Show my notes` opens the current problem.
 - [ ] Log review from the notes page updates next review, score and reps.
-- [ ] Correct latest score changes only that review and replays scheduling.
+- [ ] Edit latest review changes score, date and reps, and replays scheduling from history.
 
 ## 7. Extension capture — the automation goal
 

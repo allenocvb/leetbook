@@ -33,7 +33,7 @@ export function ReviewHistory({ reviews, onCorrectLatest }: ReviewHistoryProps) 
               <span className="review-history__details">{reviewDetails(review)}</span>
               {index === 0 && (
                 <button className="review-history__correct" type="button" onClick={onCorrectLatest}>
-                  Correct latest score
+                  Edit latest review
                 </button>
               )}
             </li>

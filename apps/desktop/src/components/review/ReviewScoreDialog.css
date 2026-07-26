@@ -42,3 +42,16 @@
   gap: var(--lb-space-2);
   margin-top: var(--lb-space-5);
 }
+
+.review-score-dialog__fields {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: var(--lb-space-4);
+  margin-top: var(--lb-space-5);
+  padding-top: var(--lb-space-5);
+  border-top: 1px solid var(--lb-bd);
+}
+
+.review-score-dialog__fields .problem-form__label {
+  margin-top: 0;
+}

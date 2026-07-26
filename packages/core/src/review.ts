@@ -67,25 +67,66 @@ export async function previewReview(
   return scheduleReview(current, problemId, score, now);
 }
 
+export interface ReviseLatestReviewInput {
+  score?: PerformanceScore;
+  /** ISO timestamp. May move the review before earlier ones; history is re-sorted. */
+  reviewedAt?: string;
+  /**
+   * Explicit rep-count override. `reviewCount` is stored FSRS state rather than a count of
+   * rows — the Notion import already sets it from a CSV column while writing a single
+   * review — so a user correcting an imported total is not fighting the data model.
+   */
+  reviewCount?: number;
+}
+
 /**
- * Corrects only the most recent review, then rebuilds FSRS from the complete
- * chronological review history. Earlier reviews and capture metadata stay intact.
+ * Corrects the most recent review — score, date, or both — then rebuilds FSRS from the
+ * complete review history. Earlier reviews and capture metadata stay intact.
  */
 export async function correctLatestReview(
   db: SqlExecutor,
   problemId: string,
   score: PerformanceScore,
 ): Promise<CorrectLatestReviewResult> {
+  return reviseLatestReview(db, problemId, { score });
+}
+
+export async function reviseLatestReview(
+  db: SqlExecutor,
+  problemId: string,
+  input: ReviseLatestReviewInput,
+): Promise<CorrectLatestReviewResult> {
   const reviews = createReviewsRepo(db);
   const history = await reviews.listByProblem(problemId);
   const latest = history.at(-1);
   if (!latest) throw new Error("Cannot correct a problem without review history.");
 
-  const corrected = { ...latest, score };
-  const correctedHistory = [...history.slice(0, -1), corrected];
-  const state = replayScheduling(problemId, correctedHistory);
+  if (input.reviewedAt !== undefined && Number.isNaN(Date.parse(input.reviewedAt))) {
+    throw new Error("Last review date is not a valid date.");
+  }
+  if (
+    input.reviewCount !== undefined &&
+    (!Number.isInteger(input.reviewCount) || input.reviewCount < 1)
+  ) {
+    throw new Error("Review count must be a whole number of at least 1.");
+  }
 
-  await reviews.correctScore(latest.id, score);
+  const corrected: Review = {
+    ...latest,
+    score: input.score ?? latest.score,
+    reviewedAt: input.reviewedAt ?? latest.reviewedAt,
+  };
+
+  // Re-sort: a new date can move this review before earlier ones, and FSRS must fold the
+  // history in the order it actually happened.
+  const revised = [...history.slice(0, -1), corrected].sort((a, b) =>
+    a.reviewedAt.localeCompare(b.reviewedAt),
+  );
+  const replayed = replayScheduling(problemId, revised);
+  const state =
+    input.reviewCount === undefined ? replayed : { ...replayed, reviewCount: input.reviewCount };
+
+  await reviews.revise(latest.id, { score: input.score, reviewedAt: input.reviewedAt });
   await createSchedulingRepo(db).put(state);
   return { review: corrected, state };
 }

@@ -37,6 +37,8 @@ export {
   type CorrectLatestReviewResult,
   correctLatestReview,
   previewReview,
+  type ReviseLatestReviewInput,
+  reviseLatestReview,
 } from "./review.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {

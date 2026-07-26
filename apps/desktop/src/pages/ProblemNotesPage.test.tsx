@@ -66,7 +66,7 @@ describe("ProblemNotesPage", () => {
     expect(screen.getByRole("heading", { name: "Review history" })).toBeInTheDocument();
     expect(screen.getByText("1 review")).toBeInTheDocument();
     expect(screen.getByText("Hesitant")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Correct latest score" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit latest review" })).toBeInTheDocument();
   });
 
   it("logs a review for an unscheduled problem and refreshes every derived field", async () => {
@@ -86,7 +86,7 @@ describe("ProblemNotesPage", () => {
     );
     expect(screen.getByText("Not reviewed yet")).toBeInTheDocument();
     expect(screen.getByText("No reviews logged yet.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Correct latest score" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit latest review" })).not.toBeInTheDocument();
     expect(await createSchedulingRepo(db).get(problem.id)).toBeNull();
 
     await userEvent.click(screen.getByRole("button", { name: "Log review" }));
@@ -118,13 +118,13 @@ describe("ProblemNotesPage", () => {
     const reviewsBefore = await createReviewsRepo(db).listByProblem(problem.id);
     const schedulingBefore = await createSchedulingRepo(db).get(problem.id);
 
-    await userEvent.click(screen.getByRole("button", { name: "Correct latest score" }));
-    const dialog = screen.getByRole("dialog", { name: "Correct latest review" });
+    await userEvent.click(screen.getByRole("button", { name: "Edit latest review" }));
+    const dialog = screen.getByRole("dialog", { name: "Edit latest review" });
     expect(within(dialog).getByRole("button", { name: "4 Hesitant" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    const submit = within(dialog).getByRole("button", { name: "Save correction" });
+    const submit = within(dialog).getByRole("button", { name: "Save changes" });
     expect(submit).toBeDisabled();
 
     await userEvent.click(within(dialog).getByRole("button", { name: "0 Blackout" }));
@@ -139,6 +139,32 @@ describe("ProblemNotesPage", () => {
     expect(schedulingAfter?.dueAt).not.toBe(schedulingBefore?.dueAt);
     expect(screen.getByText(/scored 0 · 1 reps/)).toBeInTheDocument();
     expect(screen.getByText("Blackout")).toBeInTheDocument();
+  });
+
+  it("edits the latest review's date and rep count, not just its score", async () => {
+    const { db, problem } = await setup();
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit latest review" }));
+    const dialog = screen.getByRole("dialog", { name: "Edit latest review" });
+
+    const date = within(dialog).getByLabelText("Last review");
+    await userEvent.clear(date);
+    await userEvent.type(date, "2026-06-15");
+
+    const reps = within(dialog).getByLabelText("Reps");
+    await userEvent.clear(reps);
+    await userEvent.type(reps, "6");
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    const scheduling = await createSchedulingRepo(db).get(problem.id);
+    const reviews = await createReviewsRepo(db).listByProblem(problem.id);
+    expect(scheduling?.lastReviewedAt?.slice(0, 10)).toBe("2026-06-15");
+    // Reps is an explicit override of stored FSRS state, so no rows are fabricated.
+    expect(scheduling?.reviewCount).toBe(6);
+    expect(reviews).toHaveLength(1);
+    expect(screen.getByText(/scored 4 · 6 reps/)).toBeInTheDocument();
   });
 
   it("opens LeetCode through the browser fallback outside Tauri", async () => {

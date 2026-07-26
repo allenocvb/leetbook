@@ -6,7 +6,7 @@ import { createReviewsRepo } from "./db/repositories/reviews.js";
 import { createSchedulingRepo } from "./db/repositories/scheduling.js";
 import { createTestDb } from "./db/test-helpers.js";
 import { scheduleReview } from "./fsrs.js";
-import { applyReview, correctLatestReview, previewReview } from "./review.js";
+import { applyReview, correctLatestReview, previewReview, reviseLatestReview } from "./review.js";
 
 const NOW = new Date("2026-07-25T12:00:00.000Z");
 
@@ -123,5 +123,69 @@ describe("correctLatestReview", () => {
   it("rejects correction when no review exists", async () => {
     await expect(correctLatestReview(db, problemId, 3)).rejects.toThrow("without review history");
     expect(await createSchedulingRepo(db).get(problemId)).toBeNull();
+  });
+});
+
+describe("reviseLatestReview", () => {
+  it("moves the last review date and reschedules from it", async () => {
+    await applyReview(db, { problemId, score: 4 }, new Date("2026-07-01T00:00:00.000Z"));
+    const before = await createSchedulingRepo(db).get(problemId);
+
+    const { review, state } = await reviseLatestReview(db, problemId, {
+      reviewedAt: "2026-06-01T00:00:00.000Z",
+    });
+
+    expect(review.reviewedAt).toBe("2026-06-01T00:00:00.000Z");
+    expect(state.lastReviewedAt).toBe("2026-06-01T00:00:00.000Z");
+    // An earlier review means an earlier due date; the score is untouched.
+    expect(state.dueAt < (before?.dueAt ?? "")).toBe(true);
+    expect(review.score).toBe(4);
+  });
+
+  it("overrides the rep count without inventing review rows", async () => {
+    await applyReview(db, { problemId, score: 5 }, new Date("2026-07-01T00:00:00.000Z"));
+
+    const { state } = await reviseLatestReview(db, problemId, { reviewCount: 6 });
+
+    expect(state.reviewCount).toBe(6);
+    // The log stays honest: one real review, six claimed reps, like a Notion import.
+    expect(await createReviewsRepo(db).listByProblem(problemId)).toHaveLength(1);
+  });
+
+  it("re-sorts history when a date moves a review before an earlier one", async () => {
+    await applyReview(db, { problemId, score: 2 }, new Date("2026-05-01T00:00:00.000Z"));
+    await applyReview(db, { problemId, score: 5 }, new Date("2026-07-01T00:00:00.000Z"));
+
+    // Drag the newest review back before the first one.
+    const { state } = await reviseLatestReview(db, problemId, {
+      reviewedAt: "2026-04-01T00:00:00.000Z",
+    });
+
+    // FSRS folded them in real chronological order, so the May review is now last.
+    expect(state.lastReviewedAt).toBe("2026-05-01T00:00:00.000Z");
+    expect(state.reviewCount).toBe(2);
+  });
+
+  it("changes score and date together", async () => {
+    await applyReview(db, { problemId, score: 0 }, new Date("2026-07-01T00:00:00.000Z"));
+
+    const { review } = await reviseLatestReview(db, problemId, {
+      score: 5,
+      reviewedAt: "2026-07-20T00:00:00.000Z",
+    });
+
+    expect(review).toMatchObject({ score: 5, reviewedAt: "2026-07-20T00:00:00.000Z" });
+  });
+
+  it("rejects an invalid date or a nonsense rep count", async () => {
+    await applyReview(db, { problemId, score: 3 }, new Date("2026-07-01T00:00:00.000Z"));
+
+    await expect(reviseLatestReview(db, problemId, { reviewedAt: "nope" })).rejects.toThrow(
+      /valid date/,
+    );
+    await expect(reviseLatestReview(db, problemId, { reviewCount: 0 })).rejects.toThrow(
+      /at least 1/,
+    );
+    await expect(reviseLatestReview(db, problemId, { reviewCount: 2.5 })).rejects.toThrow(/whole/);
   });
 });

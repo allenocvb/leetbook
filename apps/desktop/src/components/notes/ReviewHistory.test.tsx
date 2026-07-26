@@ -19,9 +19,9 @@ it("shows every review newest-first and only corrects the latest", async () => {
   expect(within(latest).getByText("5")).toBeInTheDocument();
   expect(within(latest).getByText("Perfect")).toBeInTheDocument();
   expect(within(earlier).getByText("2")).toBeInTheDocument();
-  expect(screen.getAllByRole("button", { name: "Correct latest score" })).toHaveLength(1);
+  expect(screen.getAllByRole("button", { name: "Edit latest review" })).toHaveLength(1);
 
-  await userEvent.click(screen.getByRole("button", { name: "Correct latest score" }));
+  await userEvent.click(screen.getByRole("button", { name: "Edit latest review" }));
   expect(onCorrectLatest).toHaveBeenCalledOnce();
 });
 

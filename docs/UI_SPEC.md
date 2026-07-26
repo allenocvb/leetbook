@@ -177,6 +177,11 @@ Dark status pills:
   elsewhere and knocks the score labels out of alignment.
 - Provide a `Log review` action so any problem—not only an already-due problem—can receive a
   0–5 review.
+- `Edit latest review` changes the latest score, its date, and the rep count in one dialog,
+  then replays FSRS over the full history. Changing the date may reorder history, so the
+  replay sorts chronologically first. Rep count is an explicit override of stored FSRS state,
+  not a count of rows — the Notion import already sets it independently — so correcting an
+  imported total does not fabricate review records.
 - Deleting a problem lives here, not in the table: a table row is a single button that opens
   notes, so a second control inside it would compete with that contract. The action is a ghost
   `Delete` that swaps in place for a `Delete for good?` label plus Cancel/Delete, matching the

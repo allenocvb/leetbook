@@ -7,8 +7,11 @@ export type ReviewInput = Omit<Review, "id">;
 export interface ReviewsRepo {
   /** Append a review. Normal review entry never updates or deletes history. */
   add(input: ReviewInput): Promise<Review>;
-  /** Core correction path only; callers must replay scheduling after changing a score. */
-  correctScore(reviewId: string, score: Review["score"]): Promise<void>;
+  /**
+   * Core correction path only; callers must replay scheduling afterwards. Changing
+   * `reviewedAt` can reorder history, so the replay must sort before folding FSRS.
+   */
+  revise(reviewId: string, patch: { score?: Review["score"]; reviewedAt?: string }): Promise<void>;
   listByProblem(problemId: string): Promise<Review[]>;
   /** Most recent first. */
   latestScores(problemId: string, limit: number): Promise<number[]>;
@@ -35,8 +38,20 @@ export function createReviewsRepo(db: SqlExecutor): ReviewsRepo {
       return { id, ...input };
     },
 
-    async correctScore(reviewId, score) {
-      await db.execute("UPDATE reviews SET score = ? WHERE id = ?", [score, reviewId]);
+    async revise(reviewId, patch) {
+      const sets: string[] = [];
+      const params: unknown[] = [];
+      if (patch.score !== undefined) {
+        sets.push("score = ?");
+        params.push(patch.score);
+      }
+      if (patch.reviewedAt !== undefined) {
+        sets.push("reviewed_at = ?");
+        params.push(patch.reviewedAt);
+      }
+      if (sets.length === 0) return;
+      params.push(reviewId);
+      await db.execute(`UPDATE reviews SET ${sets.join(", ")} WHERE id = ?`, params);
     },
 
     async listByProblem(problemId) {

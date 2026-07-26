@@ -136,6 +136,8 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
             problemId={problem.id}
             problemTitle={problem.title}
             currentScore={latestReview.score}
+            currentReviewedAt={latestReview.reviewedAt}
+            currentReviewCount={scheduling?.reviewCount ?? reviews.length}
             onClose={() => setCorrectingReview(false)}
             onCorrected={refreshReviewData}
           />
