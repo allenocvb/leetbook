@@ -57,6 +57,9 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       never a free-text field.
 - [ ] Clicking anywhere in a row opens notes; the arrow is decorative, not a second target.
 - [ ] Comfortable/compact density.
+- [ ] Hovering a row reveals a `×` at the far right. Clicking it opens a confirm dialog and
+      does **not** navigate to notes. Cancel leaves the row; confirming removes it.
+- [ ] Tab through the table: the `×` is reachable by keyboard and visible when focused.
 
 ## 5. Notes editor
 

@@ -1,5 +1,7 @@
+import type { TableRow } from "@leetbook/core";
 import { useMemo, useState } from "react";
 import { AddProblemDialog } from "../components/AddProblemDialog.js";
+import { DeleteProblemDialog } from "../components/table/DeleteProblemDialog.js";
 import {
   ProblemsHeader,
   type ProblemsView,
@@ -46,6 +48,7 @@ export function ProblemsPage({
   const [query, setQuery] = useState("");
   const [density, setDensity] = useState<TableDensity>("comfortable");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState<TableRow | null>(null);
 
   const visible = useMemo(
     () => sortRows(filterRows(rows, { query, category }), sort),
@@ -111,8 +114,18 @@ export function ProblemsPage({
         emptyMessage={emptyMessage(view, filtered, category)}
         onSort={handleSort}
         onOpen={onOpenProblem}
+        onDelete={setDeleting}
         onNew={() => setDialogOpen(true)}
       />
+
+      {deleting && (
+        <DeleteProblemDialog
+          problemId={deleting.problemId}
+          problemTitle={deleting.title}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => void refresh()}
+        />
+      )}
     </section>
   );
 }

@@ -2,28 +2,37 @@ import type { TableRow } from "@leetbook/core";
 import { formatShortDate, isDue } from "../../lib/format.js";
 import { DifficultyText, ScoreChip, StatusPill } from "./pills.js";
 
+/**
+ * A row is a grid, not a button. The name carries the only real control and stretches its
+ * hit area over the whole row via `::after`, which keeps "click anywhere to open notes"
+ * while leaving room for action buttons — a button cannot legally contain another button.
+ */
 export function ProblemTableRow({
   row,
   number,
   onOpen,
+  onDelete,
 }: {
   row: TableRow;
   number: number;
   onOpen: () => void;
+  onDelete: () => void;
 }) {
   const nextReview = isDue(row.nextReview) ? "Today" : formatShortDate(row.nextReview);
   const category = row.tags.join(", ") || "—";
 
   return (
-    <button
-      type="button"
-      className="problem-row"
-      aria-label={`Open notes for ${row.title}`}
-      onClick={onOpen}
-    >
+    <div className="problem-row">
       <span className="problem-row__name">
         <span className="problem-row__number">{number}</span>
-        <span className="problem-row__title">{row.title}</span>
+        <button
+          type="button"
+          className="problem-row__open"
+          aria-label={`Open notes for ${row.title}`}
+          onClick={onOpen}
+        >
+          {row.title}
+        </button>
         <span className="problem-row__arrow" aria-hidden="true">
           ↗
         </span>
@@ -51,6 +60,16 @@ export function ProblemTableRow({
       <span>
         <DifficultyText difficulty={row.difficulty} />
       </span>
-    </button>
+      <span className="problem-row__actions">
+        <button
+          type="button"
+          className="problem-row__delete"
+          aria-label={`Delete ${row.title}`}
+          onClick={onDelete}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </span>
+    </div>
   );
 }

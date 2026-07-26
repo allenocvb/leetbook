@@ -147,11 +147,20 @@ Dark status pills:
 - Header padding: `26px 34px 0`; Chewy 29px title and 12.5px subtitle.
 - Header actions: 190px search, Filter outline button, and solid `+ New problem`.
 - All Problems and Due Today are tabs with a shared hairline and 2px active underline.
-- Grid columns: `1.7fr .9fr .8fr .8fr .5fr .5fr 1fr .7fr`; 16px gap.
+- Grid columns: `1.7fr .9fr .8fr .8fr .5fr .5fr 1fr .7fr 28px`; 16px gap. The trailing
+  28px track is the row action column and is reserved on the header too, so it stays aligned.
 - Columns: Name, Status, Next Review, Last Review, Score, Reps, Category, Difficulty.
 - Sticky header uses 10.5px uppercase labels. Rows use 11px vertical padding in comfortable
   density and 7px in compact density.
-- The entire row opens the notes page. The arrow glyph is decorative, not a second competing link.
+- Clicking anywhere in a row opens the notes page, but the row is **not** a button: the name
+  is the only real control and stretches its hit area across the row with `::after`. A button
+  cannot legally contain another button, and the row needs to carry actions. The arrow glyph
+  stays decorative, not a second competing link.
+- Each row carries a delete action in the trailing column: a muted `×` that appears on row
+  hover and is always present for keyboard focus. It sits above the stretched hit area so it
+  never navigates. Deleting confirms in a dialog rather than inline — a 28px column cannot
+  hold a Cancel/Delete pair — and removes the problem with all its reviews, notes and
+  scheduling.
 - Score chip: 19×19px. Scores 0–1 use `softRed/red`, 2–3 use `surf3/txt3`, 4–5 use
   `tint/accTxt`, and missing uses `surf3/mut4`.
 - Provide sort, search, category filtering, filter clearing, empty state, and `+ New`.

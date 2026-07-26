@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { createProblemsRepo } from "@leetbook/core";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { DbProvider } from "../db/DbContext.js";
@@ -61,6 +62,27 @@ describe("AllProblemsPage", () => {
     ).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Open notes for Two Sum" }));
     expect(onOpenProblem).toHaveBeenCalledTimes(1);
+  });
+
+  it("deletes a problem from the table only after confirming", async () => {
+    const { db, onOpenProblem } = await renderPage();
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete Two Sum" }));
+    // Opening the confirm must not also navigate: the delete button sits above the name
+    // button's stretched hit area rather than inside it.
+    expect(onOpenProblem).not.toHaveBeenCalled();
+    expect(await createProblemsRepo(db).getBySlug("two-sum")).not.toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(await createProblemsRepo(db).getBySlug("two-sum")).not.toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete Two Sum" }));
+    const dialog = screen.getByRole("dialog", { name: "Delete problem" });
+    await userEvent.click(within(dialog).getByRole("button", { name: "Delete Two Sum" }));
+
+    await waitFor(() => expect(screen.queryByText("Two Sum")).not.toBeInTheDocument());
+    expect(await createProblemsRepo(db).getBySlug("two-sum")).toBeNull();
+    expect(screen.getByText("Word Ladder")).toBeInTheDocument();
   });
 
   it("filters by search query", async () => {

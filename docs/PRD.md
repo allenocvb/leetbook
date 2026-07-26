@@ -156,7 +156,9 @@ no editor embeds/databases. Local-first is a feature.
       on every write path, with existing variant spellings folded together on boot
 - [x] 9.28 Editable scheduling: change the latest review's score, date and rep count from one
       dialog, replaying FSRS over re-sorted history
-- [ ] 9.29 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.29 Delete from the table: restructure the row so it can carry actions, add a
+      hover-revealed delete with dialog confirmation, and keep whole-row navigation
+- [ ] 9.30 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.

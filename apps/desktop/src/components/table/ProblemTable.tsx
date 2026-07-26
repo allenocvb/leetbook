@@ -27,6 +27,7 @@ export interface ProblemTableProps {
   emptyMessage: string;
   onSort: (key: SortKey) => void;
   onOpen: (problemId: string) => void;
+  onDelete: (row: TableRow) => void;
   onNew: () => void;
 }
 
@@ -37,6 +38,7 @@ export function ProblemTable({
   emptyMessage,
   onSort,
   onOpen,
+  onDelete,
   onNew,
 }: ProblemTableProps) {
   return (
@@ -66,6 +68,7 @@ export function ProblemTable({
               row={row}
               number={index + 1}
               onOpen={() => onOpen(row.problemId)}
+              onDelete={() => onDelete(row)}
             />
           ))}
         </div>
