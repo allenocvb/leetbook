@@ -57,7 +57,7 @@ export function extractCode(slug: string, storage: StorageLike): CodeCapture | n
   const needle = `_${slug}_`;
   for (let i = storage.length - 1; i >= 0; i--) {
     const key = storage.key(i);
-    if (!key || !key.includes(needle)) continue;
+    if (!key?.includes(needle)) continue;
     const raw = storage.getItem(key);
     if (!raw) continue;
     const language = key.slice(key.lastIndexOf("_") + 1);
