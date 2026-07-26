@@ -45,13 +45,24 @@
   text-overflow: ellipsis;
 }
 
-.problem-table .cell-title a {
-  color: inherit;
-  text-decoration: none;
+.problem-table .cell-title button {
+  font: inherit;
+  font-weight: 500;
 }
 
-.problem-table .cell-title a:hover {
+.problem-table .cell-title button:hover {
   text-decoration: underline;
+}
+
+.problem-table .cell-external {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 11px;
+  visibility: hidden;
+}
+
+.problem-table tr:hover .cell-external {
+  visibility: visible;
 }
 
 .problem-table .cell-muted {

@@ -24,10 +24,12 @@ export interface ProblemTableProps {
   rows: TableRow[];
   sort: SortState;
   onSort: (key: SortKey) => void;
+  /** Opens the problem's notes page. */
+  onOpen: (problemId: string) => void;
 }
 
 /** Presentational table. Sorting/filtering is decided by the parent (see rowLogic). */
-export function ProblemTable({ rows, sort, onSort }: ProblemTableProps) {
+export function ProblemTable({ rows, sort, onSort, onOpen }: ProblemTableProps) {
   return (
     <table className="problem-table">
       <thead>
@@ -50,8 +52,17 @@ export function ProblemTable({ rows, sort, onSort }: ProblemTableProps) {
         {rows.map((row) => (
           <tr key={row.problemId}>
             <td className="cell-title">
-              <a href={row.url} target="_blank" rel="noreferrer" title="Open on LeetCode">
+              <button type="button" onClick={() => onOpen(row.problemId)} title="Open notes">
                 {row.title}
+              </button>{" "}
+              <a
+                href={row.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Open ${row.title} on LeetCode`}
+                className="cell-external"
+              >
+                ↗
               </a>
             </td>
             <td>

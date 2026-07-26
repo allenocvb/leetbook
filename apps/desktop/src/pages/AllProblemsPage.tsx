@@ -10,7 +10,7 @@ import {
 } from "../components/table/rowLogic.js";
 import { useTableRows } from "../hooks/useTableRows.js";
 
-export function AllProblemsPage() {
+export function AllProblemsPage({ onOpenProblem }: { onOpenProblem: (id: string) => void }) {
   const { rows, loading, error, refresh } = useTableRows("all");
   const [sort, setSort] = useState<SortState>({ key: "title", dir: "asc" });
   const [query, setQuery] = useState("");
@@ -108,7 +108,7 @@ export function AllProblemsPage() {
           No problems yet. Solve one on LeetCode or import your Notion table from Settings.
         </p>
       ) : (
-        <ProblemTable rows={visible} sort={sort} onSort={handleSort} />
+        <ProblemTable rows={visible} sort={sort} onSort={handleSort} onOpen={onOpenProblem} />
       )}
     </div>
   );

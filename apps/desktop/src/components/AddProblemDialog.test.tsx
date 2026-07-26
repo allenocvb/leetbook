@@ -33,7 +33,7 @@ describe("AddProblemDialog on the All Problems page", () => {
     const db = await makeDb();
     render(
       <DbProvider db={db}>
-        <AllProblemsPage />
+        <AllProblemsPage onOpenProblem={() => {}} />
       </DbProvider>,
     );
     await waitFor(() => expect(screen.getByText(/0 of 0 problems/)).toBeInTheDocument());

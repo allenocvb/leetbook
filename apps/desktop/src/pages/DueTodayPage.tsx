@@ -3,7 +3,7 @@ import { ProblemTable } from "../components/table/ProblemTable.js";
 import { type SortKey, type SortState, sortRows } from "../components/table/rowLogic.js";
 import { useTableRows } from "../hooks/useTableRows.js";
 
-export function DueTodayPage() {
+export function DueTodayPage({ onOpenProblem }: { onOpenProblem: (id: string) => void }) {
   const { rows, loading, error } = useTableRows("due");
   const [sort, setSort] = useState<SortState>({ key: "nextReview", dir: "asc" });
 
@@ -28,7 +28,12 @@ export function DueTodayPage() {
           Nothing due. Nice work — come back tomorrow.
         </p>
       ) : (
-        <ProblemTable rows={sortRows(rows, sort)} sort={sort} onSort={handleSort} />
+        <ProblemTable
+          rows={sortRows(rows, sort)}
+          sort={sort}
+          onSort={handleSort}
+          onOpen={onOpenProblem}
+        />
       )}
     </div>
   );

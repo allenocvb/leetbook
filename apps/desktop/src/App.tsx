@@ -7,6 +7,7 @@ import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
+import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 
 export function App({ db }: { db: SqlExecutor }) {
   return (
@@ -16,27 +17,44 @@ export function App({ db }: { db: SqlExecutor }) {
   );
 }
 
+/** Either a sidebar view or a specific problem's notes page. */
+type Route = { view: ViewId } | { view: "problem"; problemId: string; from: ViewId };
+
 function Shell() {
-  const [view, setView] = useState<ViewId>("all-problems");
-  const counts = useCounts(view);
+  const [route, setRoute] = useState<Route>({ view: "all-problems" });
+  const counts = useCounts(route);
+
+  const activeView = route.view === "problem" ? route.from : route.view;
+  const openProblem = (problemId: string) =>
+    setRoute({ view: "problem", problemId, from: activeView });
 
   return (
     <AppLayout
-      activeView={view}
-      onNavigate={setView}
+      activeView={activeView}
+      onNavigate={(view) => setRoute({ view })}
       counts={{ "all-problems": counts.all, "due-today": counts.due }}
     >
-      <Page view={view} />
+      <Page route={route} onOpenProblem={openProblem} onBack={() => setRoute({ view: activeView })} />
     </AppLayout>
   );
 }
 
-function Page({ view }: { view: ViewId }) {
-  switch (view) {
+function Page({
+  route,
+  onOpenProblem,
+  onBack,
+}: {
+  route: Route;
+  onOpenProblem: (id: string) => void;
+  onBack: () => void;
+}) {
+  switch (route.view) {
+    case "problem":
+      return <ProblemNotesPage problemId={route.problemId} onBack={onBack} />;
     case "all-problems":
-      return <AllProblemsPage />;
+      return <AllProblemsPage onOpenProblem={onOpenProblem} />;
     case "due-today":
-      return <DueTodayPage />;
+      return <DueTodayPage onOpenProblem={onOpenProblem} />;
     case "review":
       return <PagePlaceholder title="Review Session" hint="Review queue arrives in Phase 6." />;
     case "capture":

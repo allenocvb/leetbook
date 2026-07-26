@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DbProvider } from "../db/DbContext.js";
 import { makeDb, seed } from "../test-utils.js";
 import { AllProblemsPage } from "./AllProblemsPage.js";
 
-async function renderPage() {
+async function renderPage(onOpenProblem = vi.fn()) {
   const db = await makeDb();
   await seed(db, [
     { slug: "two-sum", title: "Two Sum", difficulty: "easy", tags: ["Array"], scores: [3, 5] },
@@ -13,10 +13,11 @@ async function renderPage() {
   ]);
   render(
     <DbProvider db={db}>
-      <AllProblemsPage />
+      <AllProblemsPage onOpenProblem={onOpenProblem} />
     </DbProvider>,
   );
   await waitFor(() => expect(screen.getByText("Two Sum")).toBeInTheDocument());
+  return { onOpenProblem };
 }
 
 describe("AllProblemsPage", () => {
@@ -28,12 +29,14 @@ describe("AllProblemsPage", () => {
     expect(screen.getByText("2 of 2 problems")).toBeInTheDocument();
   });
 
-  it("links each problem to LeetCode", async () => {
-    await renderPage();
-    expect(screen.getByRole("link", { name: "Two Sum" })).toHaveAttribute(
+  it("links each problem to LeetCode and opens notes on title click", async () => {
+    const { onOpenProblem } = await renderPage();
+    expect(screen.getByRole("link", { name: "Open Two Sum on LeetCode" })).toHaveAttribute(
       "href",
       "https://leetcode.com/problems/two-sum/",
     );
+    await userEvent.click(screen.getByRole("button", { name: "Two Sum" }));
+    expect(onOpenProblem).toHaveBeenCalledTimes(1);
   });
 
   it("filters by search query", async () => {
@@ -56,11 +59,10 @@ describe("AllProblemsPage", () => {
 
   it("sorts by clicking a column header", async () => {
     await renderPage();
+    const firstTitle = () => screen.getAllByRole("row")[1]?.textContent;
     // default: title asc → Two Sum before Word Ladder
-    let cells = screen.getAllByRole("link");
-    expect(cells[0]).toHaveTextContent("Two Sum");
+    expect(firstTitle()).toContain("Two Sum");
     await userEvent.click(screen.getByRole("button", { name: /Name/ }));
-    cells = screen.getAllByRole("link");
-    expect(cells[0]).toHaveTextContent("Word Ladder");
+    expect(firstTitle()).toContain("Word Ladder");
   });
 });
