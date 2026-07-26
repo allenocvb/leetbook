@@ -18,6 +18,8 @@ export interface ProblemsRepo {
   getBySlug(slug: string): Promise<Problem | null>;
   getById(id: string): Promise<Problem | null>;
   listAll(): Promise<Problem[]>;
+  /** Permanently remove a problem and everything derived from it. */
+  remove(id: string): Promise<void>;
 }
 
 export function createProblemsRepo(db: SqlExecutor): ProblemsRepo {
@@ -71,6 +73,20 @@ export function createProblemsRepo(db: SqlExecutor): ProblemsRepo {
     async listAll() {
       const rows = await db.select<ProblemRow>("SELECT * FROM problems ORDER BY title");
       return rows.map(toProblem);
+    },
+
+    /*
+     * Children are deleted explicitly rather than left to ON DELETE CASCADE. SQLite
+     * enforces foreign keys only when `PRAGMA foreign_keys = ON` is set on the
+     * connection, and the desktop app does not set it — relying on the cascade there
+     * would silently orphan reviews, scheduling and notes. Deleting oldest-dependent
+     * first keeps this correct whether or not enforcement is on.
+     */
+    async remove(id) {
+      await db.execute("DELETE FROM notes WHERE problem_id = ?", [id]);
+      await db.execute("DELETE FROM scheduling WHERE problem_id = ?", [id]);
+      await db.execute("DELETE FROM reviews WHERE problem_id = ?", [id]);
+      await db.execute("DELETE FROM problems WHERE id = ?", [id]);
     },
   };
 }

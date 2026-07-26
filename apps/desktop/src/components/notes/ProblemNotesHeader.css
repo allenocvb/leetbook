@@ -80,3 +80,15 @@
     grid-template-columns: 96px minmax(0, 1fr);
   }
 }
+
+.problem-notes-header__confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.problem-notes-header__confirm-label {
+  color: var(--lb-red);
+  font-size: 11.5px;
+  white-space: nowrap;
+}

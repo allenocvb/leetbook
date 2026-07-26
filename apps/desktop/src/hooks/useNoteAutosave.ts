@@ -13,7 +13,16 @@ export function useNoteAutosave(
   db: SqlExecutor,
   problemId: string,
   delayMs: number,
-): { saveState: NoteSaveState; handleChange: (contentJson: string) => void } {
+): {
+  saveState: NoteSaveState;
+  handleChange: (contentJson: string) => void;
+  /**
+   * Drop any queued autosave and settle work already in flight. Deleting a problem must
+   * call this first: the unmount flush would otherwise write the note back and leave an
+   * orphan row pointing at a problem that no longer exists.
+   */
+  discardPending: () => Promise<void>;
+} {
   const [saveState, setSaveState] = useState<NoteSaveState>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<PendingSave | null>(null);
@@ -81,5 +90,13 @@ export function useNoteAutosave(
     [delayMs, flushPending, problemId],
   );
 
-  return { saveState, handleChange };
+  const discardPending = useCallback(async () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    pending.current = null;
+    revision.current += 1; // invalidate any in-flight save's state update
+    await queue.current.catch(() => undefined);
+  }, []);
+
+  return { saveState, handleChange, discardPending };
 }

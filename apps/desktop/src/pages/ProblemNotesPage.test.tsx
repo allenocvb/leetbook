@@ -5,7 +5,7 @@ import {
   createSchedulingRepo,
   type SqlExecutor,
 } from "@leetbook/core";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { formatDueDate, formatNoteDate } from "../components/notes/ProblemNotesHeader.js";
@@ -233,6 +233,47 @@ describe("ProblemNotesPage", () => {
     const { onBack } = await setup();
     await userEvent.click(screen.getByRole("button", { name: "← All Problems" }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it("deletes a problem only after confirmation, then returns to the table", async () => {
+    const { db, problem, onBack } = await setup(true);
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    // The first click only arms the action; nothing is gone yet.
+    expect(await createProblemsRepo(db).getById(problem.id)).not.toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+    expect(await createProblemsRepo(db).getById(problem.id)).not.toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirm = within(screen.getByRole("group", { name: "Delete Two Sum" }));
+    await userEvent.click(confirm.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(onBack).toHaveBeenCalled());
+    expect(await createProblemsRepo(db).getById(problem.id)).toBeNull();
+    // Derived rows go with it rather than lingering as orphans.
+    expect(await createReviewsRepo(db).listByProblem(problem.id)).toEqual([]);
+    expect(await createSchedulingRepo(db).get(problem.id)).toBeNull();
+    expect(await createNotesRepo(db).get(problem.id)).toBeNull();
+  });
+
+  it("does not resurrect the note of a deleted problem via autosave", async () => {
+    const { db, problem, onBack } = await setup(true, 1000);
+
+    // Type first so a save is queued, then delete before the debounce fires.
+    await userEvent.click(screen.getByRole("textbox", { name: "Problem notes" }));
+    await userEvent.keyboard("pending edit");
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    const confirm = within(screen.getByRole("group", { name: "Delete Two Sum" }));
+    await userEvent.click(confirm.getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(onBack).toHaveBeenCalled());
+
+    cleanup(); // unmount runs the autosave flush
+    await waitFor(async () => {
+      expect(await createNotesRepo(db).get(problem.id)).toBeNull();
+    });
   });
 });
 

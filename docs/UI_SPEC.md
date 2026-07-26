@@ -178,6 +178,11 @@ Dark status pills:
   directly editable.
 - Provide a `Log review` action so any problem—not only an already-due problem—can receive a
   0–5 review.
+- Deleting a problem lives here, not in the table: a table row is a single button that opens
+  notes, so a second control inside it would compete with that contract. The action is a ghost
+  `Delete` that swaps in place for a `Delete for good?` label plus Cancel/Delete, matching the
+  pairing-token regenerate control. Deleting removes the problem and every derived record, then
+  returns to the table.
 
 Editor:
 

@@ -37,7 +37,14 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [editing, setEditing] = useState(false);
   const [loggingReview, setLoggingReview] = useState(false);
   const [correctingReview, setCorrectingReview] = useState(false);
-  const { saveState, handleChange } = useNoteAutosave(db, problemId, saveDelayMs);
+  const { saveState, handleChange, discardPending } = useNoteAutosave(db, problemId, saveDelayMs);
+
+  // Stop autosaving before the row disappears, or the unmount flush recreates its note.
+  const deleteProblem = async () => {
+    await discardPending();
+    await createProblemsRepo(db).remove(problemId);
+    onBack();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +90,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
           onBack={onBack}
           onEdit={() => setEditing(true)}
           onLogReview={() => setLoggingReview(true)}
+          onDelete={deleteProblem}
         />
 
         <Divider className="problem-notes-page__divider" />

@@ -118,6 +118,32 @@ describe("problems repo", () => {
     const titles = (await repo.listAll()).map((p) => p.title);
     expect(titles).toEqual(["Two Sum", "Zigzag Conversion"]);
   });
+
+  it("remove deletes the problem and every derived record", async () => {
+    const repo = createProblemsRepo(db);
+    const kept = await repo.upsertBySlug({ ...TWO_SUM, slug: "zigzag", title: "Zigzag" }, NOW);
+    const doomed = await repo.upsertBySlug(TWO_SUM, NOW);
+    await createReviewsRepo(db).add({
+      problemId: doomed.id,
+      score: 3,
+      reviewedAt: NOW.toISOString(),
+      runtimeMs: null,
+      memoryMb: null,
+      language: null,
+      codeSnapshot: null,
+    });
+    await createSchedulingRepo(db).put(scheduleReview(null, doomed.id, 3, NOW));
+    await createNotesRepo(db).put(doomed.id, "{}", NOW);
+
+    await repo.remove(doomed.id);
+
+    expect(await repo.getById(doomed.id)).toBeNull();
+    expect(await createReviewsRepo(db).listByProblem(doomed.id)).toEqual([]);
+    expect(await createSchedulingRepo(db).get(doomed.id)).toBeNull();
+    expect(await createNotesRepo(db).get(doomed.id)).toBeNull();
+    // Untouched neighbours survive.
+    expect(await repo.getById(kept.id)).toEqual(kept);
+  });
 });
 
 describe("reviews repo", () => {

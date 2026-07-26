@@ -1,4 +1,5 @@
 import type { Problem, Review, SchedulingState } from "@leetbook/core";
+import { useState } from "react";
 import { DifficultyText } from "../table/pills.js";
 import { Button } from "../ui/Button.js";
 import { ExternalLinkButton } from "../ui/ExternalLinkButton.js";
@@ -11,6 +12,7 @@ export interface ProblemNotesHeaderProps {
   onBack: () => void;
   onEdit: () => void;
   onLogReview: () => void;
+  onDelete: () => void | Promise<void>;
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -49,6 +51,48 @@ function latestPerformance(reviews: Review[]): Review | null {
   return null;
 }
 
+/**
+ * Destructive action with an inline confirm step, matching the pairing-token regenerate
+ * control: the trigger is replaced in place by Cancel/Delete rather than opening a dialog.
+ */
+function DeleteProblemAction({
+  title,
+  onDelete,
+}: {
+  title: string;
+  onDelete: () => void | Promise<void>;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  if (!confirming) {
+    return (
+      <Button variant="ghost" onClick={() => setConfirming(true)}>
+        Delete
+      </Button>
+    );
+  }
+
+  return (
+    <span className="problem-notes-header__confirm" role="group" aria-label={`Delete ${title}`}>
+      <span className="problem-notes-header__confirm-label">Delete for good?</span>
+      <Button variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>
+        Cancel
+      </Button>
+      <Button
+        variant="outline"
+        disabled={pending}
+        onClick={() => {
+          setPending(true);
+          void Promise.resolve(onDelete()).finally(() => setPending(false));
+        }}
+      >
+        {pending ? "Deleting…" : "Delete"}
+      </Button>
+    </span>
+  );
+}
+
 export function ProblemNotesHeader({
   problem,
   scheduling,
@@ -56,6 +100,7 @@ export function ProblemNotesHeader({
   onBack,
   onEdit,
   onLogReview,
+  onDelete,
 }: ProblemNotesHeaderProps) {
   const latestReview = reviews.at(-1) ?? null;
   const performance = latestPerformance(reviews);
@@ -86,6 +131,7 @@ export function ProblemNotesHeader({
           <Button variant="ghost" onClick={onEdit}>
             Edit problem
           </Button>
+          <DeleteProblemAction title={problem.title} onDelete={onDelete} />
         </div>
       </div>
 

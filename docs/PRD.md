@@ -143,7 +143,10 @@ no editor embeds/databases. Local-first is a feature.
       a newly inserted block can hold the caret, keep Tab in the block as indentation, add
       Shift-Tab outdent and indentation-preserving Enter, and stop `/` opening the slash menu
       inside code
-- [ ] 9.23 UI acceptance evidence: capture final reference screenshots, record known limitations,
+- [x] 9.23 Problem deletion: remove a problem and all derived records from the notes page with
+      an inline confirm, cancel autosave first so the note is not recreated, and delete children
+      explicitly rather than relying on a foreign-key cascade the app connection does not enable
+- [ ] 9.24 UI acceptance evidence: capture final reference screenshots, record known limitations,
       and verify every Phase 9 item against the final visual contract
 
 ## Phase 10 — Packaging
