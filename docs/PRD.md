@@ -105,7 +105,7 @@ no editor embeds/databases. Local-first is a feature.
       remain notes navigation with decorative arrows per the UI contract
 - [x] 9.7 Problem editing: reuse the problem form to edit title, URL, difficulty, and
       categories from the notes page; keep scheduling fields derived
-- [ ] 9.8 Notes page shell: final 720px layout, title and metadata treatment, category chips,
+- [x] 9.8 Notes page shell: final 720px layout, title and metadata treatment, category chips,
       latest score/reps/runtime, save status, and action placement
 - [ ] 9.9 Editor fundamentals: final document typography and spacing, placeholder, headings,
       paragraphs, marks, lists, blockquote, keyboard behavior, autosave, and tests

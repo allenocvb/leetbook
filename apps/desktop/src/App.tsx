@@ -77,7 +77,9 @@ function Shell() {
       activeCategory={activeCategory}
       onPickCategory={pickCategory}
       listener={listener}
-      flushMain={route.view === "all-problems" || route.view === "due-today"}
+      flushMain={
+        route.view === "all-problems" || route.view === "due-today" || route.view === "problem"
+      }
     >
       <Page
         route={route}

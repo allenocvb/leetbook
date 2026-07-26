@@ -105,6 +105,17 @@ describe("App shell", () => {
     expect(screen.queryByText("Untouched")).not.toBeInTheDocument();
   });
 
+  it("opens problem notes in the flush scrolling pane", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: "Open notes for Old Fail" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument(),
+    );
+    expect(document.querySelector(".app-layout__main")).toHaveClass("app-layout__main--flush");
+    expect(document.querySelector(".problem-notes-page__content")).toBeInTheDocument();
+  });
+
   it("navigates to the review session, which picks up the due problem", async () => {
     await renderApp();
     await userEvent.click(screen.getByRole("button", { name: /Review Session/ }));

@@ -8,6 +8,7 @@ import {
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { formatDueDate, formatNoteDate } from "../components/notes/ProblemNotesHeader.js";
 import { DbProvider } from "../db/DbContext.js";
 import { makeDb, seed } from "../test-utils.js";
 import { ProblemNotesPage } from "./ProblemNotesPage.js";
@@ -47,12 +48,20 @@ async function setup(withNote = false) {
 }
 
 describe("ProblemNotesPage", () => {
-  it("shows the metadata header", async () => {
+  it("shows the final metadata header with derived score, reps, and category chips", async () => {
     await setup();
     expect(screen.getByText("Easy")).toBeInTheDocument();
-    expect(screen.getByText("Array, Hash Table")).toBeInTheDocument();
-    expect(screen.getByText(/1 reps/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Open on LeetCode/ })).toBeInTheDocument();
+    expect(screen.getByText("Array")).toHaveClass("problem-notes-header__chip");
+    expect(screen.getByText("Hash Table")).toHaveClass("problem-notes-header__chip");
+    expect(screen.getByText("Jul 1, 2026 · scored 4 · 1 reps")).toBeInTheDocument();
+    expect(screen.getByText("Next review").nextElementSibling).toHaveClass(
+      "problem-notes-header__next",
+    );
+    expect(screen.queryByText("Runtime")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Open on LeetCode/ })).toHaveClass(
+      "ui-button--outline",
+    );
+    expect(screen.getByRole("button", { name: "Edit problem" })).toBeInTheDocument();
   });
 
   it("opens LeetCode through the browser fallback outside Tauri", async () => {
@@ -99,7 +108,8 @@ describe("ProblemNotesPage", () => {
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByText("Medium")).toBeInTheDocument();
-    expect(screen.getByText("Array, Two Pointers")).toBeInTheDocument();
+    expect(screen.getByText("Array")).toHaveClass("problem-notes-header__chip");
+    expect(screen.getByText("Two Pointers")).toHaveClass("problem-notes-header__chip");
 
     expect(await createProblemsRepo(db).getById(problem.id)).toMatchObject({
       id: problem.id,
@@ -136,7 +146,7 @@ describe("ProblemNotesPage", () => {
 });
 
 describe("code snapshot", () => {
-  it("shows the latest captured solution with metadata", async () => {
+  it("shows the latest captured solution and latest available runtime metadata", async () => {
     const db = await makeDb();
     await seed(db, [{ slug: "two-sum", title: "Two Sum" }]);
     const problem = await createProblemsRepo(db).getBySlug("two-sum");
@@ -150,6 +160,15 @@ describe("code snapshot", () => {
       language: "python3",
       codeSnapshot: "def twoSum(self, nums, target): ...",
     });
+    await createReviewsRepo(db).add({
+      problemId: problem.id,
+      score: 5,
+      reviewedAt: "2026-07-22T00:00:00.000Z",
+      runtimeMs: null,
+      memoryMb: null,
+      language: null,
+      codeSnapshot: null,
+    });
 
     render(
       <DbProvider db={db}>
@@ -162,6 +181,8 @@ describe("code snapshot", () => {
     );
     expect(screen.getByText("def twoSum(self, nums, target): ...")).toBeInTheDocument();
     expect(screen.getByText(/python3 · snapshot · Jul 21 · 61 ms · 18.4 MB/)).toBeInTheDocument();
+    expect(screen.getByText("61 ms · 18.4 MB")).toBeInTheDocument();
+    expect(screen.getByText("Jul 22, 2026 · scored 5 · 2 reps")).toBeInTheDocument();
   });
 
   it("renders nothing when no review has a snapshot", async () => {
@@ -169,5 +190,17 @@ describe("code snapshot", () => {
     expect(
       screen.queryByRole("region", { name: "Latest solution snapshot" }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("notes metadata formatting", () => {
+  it("uses stable full dates and calendar-day due labels", () => {
+    expect(formatNoteDate("2026-07-28T18:00:00.000Z")).toBe("Jul 28, 2026");
+    expect(formatDueDate("2026-07-28T18:00:00.000Z", new Date("2026-07-25T23:00:00.000Z"))).toBe(
+      "Jul 28, 2026 · in 3 days",
+    );
+    expect(formatDueDate("2026-07-25T00:00:00.000Z", new Date("2026-07-26T01:00:00.000Z"))).toBe(
+      "Jul 25, 2026 · 1 day overdue",
+    );
   });
 });

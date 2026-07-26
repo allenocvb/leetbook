@@ -12,11 +12,10 @@ import { useEffect, useRef, useState } from "react";
 import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { EditProblemDialog } from "../components/EditProblemDialog.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
-import { DifficultyText } from "../components/table/pills.js";
-import { Button } from "../components/ui/Button.js";
-import { ExternalLinkButton } from "../components/ui/ExternalLinkButton.js";
+import { ProblemNotesHeader } from "../components/notes/ProblemNotesHeader.js";
+import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
-import { formatShortDate } from "../lib/format.js";
+import "./ProblemNotesPage.css";
 
 export interface ProblemNotesPageProps {
   problemId: string;
@@ -32,7 +31,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [problem, setProblem] = useState<Problem | null>(null);
   const [scheduling, setScheduling] = useState<SchedulingState | null>(null);
   const [note, setNote] = useState<Note | null | "loading">("loading");
-  const [snapshot, setSnapshot] = useState<Review | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [editing, setEditing] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,7 +49,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
       setProblem(p);
       setScheduling(s);
       setNote(n);
-      setSnapshot(reviews.filter((r) => r.codeSnapshot !== null).at(-1) ?? null);
+      setReviews(reviews);
     })();
     return () => {
       cancelled = true;
@@ -69,86 +68,40 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   };
 
   if (note === "loading") return null;
-  if (!problem) return <p style={{ color: "var(--danger)" }}>Problem not found.</p>;
+  if (!problem) return <p className="problem-notes-page__error">Problem not found.</p>;
+
+  const snapshot = reviews.filter((review) => review.codeSnapshot !== null).at(-1) ?? null;
 
   return (
-    <div style={{ maxWidth: 880, margin: "0 auto" }}>
-      <button
-        type="button"
-        onClick={onBack}
-        style={{ color: "var(--text-secondary)", fontSize: 13, marginBottom: 20 }}
-      >
-        ← All Problems
-      </button>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>{problem.title}</h1>
-        <Button variant="outline" onClick={() => setEditing(true)}>
-          Edit problem
-        </Button>
-        <ExternalLinkButton
-          url={problem.url}
-          style={{ fontSize: 12, color: "var(--text-secondary)" }}
-        >
-          Open on LeetCode ↗
-        </ExternalLinkButton>
-      </div>
-
-      <dl
-        style={{
-          display: "grid",
-          gridTemplateColumns: "110px 1fr",
-          rowGap: 6,
-          columnGap: 16,
-          margin: "16px 0 0",
-          fontSize: 13,
-          color: "var(--text-secondary)",
-        }}
-      >
-        <dt>Difficulty</dt>
-        <dd style={{ margin: 0 }}>
-          <DifficultyText difficulty={problem.difficulty} />
-        </dd>
-        <dt>Category</dt>
-        <dd style={{ margin: 0 }}>{problem.tags.join(", ") || "—"}</dd>
-        <dt>Next review</dt>
-        <dd style={{ margin: 0 }}>{formatShortDate(scheduling?.dueAt ?? null)}</dd>
-        <dt>Last review</dt>
-        <dd style={{ margin: 0 }}>
-          {scheduling
-            ? `${formatShortDate(scheduling.lastReviewedAt)} · ${scheduling.reviewCount} reps`
-            : "not reviewed yet"}
-        </dd>
-      </dl>
-
-      <hr style={{ border: "none", borderTop: "1px solid var(--border)", margin: "20px 0" }} />
-
-      {snapshot && <CodeSnapshot review={snapshot} />}
-
-      <div style={{ position: "relative" }}>
-        <span
-          aria-live="polite"
-          style={{
-            position: "absolute",
-            top: -34,
-            right: 0,
-            fontSize: 11,
-            color: "var(--text-secondary)",
-          }}
-        >
-          {saveState === "pending" ? "Saving…" : saveState === "saved" ? "Saved" : ""}
-        </span>
-        <NoteEditor initialContentJson={note?.contentJson ?? null} onChange={handleChange} />
-      </div>
-
-      {editing && (
-        <EditProblemDialog
-          key={problem.id}
+    <div className="problem-notes-page">
+      <div className="problem-notes-page__content">
+        <ProblemNotesHeader
           problem={problem}
-          onClose={() => setEditing(false)}
-          onSaved={setProblem}
+          scheduling={scheduling}
+          reviews={reviews}
+          onBack={onBack}
+          onEdit={() => setEditing(true)}
         />
-      )}
+
+        <Divider className="problem-notes-page__divider" />
+
+        <div className="problem-notes-page__document">
+          <span className="problem-notes-page__save-status" aria-live="polite">
+            {saveState === "pending" ? "Saving…" : saveState === "saved" ? "Saved" : ""}
+          </span>
+          {snapshot && <CodeSnapshot review={snapshot} />}
+          <NoteEditor initialContentJson={note?.contentJson ?? null} onChange={handleChange} />
+        </div>
+
+        {editing && (
+          <EditProblemDialog
+            key={problem.id}
+            problem={problem}
+            onClose={() => setEditing(false)}
+            onSaved={setProblem}
+          />
+        )}
+      </div>
     </div>
   );
 }
