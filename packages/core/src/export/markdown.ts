@@ -49,6 +49,10 @@ function renderBlock(node: TipTapNode): string {
         .join("\n");
     case "blockquote":
       return (node.content ?? []).map((child) => `> ${renderBlock(child)}`).join("\n");
+    case "callout":
+      return (node.content ?? [])
+        .map((child, index) => `> ${index === 0 ? "**Recall:** " : ""}${renderBlock(child)}`)
+        .join("\n");
     default:
       return renderInline(node.content);
   }

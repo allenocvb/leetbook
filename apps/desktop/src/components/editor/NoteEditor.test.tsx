@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { Editor } from "@tiptap/react";
 import { describe, expect, it, vi } from "vitest";
 import { NOTE_PLACEHOLDER, NoteEditor } from "./NoteEditor.js";
+import { SLASH_COMMANDS } from "./slashCommands.js";
 
 const SAMPLE = JSON.stringify({
   type: "doc",
@@ -53,6 +54,21 @@ const RICH_TEXT = JSON.stringify({
       type: "blockquote",
       content: [
         { type: "paragraph", content: [{ type: "text", text: "Remember the invariant." }] },
+      ],
+    },
+  ],
+});
+
+const CALLOUT = JSON.stringify({
+  type: "doc",
+  content: [
+    {
+      type: "callout",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Recall the shrinking-window invariant." }],
+        },
       ],
     },
   ],
@@ -109,6 +125,77 @@ describe("NoteEditor", () => {
 
     expect(screen.getByRole("heading", { level: 2, name: "Intuition" })).toBeInTheDocument();
     expect(document.querySelector(".note-editor ul")).toHaveTextContent("Hash map");
+  });
+
+  it("opens a slash menu with every supported block type", async () => {
+    await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/");
+
+    expect(screen.getByRole("listbox", { name: "Block types" })).toBeInTheDocument();
+    expect(screen.getAllByRole("option")).toHaveLength(SLASH_COMMANDS.length);
+    expect(screen.getByRole("option", { name: /Recall callout/ })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Code block/ })).toBeInTheDocument();
+    expect(surface).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("filters slash commands and inserts a persisted recall callout", async () => {
+    const { onChange } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/rec");
+
+    expect(screen.getAllByRole("option")).toHaveLength(1);
+    expect(screen.getByRole("option", { name: /Recall callout/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await userEvent.keyboard("{Enter}Remember the invariant");
+
+    expect(screen.queryByRole("listbox", { name: "Block types" })).not.toBeInTheDocument();
+    expect(document.querySelector(".note-callout")).toHaveTextContent("Remember the invariant");
+    await waitFor(() => {
+      const saved = onChange.mock.calls.at(-1)?.[0] as string;
+      expect(JSON.parse(saved).content[0].type).toBe("callout");
+    });
+  });
+
+  it("converts an existing block when a slash command is invoked at its start", async () => {
+    const { editor } = await renderEditor(SAMPLE);
+    editor.commands.setTextSelection(1);
+    editor.view.focus();
+    await userEvent.keyboard("/rec{Enter}");
+
+    await waitFor(() => {
+      const firstBlock = document.querySelector(".ProseMirror")?.firstElementChild;
+      expect(firstBlock).toHaveClass("note-callout");
+      expect(firstBlock).toHaveTextContent("Intuition");
+    });
+  });
+
+  it("moves through slash commands with arrows and closes with escape", async () => {
+    await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/{ArrowDown}");
+
+    expect(screen.getByRole("option", { name: /Heading 1/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(surface).toHaveAttribute("aria-activedescendant", "slash-command-heading-1");
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("listbox", { name: "Block types" })).not.toBeInTheDocument();
+    expect(surface).toHaveFocus();
+  });
+
+  it("renders stored recall callouts", async () => {
+    await renderEditor(CALLOUT);
+    const callout = document.querySelector('.note-callout[data-type="callout"]');
+    expect(callout).toHaveTextContent("Recall the shrinking-window invariant.");
   });
 
   it("emits serialized JSON on content changes", async () => {

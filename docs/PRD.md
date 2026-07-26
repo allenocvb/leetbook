@@ -109,7 +109,7 @@ no editor embeds/databases. Local-first is a feature.
       latest score/reps/runtime, save status, and action placement
 - [x] 9.9 Editor fundamentals: final document typography and spacing, placeholder, headings,
       paragraphs, marks, lists, blockquote, keyboard behavior, autosave, and tests
-- [ ] 9.10 Slash commands and callouts: keyboard-operable `/` menu for every supported block
+- [x] 9.10 Slash commands and callouts: keyboard-operable `/` menu for every supported block
       type, including the final purple-rule recall callout
 - [ ] 9.11 Code authoring and snapshots: discoverable code-block insertion, language selection,
       lowlight highlighting, final header/body styling, and consistent read-only snapshots

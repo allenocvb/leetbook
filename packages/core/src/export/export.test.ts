@@ -53,6 +53,15 @@ const SAMPLE_NOTE = JSON.stringify({
         },
       ],
     },
+    {
+      type: "callout",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Recall the complement before scanning." }],
+        },
+      ],
+    },
   ],
 });
 
@@ -70,6 +79,7 @@ describe("tiptapToMarkdown", () => {
     expect(md).toContain("Store the **complement** in a hash map.");
     expect(md).toContain("```python\nseen = {}");
     expect(md).toContain("- O(n) time\n- O(n) space");
+    expect(md).toContain("> **Recall:** Recall the complement before scanning.");
   });
 
   it("returns non-JSON content unchanged instead of losing it", () => {

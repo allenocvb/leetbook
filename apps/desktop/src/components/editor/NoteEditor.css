@@ -1,3 +1,7 @@
+.note-editor {
+  position: relative;
+}
+
 .note-editor .ProseMirror {
   min-height: 240px;
   color: var(--lb-text-2);
@@ -95,6 +99,20 @@
   border-left: 2px solid var(--lb-bd-2);
 }
 
+.note-editor .ProseMirror .note-callout {
+  margin: 16px 0;
+  padding: 11px 14px;
+  color: var(--lb-text-2);
+  background: var(--lb-tint);
+  border-left: 2px solid var(--lb-accent);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.note-editor .ProseMirror .note-callout p + p {
+  margin-top: 6px;
+}
+
 .note-editor .ProseMirror ul,
 .note-editor .ProseMirror ol {
   margin: 12px 0;
@@ -139,4 +157,90 @@
 .note-editor .hljs-function {
   color: var(--lb-ink);
   font-weight: 500;
+}
+
+.slash-command-menu {
+  position: absolute;
+  z-index: 20;
+  width: 310px;
+  max-height: 360px;
+  padding: 6px;
+  overflow-y: auto;
+  color: var(--lb-text-2);
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-5);
+  box-shadow: var(--lb-shadow-floating);
+}
+
+.slash-command-menu__label {
+  padding: 5px 8px 7px;
+  color: var(--lb-muted-2);
+  font-family: var(--lb-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.slash-command-menu__item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--lb-radius-3);
+  cursor: pointer;
+}
+
+.slash-command-menu__item[data-active="true"],
+.slash-command-menu__item:hover {
+  color: var(--lb-accent-text);
+  background: var(--lb-tint);
+}
+
+.slash-command-menu__item:focus-visible {
+  outline: 2px solid var(--lb-accent);
+  outline-offset: -2px;
+}
+
+.slash-command-menu__badge {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--lb-text-3);
+  background: var(--lb-surf-3);
+  border: 1px solid var(--lb-bd);
+  border-radius: var(--lb-radius-2);
+  font-family: var(--lb-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.slash-command-menu__item[data-active="true"] .slash-command-menu__badge,
+.slash-command-menu__item:hover .slash-command-menu__badge {
+  color: var(--lb-accent-text);
+  border-color: var(--lb-accent);
+}
+
+.slash-command-menu__name,
+.slash-command-menu__description {
+  display: block;
+}
+
+.slash-command-menu__name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.slash-command-menu__description {
+  margin-top: 1px;
+  color: var(--lb-muted);
+  font-size: 11.5px;
 }
