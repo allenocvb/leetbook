@@ -5,6 +5,15 @@ for tracking LeetCode practice with FSRS spaced repetition and Notion-style note
 Monorepo: `packages/core` (pure TS business logic), `apps/desktop`, `apps/extension`.
 
 Read `docs/PRD.md` before writing code. Read `docs/DESIGN.md` for product/architecture context.
+Before any UI work, read `docs/UI_SPEC.md` and `.claude/skills/frontend-design/SKILL.md`.
+
+Document precedence:
+
+1. `docs/PRD.md` controls scope and implementation order.
+2. `docs/UI_SPEC.md` controls visual design and interaction behavior.
+3. `docs/DESIGN.md` controls architecture and data invariants.
+
+If an older deck, screenshot, comment, or component conflicts with these files, follow this order.
 
 ## Workflow — the most important rules
 
@@ -72,5 +81,4 @@ pnpm 11 / Node 22. Rust is only needed for the desktop shell; core and extension
   Do not add these, or dependencies for them.
 - The desktop app must stay fully usable with manual entry — the extension is an
   automation layer, never a dependency.
-- White/black Notion-like aesthetic; see `.claude/skills/frontend-design/SKILL.md`
-  before building any UI.
+- Match `docs/UI_SPEC.md` at the 1280×820 reference size before calling UI work complete.

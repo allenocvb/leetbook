@@ -1,0 +1,206 @@
+# LeetBook v1 UI Specification
+
+**Status:** Final implementation contract
+**Source:** July 26, 2026 high-fidelity design handoff and `LeetBookpp.key`
+
+This document is the repository-owned source of truth for LeetBook's v1 visual design and
+interaction behavior. It replaces the earlier system-font mockup guidance.
+
+## Contract and precedence
+
+- `docs/PRD.md` controls product scope and implementation order.
+- This file controls UI appearance, measurements, states, and interaction behavior.
+- `docs/DESIGN.md` controls architecture and data invariants.
+- If an older screenshot, deck, comment, or component conflicts with this file, this file wins.
+- The handoff React files are structural references, not production code. Rebuild them in
+  `apps/desktop`, preserve the real data wiring, and keep business logic in `packages/core`.
+- Match the specification at the 1280×820 reference size before adding flexible-window behavior.
+
+## Product character
+
+LeetBook should feel like Notion crossed with a paper notebook: quiet, content-first, and warm
+without becoming decorative. It uses one restrained purple accent, playful display type for
+identity and headings, and precise mono typography for dates, scores, ports, and code.
+
+## Tokens
+
+Implement these as semantic CSS custom properties. Components must not introduce replacement
+hex values for an existing semantic role.
+
+### Light
+
+| Token | Value | Use |
+|---|---|---|
+| `bg` | `#efedf3` | Desk behind the app window |
+| `surf` | `#ffffff` | Main app surface |
+| `surf2` | `#fbfafc` | Titlebar, sidebar, row hover |
+| `surf3` | `#f7f6fa` | Muted panels and middle score chips |
+| `code` | `#fdfdfe` | Code block body |
+| `chip` | `#f4f2f8` | Tags and token fields |
+| `tint` | `#f1eefb` | Active navigation, chips, progress track |
+| `bd` | `#efeef2` | Hairlines |
+| `bd2` | `#e8e6ee` | Control borders |
+| `ink` | `#191720` | Primary text and solid buttons |
+| `txt2` | `#33313c` | Body copy |
+| `txt3` | `#57545f` | Secondary copy |
+| `mut` | `#8b8896` | Metadata |
+| `mut2` | `#a5a2b0` | Labels |
+| `mut3` | `#b3b0bd` | Quiet controls |
+| `mut4` | `#c2bfcc` | Faint affordances |
+| `acc` | `#6d4aff` | Purple accent |
+| `accTxt` | `#5638d8` | Accent text on tint |
+| `green` | `#3d7a52` | Easy and mastered |
+| `amber` | `#9a6b1f` | Medium |
+| `red` | `#a63b4c` | Hard, leech, low score |
+| `softRed` | `#fdeef0` | Low-score background |
+| `kw` | `#8b5cf6` | Code keyword |
+
+Status pills:
+
+- Mastered: `#eef7f0` background, `#3d7a52` foreground.
+- Learning: `#f1eefb` background, `#5638d8` foreground.
+- Leech: `#fdeef0` background, `#a63b4c` foreground.
+- New: `#f4f2f8` background, `#57545f` foreground.
+
+### Dark
+
+Use the same semantic keys: `bg #0e0d11`, `surf #18171d`, `surf2 #1c1b22`,
+`surf3 #212028`, `code #141319`, `chip #272631`, `tint #2a2340`, `bd #252430`,
+`bd2 #2f2e3b`, `ink #f2f1f6`, `txt2 #dcdae3`, `txt3 #a8a5b3`, `mut #8b8896`,
+`mut2 #7d7a89`, `mut3 #6a6776`, `mut4 #565364`, `acc #8b6bff`,
+`accTxt #bda6ff`, `green #6cba86`, `amber #cfa04c`, `red #e0808f`,
+`softRed #301c22`, and `kw #a98bff`.
+
+Dark status pills:
+
+- Mastered: `#1c2a21` background, `#6cba86` foreground.
+- Learning: `#241f3a` background, `#bda6ff` foreground.
+- Leech: `#301c22` background, `#e0808f` foreground.
+- New: `#272631` background, `#a8a5b3` foreground.
+
+### Typography and geometry
+
+- Display: Chewy, one weight only. Use for logo, screen titles, note headings, and score numerals.
+- Body/UI: Quicksand 400/500/600/700.
+- Mono: JetBrains Mono 400/500.
+- Self-host WOFF2 files so the Tauri app remains fully local and works offline.
+- Type scale: 10.5, 11, 11.5, 12, 12.5, 13.5, 14.5, 16, 19, 20, 22, 24, 29, 34,
+  38, and 46px.
+- Never bold Chewy or use it below 16px.
+- Radius scale: 5, 6, 7, 8, 9, 11, 12, 14, and 20px for pills.
+- Spacing scale: 4, 6, 9, 12, 16, 22, 26, and 34px.
+- Window shadow:
+  `0 24px 60px rgba(25,23,32,.18), 0 2px 6px rgba(25,23,32,.08)`.
+- Floating shadow: `0 18px 40px rgba(25,23,32,.16)`.
+- Transitions are optional and limited to 120ms on background and border colors.
+
+## Shared behavior
+
+- Persist light/dark theme and apply it to the document background and app surface.
+- Every interactive control must be keyboard reachable and have a visible focus state.
+- External URLs in Tauri must use the platform URL opener, with a browser-safe fallback for tests.
+- Status, due-ness, latest score, review count, and dates remain derived from core records.
+- A score is recorded by appending or explicitly correcting a review; never write a redundant
+  score field to a problem.
+- The desktop app remains fully usable without the extension.
+
+## Screens
+
+### Window shell and intro
+
+- Reference viewport: 1280×820, 12px radius, centered on `bg` with 40px desk padding.
+- Titlebar: 38px high, `surf2`, 1px `bd` bottom border, three 11px neutral circles, app name,
+  and a right-aligned theme toggle.
+- Intro: centered 54px logo, Chewy 46px title, 13.5px tagline, `Le(e)t's Code` primary button,
+  and an 11px mono problem/due count.
+- Intro is first-run/launch behavior; the button opens All Problems.
+
+### Sidebar
+
+- Fixed 236px width, `surf2`, 1px `bd` right border, `16px 10px 12px` padding.
+- Header: 22px logo, Chewy 16px name, mono 10px `v1`.
+- Navigation order: All Problems, Due Today, Review Session, Capture (extension),
+  Settings & Pairing.
+- Navigation rows use 7px radius and `7px 9px` padding. Active and hover states use `tint`;
+  the active label uses `accTxt`.
+- Show category counts beneath a 10.5px uppercase section label. Clicking a category filters
+  the table; clicking it again clears the filter.
+- Footer shows real extension/listener state and port. Do not claim “connected” without evidence.
+
+### Problem table
+
+- Header padding: `26px 34px 0`; Chewy 29px title and 12.5px subtitle.
+- Header actions: 190px search, Filter outline button, and solid `+ New problem`.
+- All Problems and Due Today are tabs with a shared hairline and 2px active underline.
+- Grid columns: `1.7fr .9fr .8fr .8fr .5fr .5fr 1fr .7fr`; 16px gap.
+- Columns: Name, Status, Next Review, Last Review, Score, Reps, Category, Difficulty.
+- Sticky header uses 10.5px uppercase labels. Rows use 11px vertical padding in comfortable
+  density and 7px in compact density.
+- The entire row opens the notes page. The arrow glyph is decorative, not a second competing link.
+- Score chip: 19×19px. Scores 0–1 use `softRed/red`, 2–3 use `surf3/txt3`, 4–5 use
+  `tint/accTxt`, and missing uses `surf3/mut4`.
+- Provide sort, search, category filtering, filter clearing, empty state, and `+ New`.
+
+### Problem notes
+
+- Centered 720px column with `26px 40px 80px` padding.
+- Back link is 12.5px `mut`; title is Chewy 38px; external link is an outline button.
+- Metadata grid is `118px 1fr`, 9px row gap, 12px column gap. Include difficulty, category
+  chips, next review, last review with latest score and reps, and latest runtime when present.
+- Allow editing title, URL, difficulty, and categories without making derived scheduling fields
+  directly editable.
+- Provide a `Log review` action so any problem—not only an already-due problem—can receive a
+  0–5 review.
+
+Editor:
+
+- TipTap document body is 14.5px with 1.72 line height.
+- H2 is Chewy 22px with `26px 0 6px` margin.
+- Support headings, paragraphs, bold, italic, inline code, bullets, numbered lists, blockquote,
+  callout, and syntax-highlighted code blocks.
+- Empty editor placeholder: `Type “/” for commands…`.
+- Slash menu exposes the supported block types and is fully keyboard operable.
+- Code blocks show a `surf2` header with language on the left and optional snapshot date on the
+  right, followed by a `code` body using JetBrains Mono 12.5px.
+- Captured code snapshots are read-only and visually consistent with editable code blocks.
+- Autosave reports Saving/Saved without moving content.
+
+### Review session
+
+- Top bar includes label, 4px progress track, mono `N of M`, and Exit.
+- Center content is 620px wide. Use Chewy 34px title and show difficulty, last score, and reps.
+- Provide working `Open on LeetCode` and `Show my notes` actions.
+- Six equal score tiles show 0–5, labels, hover/selected state, full rubric, and FSRS preview.
+- Keyboard behavior: 0–5 selects, Enter confirms, Escape exits.
+- Confirming appends a review, recomputes FSRS, and advances. End with a session summary.
+
+### Capture
+
+- Desktop Capture view explains pairing and shows current listener/queue state; it must not contain
+  stale phase-placeholder copy.
+- Extension toast is fixed bottom-right with 22px inset, 320px width, 11px radius, `surf`,
+  `bd2`, and the floating shadow.
+- Header shows logo, “Accepted · captured” or “Queued — N waiting,” and dismiss.
+- Show title, difficulty/runtime/memory/code status, and six score buttons.
+- A chosen score is posted or queued. Dismiss/skip schedules as Good, as specified by the handoff.
+- Shadow DOM isolates the toast from LeetCode styles.
+
+### Settings and pairing
+
+- Content has `28px 34px` padding and a 600px maximum width.
+- Three cards use `bd2`, 9px radius, 18px padding, and 14px gaps.
+- Connection card: truthful connection state, last capture, listener, pairing token, regenerate,
+  and queued count.
+- Scheduling card: FSRS identity, daily new limit, and score mapping.
+- Data card: database stats, Import Notion CSV, Export JSON, and Export Markdown.
+- Import result explains imported/skipped rows and offers an immediate route to imported problems.
+
+## Required validation
+
+Each remediation task ships with focused tests. Before checking a PRD item:
+
+1. Run `pnpm lint`, `pnpm typecheck`, and `pnpm test`.
+2. Render every affected screen at 1280×820 in light and dark themes.
+3. Compare against the UI contract for layout, typography, color, states, and interaction.
+4. Test Tauri-only behavior, including external links and file operations, in the desktop shell.
+5. Verify the extension toast on an actual or fixture LeetCode page.

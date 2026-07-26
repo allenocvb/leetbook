@@ -6,7 +6,9 @@ A desktop app (Tauri 2) that tracks your LeetCode practice with FSRS scheduling 
 notes, plus a browser extension that captures Accepted submissions automatically so you never
 retype a problem again.
 
-> **Status:** early scaffold. Nothing to see yet — see `docs/` for the design doc.
+> **Status:** functional v1 foundation. Core scheduling, local SQLite, desktop views, notes,
+> review sessions, import/export, and extension capture are implemented. The current focus is
+> UI fidelity and interaction recovery against the final [`docs/UI_SPEC.md`](./docs/UI_SPEC.md).
 
 ## Structure
 

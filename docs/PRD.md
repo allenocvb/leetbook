@@ -4,6 +4,10 @@ The single source of truth for **what to build next**. Work top-to-bottom, one t
 time (see `AGENTS.md` for workflow rules). A task is done when it's implemented, tested,
 committed, and its box is checked.
 
+`docs/UI_SPEC.md` is the source of truth for visual and interaction acceptance. Historical
+Phases 1–8 record functional foundations that exist in the repository; Phase 9 closes the
+fidelity, authoring, editing, and desktop-integration gaps found in the July 26, 2026 audit.
+
 ## Product summary
 
 LeetBook tracks LeetCode practice with FSRS spaced repetition and Notion-style notes.
@@ -53,7 +57,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 4.1 SQLite wiring: implement `SqlExecutor` with tauri-plugin-sql; run migrations on boot
 - [x] 4.2 App layout: sidebar + main pane (per design deck)
 - [x] 4.3 Table view: All Problems (sort, filter, category jump)
-- [x] 4.4 Manual problem add/edit dialog (add; editing lands with the notes page header in 5.2)
+- [x] 4.4 Manual problem add dialog
 - [x] 4.5 Due Today view
 
 ## Phase 5 — Notes editor ✅
@@ -62,7 +66,7 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 5.2 Problem notes page: metadata header + editor, autosave to `notes`
 - [x] 5.3 Code snapshot block (from captured submissions)
 
-## Phase 6 — Review queue ⭐ first shippable ✅
+## Phase 6 — Review queue functional foundation ✅
 
 - [x] 6.1 Review session UI: one problem at a time, 0–5 rating, rubric visible
 - [x] 6.2 Rating applies `scheduleReview` via core `applyReview`; progress + session summary
@@ -81,12 +85,59 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 8.1 Notion CSV import flow (file picker + result summary with skipped reasons)
 - [x] 8.2 JSON/Markdown export buttons (tauri dialog + fs)
 
-## Phase 9 — Packaging
+## Phase 9 — UI fidelity, interaction & reliability recovery
 
-- [ ] 9.1 tauri-action release builds + auto-update
-- [ ] 9.2 macOS signing/notarization; Chrome Web Store submission
+> Complete strictly top-to-bottom. Each item includes focused tests and visual verification
+> against `docs/UI_SPEC.md` at 1280×820 in light and dark themes when applicable.
 
-## Phase 10 — Launch
+- [ ] 9.1 Restore the green repository gate: fix the current `node:sqlite` typecheck failure,
+      then verify `pnpm lint && pnpm typecheck && pnpm test`
+- [ ] 9.2 Design foundation: semantic light/dark CSS tokens, self-hosted Chewy/Quicksand/
+      JetBrains Mono fonts, persisted theme, focus styles, and shared primitives
+- [ ] 9.3 Window shell and intro: final titlebar/window treatment, theme toggle, first-run
+      intro, and flexible behavior beyond the 1280×820 reference size
+- [ ] 9.4 Sidebar: final 236px layout, nav states/counts, category counts/filtering, version,
+      and truthful extension/listener footer
+- [ ] 9.5 Problem table: final header/tabs/grid/rows/chips, full-row navigation, search,
+      sorting, category/filter states, density, empty state, and new-problem affordances
+- [ ] 9.6 External links: shared Tauri opener integration for table, notes, and review-session
+      LeetCode actions, with browser/test fallback and desktop-shell verification
+- [ ] 9.7 Problem editing: reuse the problem form to edit title, URL, difficulty, and
+      categories from the notes page; keep scheduling fields derived
+- [ ] 9.8 Notes page shell: final 720px layout, title and metadata treatment, category chips,
+      latest score/reps/runtime, save status, and action placement
+- [ ] 9.9 Editor fundamentals: final document typography and spacing, placeholder, headings,
+      paragraphs, marks, lists, blockquote, keyboard behavior, autosave, and tests
+- [ ] 9.10 Slash commands and callouts: keyboard-operable `/` menu for every supported block
+      type, including the final purple-rule recall callout
+- [ ] 9.11 Code authoring and snapshots: discoverable code-block insertion, language selection,
+      lowlight highlighting, final header/body styling, and consistent read-only snapshots
+- [ ] 9.12 Manual review entry: add a 0–5 `Log review` flow from any problem, append the review,
+      recompute FSRS, and refresh all derived fields
+- [ ] 9.13 Review correction and history: show review history and safely correct the latest
+      mistaken review by replaying derived scheduling; never overwrite a redundant score field
+- [ ] 9.14 Review session fidelity: final top progress bar, 620px content, score hover/selection
+      rubric, FSRS preview, working `Show my notes`, keyboard flow, and summary
+- [ ] 9.15 Extension capture fidelity: final bottom-right toast, queued state/count, dismiss,
+      skip-as-Good behavior, offline flush feedback, and fixture-page verification
+- [ ] 9.16 Desktop Capture view: replace the stale Phase 7 placeholder with real pairing,
+      listener, queue, capture-status, and extension-setup information
+- [ ] 9.17 Settings & Pairing fidelity: final connection/scheduling/data cards, real status and
+      last capture, token regeneration, queued count, daily limit, stats, import, and exports
+- [ ] 9.18 Import follow-through: clearer import limitations/results, duplicate handling,
+      skipped-row details, and a direct action to view and work with imported problems
+- [ ] 9.19 Full visual and integration QA: every view in light/dark at 1280×820, keyboard and
+      focus audit, real Tauri external links/file operations, real extension capture path,
+      and regression fixes
+- [ ] 9.20 UI acceptance evidence: capture final reference screenshots, record known limitations,
+      and verify every Phase 9 item against the final visual contract
 
-- [ ] 10.1 README with demo GIF, CONTRIBUTING.md, issue templates
-- [ ] 10.2 v0.1.0 release
+## Phase 10 — Packaging
+
+- [ ] 10.1 tauri-action release builds + auto-update
+- [ ] 10.2 macOS signing/notarization; Chrome Web Store submission
+
+## Phase 11 — Launch
+
+- [ ] 11.1 Launch README with demo GIF, extension setup, CONTRIBUTING.md, and issue templates
+- [ ] 11.2 v0.1.0 release

@@ -1,6 +1,7 @@
 # LeetBook — Design & Architecture Doc
 
-**Status:** Pre-design phase. Decisions locked, ready for UI design, then development.
+**Status:** Architecture implemented through the v1 foundation; UI fidelity and interaction
+recovery are in progress. See `docs/PRD.md` Phase 9 and `docs/UI_SPEC.md`.
 **Author:** Allen · July 2026
 
 ---
@@ -110,11 +111,13 @@ Status and table columns are always **derived**, never stored redundantly. Appen
 3. **`packages/core`** — schema, migrations, FSRS wrapper, unit tests. Logic before pixels.
 4. **Desktop shell + table view** — Tauri app on SQLite, manual problem add.
 5. **Notes editor** — TipTap integration.
-6. **Review queue + in-app scoring** — ✅ complete, shippable manual product.
+6. **Review queue + in-app scoring** — functional foundation complete.
 7. **Extension** — capture adapter, localhost bridge, pairing, offline queue.
 8. **Import/export** — Notion CSV import (existing 47 problems = test fixture), JSON/Markdown export.
-9. **Packaging polish** — auto-update, signing, store submission.
-10. **Launch** — docs, demo GIF, open-source release.
+9. **UI fidelity and interaction recovery** — match the final handoff, close authoring/editing
+   gaps, and verify Tauri-only behavior.
+10. **Packaging polish** — auto-update, signing, store submission.
+11. **Launch** — docs, demo GIF, open-source release.
 
 ## 7. Risks
 
@@ -123,13 +126,15 @@ Status and table columns are always **derived**, never stored redundantly. Appen
 | LeetCode DOM/API changes break capture | Isolated adapter module + tests; app fully usable manually |
 | MV3 service worker limits | Capture logic in content script; localhost fetch needs host permission |
 | Chrome Web Store review delays | Ship desktop app first (usable standalone); extension follows |
-| Editor scope creep | TipTap defaults + code blocks only in v1; no databases/embeds |
+| Editor scope creep | Keep the bounded block set in `docs/UI_SPEC.md`; no databases or embeds |
 | Sync requests from users | Append-only reviews log designed for it; explicitly post-v1 |
 
-## 8. Design Phase Inputs
+## 8. Final UI Contract
 
-For the upcoming Claude design session:
+The design phase is complete. `docs/UI_SPEC.md` is the final repository-owned contract for
+visual design and interaction behavior.
 
-- Theme: white-dominant, black text, Notion/notebook aesthetic. Minimal chrome.
-- Screens to design: table view (All / Due Today), problem notes page, review queue, extension toast, pairing/settings screen, empty states, Notion import flow.
-- Reference: existing Notion setup screenshots (table + note page).
+The contract covers the window shell and intro, table and sidebar, notes editor, review session,
+extension capture toast, settings/pairing, empty states, import feedback, and light/dark themes.
+The original component sketches are references only; production code must retain the real
+SQLite/core/extension wiring.
