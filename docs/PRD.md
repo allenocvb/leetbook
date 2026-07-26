@@ -151,7 +151,8 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.25 Native macOS window controls: switch to a decorated window with
       `titleBarStyle: "Overlay"` so the green button offers Move/Resize/Tile, remove the drawn
       traffic lights, and drop the transparent-window workaround they made necessary
-- [x] 9.26 Chewy across the interface, with synthetic bold disabled
+- [x] 9.26 Type pairing: Chewy for display only (titles, headings, brand, score numerals),
+      Rubik for all interface text, with synthetic bold disabled
 - [x] 9.27 Canonical categories: closed LeetCode topic list picked from a dropdown, normalized
       on every write path, with existing variant spellings folded together on boot
 - [x] 9.28 Editable scheduling: change the latest review's score, date and rep count from one

@@ -14,7 +14,7 @@
   "dependencies": {
     "@fontsource/chewy": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
-    "@fontsource/quicksand": "^5.3.0",
+    "@fontsource/rubik": "^5.2.5",
     "@leetbook/core": "workspace:*",
     "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-dialog": "^2.2.0",

@@ -1,7 +1,7 @@
 import "@fontsource/chewy/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
-import "@fontsource/quicksand/latin-400.css";
-import "@fontsource/quicksand/latin-500.css";
+import "@fontsource/rubik/latin-400.css";
+import "@fontsource/rubik/latin-500.css";
 import {
   extractCode,
   extractStats,

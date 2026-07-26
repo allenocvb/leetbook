@@ -48,7 +48,7 @@ export const CAPTURE_TOAST_STYLES = `
     border: 1px solid var(--lb-bd-2);
     border-radius: 11px;
     box-shadow: var(--lb-shadow);
-    font-family: "Quicksand", "Helvetica Neue", sans-serif;
+    font-family: "Rubik", "Helvetica Neue", sans-serif;
     font-size: 12px;
   }
 

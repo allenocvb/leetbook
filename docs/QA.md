@@ -28,6 +28,10 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       this failed silently once before, while resizing still worked).
 - [ ] Resize from an edge, down to the 800×600 minimum.
 - [ ] Theme toggle switches light/dark and **survives a restart**.
+- [ ] Chewy is confined to screen titles, the sidebar brand, section headings, note headings,
+      dialog titles and score numerals. Everything else — table rows and column headers,
+      notes metadata labels, nav items, buttons, form fields — is Rubik. Nothing is
+      faux-bolded.
 
 ## 2. Data and persistence
 

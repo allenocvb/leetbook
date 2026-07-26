@@ -80,10 +80,11 @@ Dark status pills:
 
 ### Typography and geometry
 
-- Chewy is the interface typeface: logo, screen titles, note headings, score numerals and
-  all body/UI text. It has one weight, so `font-synthesis-weight: none` is set globally —
-  otherwise every 500/600/700 in the UI renders as a smeared synthetic bold.
-- Quicksand remains the fallback behind Chewy.
+- Display: Chewy, one weight only. Logo, screen titles, note headings and score numerals.
+  Never below 16px — it is unreadable at interface sizes.
+- Body/UI: Rubik 400/500/600/700. Subtly rounded terminals echo Chewy without the bounce,
+  legible down to 10.5px, which Chewy is not. `font-synthesis-weight: none` is set globally so
+  Chewy is never faux-bolded; Rubik carries real weights instead.
 - Mono: JetBrains Mono 400/500.
 - Self-host WOFF2 files so the Tauri app remains fully local and works offline.
 - Type scale: 10.5, 11, 11.5, 12, 12.5, 13.5, 14.5, 16, 19, 20, 22, 24, 29, 34,
