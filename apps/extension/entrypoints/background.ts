@@ -1,4 +1,4 @@
-import { DEFAULT_PORT, type PairingSettings } from "../capture/client.js";
+import { DEFAULT_PORT, type PairingSettings, sendQueueStatus } from "../capture/client.js";
 import { deliverCapture, flushCaptureQueue, type QueueStatusMessage } from "../capture/delivery.js";
 import type { CapturePayload } from "../capture/payload.js";
 import { createQueue, type KvStorage } from "../capture/queue.js";
@@ -23,12 +23,15 @@ async function pairingSettings(): Promise<PairingSettings> {
 
 async function deliver(payload: CapturePayload) {
   const settings = await pairingSettings();
-  return deliverCapture(queue, settings, payload);
+  const result = await deliverCapture(queue, settings, payload);
+  await sendQueueStatus(result.queued, settings);
+  return result;
 }
 
 async function flushQueue(): Promise<void> {
   const settings = await pairingSettings();
   const result = await flushCaptureQueue(queue, settings);
+  await sendQueueStatus(result.remaining, settings);
   if (result.sent > 0) await notifyQueueStatus(result);
 }
 

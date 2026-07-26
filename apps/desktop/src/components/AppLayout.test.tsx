@@ -137,9 +137,12 @@ describe("App shell", () => {
     expect(screen.getByRole("heading", { name: "Old Fail" })).toBeInTheDocument();
   });
 
-  it("navigates to placeholder pages", async () => {
+  it("navigates to the real capture setup and status view", async () => {
     await renderApp();
     await userEvent.click(screen.getByRole("button", { name: /Capture/ }));
     expect(screen.getByRole("heading", { name: "Capture" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Set up automatic capture" })).toBeInTheDocument();
+    expect(screen.getByText("Waiting for an extension report")).toBeInTheDocument();
+    expect(screen.queryByText(/arrives in Phase 7/i)).not.toBeInTheDocument();
   });
 });

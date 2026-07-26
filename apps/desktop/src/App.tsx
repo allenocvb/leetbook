@@ -1,14 +1,14 @@
 import type { SqlExecutor } from "@leetbook/core";
 import { useCallback, useState } from "react";
-import { useCaptureListener } from "./capture/useCaptureListener.js";
+import { type CaptureRuntime, useCaptureListener } from "./capture/useCaptureListener.js";
 import { AppLayout } from "./components/AppLayout.js";
-import { PagePlaceholder } from "./components/PagePlaceholder.js";
 import type { ViewId } from "./components/Sidebar.js";
 import type { ProblemsView } from "./components/table/ProblemsHeader.js";
 import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
+import { CapturePage } from "./pages/CapturePage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
@@ -44,7 +44,7 @@ function Shell() {
   const [route, setRoute] = useState<Route>(readInitialRoute);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [captureTick, setCaptureTick] = useState(0);
-  const listener = useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
+  const capture = useCaptureListener(useCallback(() => setCaptureTick((tick) => tick + 1), []));
   const counts = useCounts({ route, captureTick });
 
   if (route.view === "intro") {
@@ -76,7 +76,7 @@ function Shell() {
       categories={counts.categories}
       activeCategory={activeCategory}
       onPickCategory={pickCategory}
-      listener={listener}
+      listener={capture.listener}
       flushMain={
         route.view === "all-problems" ||
         route.view === "due-today" ||
@@ -92,6 +92,7 @@ function Shell() {
         onOpenProblem={openProblem}
         onBack={() => setRoute({ view: activeView })}
         onExitReview={() => setRoute({ view: "due-today" })}
+        capture={capture}
       />
     </AppLayout>
   );
@@ -105,6 +106,7 @@ function Page({
   onOpenProblem,
   onBack,
   onExitReview,
+  capture,
 }: {
   route: Route;
   activeCategory: string | null;
@@ -113,6 +115,7 @@ function Page({
   onOpenProblem: (id: string) => void;
   onBack: () => void;
   onExitReview: () => void;
+  capture: CaptureRuntime;
 }) {
   switch (route.view) {
     case "problem":
@@ -138,7 +141,7 @@ function Page({
     case "review":
       return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
     case "capture":
-      return <PagePlaceholder title="Capture" hint="Extension capture arrives in Phase 7." />;
+      return <CapturePage runtime={capture} />;
     case "settings":
       return <SettingsPage />;
   }

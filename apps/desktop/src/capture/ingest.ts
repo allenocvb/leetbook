@@ -6,7 +6,9 @@ import {
   type SqlExecutor,
 } from "@leetbook/core";
 
-export type IngestResult = { ok: true; slug: string } | { ok: false; error: string };
+export type IngestResult =
+  | { ok: true; slug: string; title: string; reviewedAt: string }
+  | { ok: false; error: string };
 
 /**
  * Applies one extension capture: upserts the problem, appends the review with
@@ -59,5 +61,5 @@ export async function ingestCapture(
     now,
   );
 
-  return { ok: true, slug };
+  return { ok: true, slug, title, reviewedAt: now.toISOString() };
 }

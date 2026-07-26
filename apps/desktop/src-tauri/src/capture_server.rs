@@ -7,7 +7,7 @@
 use std::{
     fs,
     path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, AtomicUsize, Ordering},
     thread,
 };
 
@@ -22,10 +22,20 @@ pub struct PairingInfo {
     pub port: u16,
     pub token: String,
     pub listening: bool,
+    pub queued: Option<usize>,
 }
 
 #[derive(Default)]
-pub struct ListenerState(AtomicBool);
+pub struct ListenerState {
+    listening: AtomicBool,
+    queued: AtomicUsize,
+    queue_reported: AtomicBool,
+}
+
+#[derive(serde::Deserialize)]
+struct QueueStatus {
+    queued: usize,
+}
 
 #[tauri::command]
 pub fn get_pairing_info(
@@ -35,7 +45,11 @@ pub fn get_pairing_info(
     Ok(PairingInfo {
         port: PORT,
         token: load_or_create_token(&app)?,
-        listening: state.0.load(Ordering::Relaxed),
+        listening: state.listening.load(Ordering::Relaxed),
+        queued: state
+            .queue_reported
+            .load(Ordering::Relaxed)
+            .then(|| state.queued.load(Ordering::Relaxed)),
     })
 }
 
@@ -43,7 +57,7 @@ pub fn start(app: AppHandle) -> Result<(), String> {
     let token = load_or_create_token(&app)?;
     let server = Server::http(("127.0.0.1", PORT)).map_err(|e| e.to_string())?;
     app.state::<ListenerState>()
-        .0
+        .listening
         .store(true, Ordering::Relaxed);
     thread::spawn(move || {
         for mut request in server.incoming_requests() {
@@ -64,33 +78,79 @@ fn handle(
         (Method::Options, _) => cors(Response::from_string("").with_status_code(204)),
         (Method::Get, "/ping") => cors(json_response(200, r#"{"ok":true,"app":"leetbook"}"#)),
         (Method::Post, "/capture") => {
-            let provided = request
-                .headers()
-                .iter()
-                .find(|h| h.field.as_str().as_str().eq_ignore_ascii_case(TOKEN_HEADER))
-                .map(|h| h.value.as_str().to_string());
-            if provided.as_deref() != Some(token) {
+            if !has_valid_token(request, token) {
                 return cors(json_response(401, r#"{"ok":false,"error":"bad token"}"#));
             }
 
-            let mut body = String::new();
-            if request.as_reader().read_to_string(&mut body).is_err() {
-                return cors(json_response(
-                    400,
-                    r#"{"ok":false,"error":"unreadable body"}"#,
-                ));
-            }
-            if serde_json::from_str::<serde_json::Value>(&body).is_err() {
-                return cors(json_response(400, r#"{"ok":false,"error":"invalid json"}"#));
-            }
+            let body = match read_json_body(request) {
+                Ok(body) => body,
+                Err(response) => return cors(response),
+            };
 
             match app.emit("leetbook://capture", body) {
                 Ok(()) => cors(json_response(200, r#"{"ok":true}"#)),
                 Err(_) => cors(json_response(500, r#"{"ok":false,"error":"emit failed"}"#)),
             }
         }
+        (Method::Post, "/status") => {
+            if !has_valid_token(request, token) {
+                return cors(json_response(401, r#"{"ok":false,"error":"bad token"}"#));
+            }
+
+            let body = match read_json_body(request) {
+                Ok(body) => body,
+                Err(response) => return cors(response),
+            };
+            let status = match serde_json::from_str::<QueueStatus>(&body) {
+                Ok(status) => status,
+                Err(_) => {
+                    return cors(json_response(
+                        400,
+                        r#"{"ok":false,"error":"invalid queue status"}"#,
+                    ));
+                }
+            };
+            let state = app.state::<ListenerState>();
+            state.queued.store(status.queued, Ordering::Relaxed);
+            state.queue_reported.store(true, Ordering::Relaxed);
+
+            match app.emit("leetbook://queue-status", status.queued) {
+                Ok(()) => cors(json_response(200, r#"{"ok":true}"#)),
+                Err(_) => cors(json_response(500, r#"{"ok":false,"error":"emit failed"}"#)),
+            }
+        }
         _ => cors(json_response(404, r#"{"ok":false,"error":"not found"}"#)),
     }
+}
+
+fn has_valid_token(request: &tiny_http::Request, token: &str) -> bool {
+    request
+        .headers()
+        .iter()
+        .find(|header| {
+            header
+                .field
+                .as_str()
+                .as_str()
+                .eq_ignore_ascii_case(TOKEN_HEADER)
+        })
+        .is_some_and(|header| header.value.as_str() == token)
+}
+
+fn read_json_body(
+    request: &mut tiny_http::Request,
+) -> Result<String, Response<std::io::Cursor<Vec<u8>>>> {
+    let mut body = String::new();
+    if request.as_reader().read_to_string(&mut body).is_err() {
+        return Err(json_response(
+            400,
+            r#"{"ok":false,"error":"unreadable body"}"#,
+        ));
+    }
+    if serde_json::from_str::<serde_json::Value>(&body).is_err() {
+        return Err(json_response(400, r#"{"ok":false,"error":"invalid json"}"#));
+    }
+    Ok(body)
 }
 
 fn json_response(status: u16, body: &str) -> Response<std::io::Cursor<Vec<u8>>> {

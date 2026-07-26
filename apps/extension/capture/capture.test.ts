@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { pingApp, sendCapture } from "./client.js";
+import { pingApp, sendCapture, sendQueueStatus } from "./client.js";
 import { deliverCapture, isCaptureDeliveryResult } from "./delivery.js";
 import type { CapturePayload } from "./payload.js";
 import { createQueue, type KvStorage } from "./queue.js";
@@ -62,6 +62,25 @@ describe("pingApp", () => {
       throw new Error("nope");
     });
     expect(await pingApp(SETTINGS, fetchFn as unknown as typeof fetch)).toBe(false);
+  });
+});
+
+describe("sendQueueStatus", () => {
+  it("POSTs the real queue count with the pairing token", async () => {
+    const fetchFn = vi.fn(async () => new Response('{"ok":true}'));
+
+    expect(await sendQueueStatus(3, SETTINGS, fetchFn as unknown as typeof fetch)).toBe(true);
+    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://127.0.0.1:7749/status");
+    expect((init.headers as Record<string, string>)["x-leetbook-token"]).toBe("7F2K91QD");
+    expect(JSON.parse(init.body as string)).toEqual({ queued: 3 });
+  });
+
+  it("returns false when the desktop app cannot receive status", async () => {
+    const fetchFn = vi.fn(async () => {
+      throw new Error("app closed");
+    });
+    expect(await sendQueueStatus(2, SETTINGS, fetchFn as unknown as typeof fetch)).toBe(false);
   });
 });
 

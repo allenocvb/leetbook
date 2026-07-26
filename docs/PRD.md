@@ -121,7 +121,7 @@ no editor embeds/databases. Local-first is a feature.
       rubric, FSRS preview, working `Show my notes`, keyboard flow, and summary
 - [x] 9.15 Extension capture fidelity: final bottom-right toast, queued state/count, dismiss,
       skip-as-Good behavior, offline flush feedback, and fixture-page verification
-- [ ] 9.16 Desktop Capture view: replace the stale Phase 7 placeholder with real pairing,
+- [x] 9.16 Desktop Capture view: replace the stale Phase 7 placeholder with real pairing,
       listener, queue, capture-status, and extension-setup information
 - [ ] 9.17 Settings & Pairing fidelity: final connection/scheduling/data cards, real status and
       last capture, token regeneration, queued count, daily limit, stats, import, and exports

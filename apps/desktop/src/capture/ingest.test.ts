@@ -23,7 +23,12 @@ describe("ingestCapture", () => {
   it("creates the problem, review, and scheduling from a capture", async () => {
     const db = await makeDb();
     const result = await ingestCapture(db, VALID, NOW);
-    expect(result).toEqual({ ok: true, slug: "two-sum" });
+    expect(result).toEqual({
+      ok: true,
+      slug: "two-sum",
+      title: "Two Sum",
+      reviewedAt: NOW.toISOString(),
+    });
 
     const problem = await createProblemsRepo(db).getBySlug("two-sum");
     expect(problem?.title).toBe("Two Sum");
