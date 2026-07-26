@@ -4,7 +4,7 @@
 //! are forwarded to the webview as a `leetbook://capture` event; all business
 //! logic stays in TypeScript (packages/core).
 
-use std::{fs, io::Read, path::PathBuf, thread};
+use std::{fs, io::Read as _, path::PathBuf, thread};
 
 use tauri::{AppHandle, Emitter, Manager};
 use tiny_http::{Header, Method, Response, Server};
