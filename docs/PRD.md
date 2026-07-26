@@ -90,7 +90,7 @@ no editor embeds/databases. Local-first is a feature.
 > Complete strictly top-to-bottom. Each item includes focused tests and visual verification
 > against `docs/UI_SPEC.md` at 1280×820 in light and dark themes when applicable.
 
-- [ ] 9.1 Restore the green repository gate: fix the current `node:sqlite` typecheck failure,
+- [x] 9.1 Restore the green repository gate: fix the current `node:sqlite` typecheck failure,
       then verify `pnpm lint && pnpm typecheck && pnpm test`
 - [ ] 9.2 Design foundation: semantic light/dark CSS tokens, self-hosted Chewy/Quicksand/
       JetBrains Mono fonts, persisted theme, focus styles, and shared primitives
