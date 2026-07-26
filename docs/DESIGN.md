@@ -131,36 +131,6 @@ full history. This keeps mistakes recoverable without adding a redundant score f
 | Editor scope creep | Keep the bounded block set in `docs/UI_SPEC.md`; no databases or embeds |
 | Sync requests from users | Review history is retained and latest-score correction is explicit; sync remains post-v1 |
 
-## 7.1 Web build (planned — PRD Phase 12)
-
-The v1 locked decisions in §2 stand: local-first, no accounts, no server. The web build is
-a second consumer of the same `packages/core`, not a rewrite.
-
-**Why this is cheap.** Core is ~1,330 lines with one dependency and reaches storage only
-through `SqlExecutor`. Only six modules in `apps/desktop` touch Tauri: the SQL executor and
-its boot, `lib/fileio`, `lib/externalLinks`, `capture/useCaptureListener`, and the window
-chrome. Everything else is platform-agnostic React.
-
-| Seam | Desktop | Web |
-|---|---|---|
-| Storage | tauri-plugin-sql | OPFS + wa-sqlite in a worker |
-| External links | tauri-plugin-opener | `window.open` (fallback already present) |
-| Files | tauri dialog/fs | File System Access API, download fallback |
-| Window chrome | custom titlebar | none — the browser is the window |
-| Capture ingress | HTTP listener on 127.0.0.1 | content script → open tab → message |
-
-**Known regressions, accepted deliberately.** Browser storage is evictable, so the web
-build must call `navigator.storage.persist()` and push backups harder than the desktop app
-ever needed to. Capture is *worse* on web: an extension cannot reach the site's OPFS, so
-LeetBook has to be open in a tab, where the desktop app simply runs. Desktop therefore
-stays the better capture path and both ship from this monorepo.
-
-**Not doing yet.** No `packages/ui`. A shared UI package needs two maintained consumers to
-justify its indirection; extract it when web has shipped and desktop is still alive.
-
-Sync stays out (PRD Phase 13). The append-only review log and the single explicit
-latest-score correction path keep the door open without committing to a server.
-
 ## 8. Final UI Contract
 
 The design phase is complete. `docs/UI_SPEC.md` is the final repository-owned contract for

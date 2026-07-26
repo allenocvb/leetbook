@@ -7,6 +7,9 @@ Monorepo: `packages/core` (pure TS business logic), `apps/desktop`, `apps/extens
 Read `docs/PRD.md` before writing code. Read `docs/DESIGN.md` for product/architecture context.
 Before any UI work, read `docs/UI_SPEC.md` and `.claude/skills/frontend-design/SKILL.md`.
 
+`docs/QA.md` is the manual checklist for everything the automated gate cannot reach
+(OS window, platform opener, native dialogs, live LeetCode capture).
+
 Document precedence:
 
 1. `docs/PRD.md` controls scope and implementation order.
