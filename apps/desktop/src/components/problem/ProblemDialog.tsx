@@ -5,9 +5,10 @@ export interface ProblemDialogProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
 }
 
-export function ProblemDialog({ title, onClose, children }: ProblemDialogProps) {
+export function ProblemDialog({ title, onClose, children, className = "" }: ProblemDialogProps) {
   const titleId = useId();
 
   return (
@@ -19,7 +20,7 @@ export function ProblemDialog({ title, onClose, children }: ProblemDialogProps) 
         onClick={onClose}
       />
       <div
-        className="problem-dialog"
+        className={`problem-dialog ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

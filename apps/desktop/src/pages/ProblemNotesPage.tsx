@@ -13,6 +13,7 @@ import { CodeSnapshot } from "../components/CodeSnapshot.js";
 import { EditProblemDialog } from "../components/EditProblemDialog.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { ProblemNotesHeader } from "../components/notes/ProblemNotesHeader.js";
+import { LogReviewDialog } from "../components/review/LogReviewDialog.js";
 import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
 import { useNoteAutosave } from "../hooks/useNoteAutosave.js";
@@ -32,6 +33,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
   const [note, setNote] = useState<Note | null | "loading">("loading");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [editing, setEditing] = useState(false);
+  const [loggingReview, setLoggingReview] = useState(false);
   const { saveState, handleChange } = useNoteAutosave(db, problemId, saveDelayMs);
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
           reviews={reviews}
           onBack={onBack}
           onEdit={() => setEditing(true)}
+          onLogReview={() => setLoggingReview(true)}
         />
 
         <Divider className="problem-notes-page__divider" />
@@ -96,6 +99,21 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
             problem={problem}
             onClose={() => setEditing(false)}
             onSaved={setProblem}
+          />
+        )}
+        {loggingReview && (
+          <LogReviewDialog
+            problemId={problem.id}
+            problemTitle={problem.title}
+            onClose={() => setLoggingReview(false)}
+            onLogged={async () => {
+              const [nextScheduling, nextReviews] = await Promise.all([
+                createSchedulingRepo(db).get(problem.id),
+                createReviewsRepo(db).listByProblem(problem.id),
+              ]);
+              setScheduling(nextScheduling);
+              setReviews(nextReviews);
+            }}
           />
         )}
       </div>

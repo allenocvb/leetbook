@@ -1,0 +1,44 @@
+.log-review-dialog.problem-dialog {
+  width: min(520px, 100%);
+}
+
+.log-review-dialog__fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.log-review-dialog__intro {
+  margin: calc(var(--lb-space-2) * -1) 0 var(--lb-space-5);
+  color: var(--lb-text-3);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.log-review-dialog__problem {
+  color: var(--lb-ink);
+  font-weight: 600;
+}
+
+.log-review-dialog__hint {
+  margin: var(--lb-space-3) 0 0;
+  color: var(--lb-muted-2);
+  font-family: var(--lb-font-mono);
+  font-size: 10.5px;
+  text-align: center;
+}
+
+.log-review-dialog__error {
+  margin: var(--lb-space-3) 0 0;
+  color: var(--lb-red);
+  font-size: 12px;
+  text-align: center;
+}
+
+.log-review-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--lb-space-2);
+  margin-top: var(--lb-space-5);
+}

@@ -1,4 +1,6 @@
 import type { PerformanceScore } from "@leetbook/core";
+import type { Ref } from "react";
+import "./ScorePicker.css";
 
 export const SCORE_LABELS: Record<PerformanceScore, string> = {
   0: "Blackout",
@@ -23,53 +25,39 @@ export const ALL_SCORES: PerformanceScore[] = [0, 1, 2, 3, 4, 5];
 export interface ScorePickerProps {
   selected: PerformanceScore | null;
   onSelect: (score: PerformanceScore) => void;
+  disabled?: boolean;
+  firstOptionRef?: Ref<HTMLButtonElement>;
 }
 
 /** The 0–5 chip row. The rubric for the selected score stays visible below. */
-export function ScorePicker({ selected, onSelect }: ScorePickerProps) {
+export function ScorePicker({
+  selected,
+  onSelect,
+  disabled = false,
+  firstOptionRef,
+}: ScorePickerProps) {
   return (
-    <div>
-      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+    <div className="score-picker">
+      <div className="score-picker__options">
         {ALL_SCORES.map((score) => {
           const active = score === selected;
           return (
             <button
               key={score}
               type="button"
+              className="score-picker__option"
               aria-pressed={active}
+              disabled={disabled}
+              ref={score === 0 ? firstOptionRef : undefined}
               onClick={() => onSelect(score)}
-              style={{
-                width: 72,
-                padding: "10px 0 8px",
-                borderRadius: 8,
-                border: `1px solid ${active ? "var(--accent)" : "var(--border)"}`,
-                background: active ? "var(--accent)" : "var(--bg)",
-                color: active ? "#ffffff" : "var(--text)",
-                display: "grid",
-                gap: 2,
-              }}
             >
-              <span style={{ fontSize: 17, fontWeight: 600 }}>{score}</span>
-              <span style={{ fontSize: 10.5, opacity: active ? 0.9 : 0.6 }}>
-                {SCORE_LABELS[score]}
-              </span>
+              <span className="score-picker__score">{score}</span>
+              <span className="score-picker__label">{SCORE_LABELS[score]}</span>
             </button>
           );
         })}
       </div>
-      <p
-        aria-live="polite"
-        style={{
-          textAlign: "center",
-          fontSize: 13,
-          color: "var(--text-secondary)",
-          background: "var(--surface)",
-          borderRadius: 6,
-          padding: "10px 14px",
-          minHeight: 20,
-          marginTop: 16,
-        }}
-      >
+      <p className="score-picker__rubric" aria-live="polite">
         {selected !== null ? `${selected} — ${SCORE_RUBRIC[selected]}` : "Rate your recall: 0–5."}
       </p>
     </div>

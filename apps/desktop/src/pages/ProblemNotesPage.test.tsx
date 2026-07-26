@@ -5,7 +5,7 @@ import {
   createSchedulingRepo,
   type SqlExecutor,
 } from "@leetbook/core";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { formatDueDate, formatNoteDate } from "../components/notes/ProblemNotesHeader.js";
@@ -62,6 +62,49 @@ describe("ProblemNotesPage", () => {
       "ui-button--outline",
     );
     expect(screen.getByRole("button", { name: "Edit problem" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log review" })).toBeInTheDocument();
+  });
+
+  it("logs a review for an unscheduled problem and refreshes every derived field", async () => {
+    const db = await makeDb();
+    await seed(db, [{ slug: "valid-anagram", title: "Valid Anagram", tags: ["Hash Table"] }]);
+    const problem = await createProblemsRepo(db).getBySlug("valid-anagram");
+    if (!problem) throw new Error("seed failed");
+
+    render(
+      <DbProvider db={db}>
+        <ProblemNotesPage problemId={problem.id} onBack={() => {}} saveDelayMs={0} />
+      </DbProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Valid Anagram" })).toBeInTheDocument(),
+    );
+    expect(screen.getByText("Not reviewed yet")).toBeInTheDocument();
+    expect(await createSchedulingRepo(db).get(problem.id)).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "Log review" }));
+    const dialog = screen.getByRole("dialog", { name: "Log review" });
+    const submit = within(dialog).getByRole("button", { name: "Log review" });
+    expect(submit).toBeDisabled();
+
+    await userEvent.keyboard("5");
+    expect(within(dialog).getByRole("button", { name: "5 Perfect" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(within(dialog).getByText(/Perfect recall/)).toBeInTheDocument();
+    await userEvent.click(submit);
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    const reviews = await createReviewsRepo(db).listByProblem(problem.id);
+    const scheduling = await createSchedulingRepo(db).get(problem.id);
+    expect(reviews).toHaveLength(1);
+    expect(reviews[0]?.score).toBe(5);
+    expect(scheduling?.reviewCount).toBe(1);
+    expect(scheduling?.lastReviewedAt).toBe(reviews[0]?.reviewedAt);
+    expect(screen.getByText(/scored 5 · 1 reps/)).toBeInTheDocument();
+    expect(screen.getByText("Next review").nextElementSibling).toHaveTextContent(/in \d+ days/);
   });
 
   it("opens LeetCode through the browser fallback outside Tauri", async () => {

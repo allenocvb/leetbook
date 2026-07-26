@@ -10,6 +10,7 @@ export interface ProblemNotesHeaderProps {
   reviews: Review[];
   onBack: () => void;
   onEdit: () => void;
+  onLogReview: () => void;
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -54,6 +55,7 @@ export function ProblemNotesHeader({
   reviews,
   onBack,
   onEdit,
+  onLogReview,
 }: ProblemNotesHeaderProps) {
   const latestReview = reviews.at(-1) ?? null;
   const performance = latestPerformance(reviews);
@@ -77,6 +79,7 @@ export function ProblemNotesHeader({
       <div className="problem-notes-header__title-row">
         <h1>{problem.title}</h1>
         <div className="problem-notes-header__actions">
+          <Button onClick={onLogReview}>Log review</Button>
           <ExternalLinkButton className="ui-button ui-button--outline" url={problem.url}>
             Open on LeetCode ↗
           </ExternalLinkButton>
