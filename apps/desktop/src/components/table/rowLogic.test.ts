@@ -68,6 +68,17 @@ describe("sortRows", () => {
     ]);
   });
 
+  it("sorts by the first category label", () => {
+    const rows = [
+      row({ problemId: "b", title: "B", tags: ["Trees"] }),
+      row({ problemId: "a", title: "A", tags: ["Array"] }),
+    ];
+    expect(sortRows(rows, { key: "category", dir: "asc" }).map((item) => item.title)).toEqual([
+      "A",
+      "B",
+    ]);
+  });
+
   it("sorts by nextReview with nulls last in either direction", () => {
     expect(sortRows(ROWS, { key: "nextReview", dir: "asc" }).map((r) => r.slug)).toEqual([
       "c",

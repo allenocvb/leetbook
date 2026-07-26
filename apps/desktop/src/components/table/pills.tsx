@@ -22,5 +22,6 @@ export function DifficultyText({ difficulty }: { difficulty: Difficulty }) {
 }
 
 export function ScoreChip({ score }: { score: number | null }) {
-  return <span className="score-chip">{score ?? "—"}</span>;
+  const band = score === null ? "" : score <= 1 ? "low" : score <= 3 ? "middle" : "high";
+  return <span className={`score-chip${band ? ` score-chip--${band}` : ""}`}>{score ?? "–"}</span>;
 }

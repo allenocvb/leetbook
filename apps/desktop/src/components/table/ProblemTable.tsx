@@ -1,11 +1,11 @@
 import type { TableRow } from "@leetbook/core";
-import { formatShortDate, isDue } from "../../lib/format.js";
-import { DifficultyText, ScoreChip, StatusPill } from "./pills.js";
+import type { TableDensity } from "./ProblemsHeader.js";
+import { ProblemTableRow } from "./ProblemTableRow.js";
 import type { SortKey, SortState } from "./rowLogic.js";
 import "./ProblemTable.css";
 
 interface Column {
-  key: SortKey | null;
+  key: SortKey;
   label: string;
 }
 
@@ -16,78 +16,71 @@ const COLUMNS: Column[] = [
   { key: "lastReview", label: "Last Review" },
   { key: "lastScore", label: "Score" },
   { key: "reviewCount", label: "Reps" },
-  { key: null, label: "Category" },
+  { key: "category", label: "Category" },
   { key: "difficulty", label: "Difficulty" },
 ];
 
 export interface ProblemTableProps {
   rows: TableRow[];
   sort: SortState;
+  density: TableDensity;
+  emptyMessage: string;
   onSort: (key: SortKey) => void;
-  /** Opens the problem's notes page. */
   onOpen: (problemId: string) => void;
+  onNew: () => void;
 }
 
-/** Presentational table. Sorting/filtering is decided by the parent (see rowLogic). */
-export function ProblemTable({ rows, sort, onSort, onOpen }: ProblemTableProps) {
+export function ProblemTable({
+  rows,
+  sort,
+  density,
+  emptyMessage,
+  onSort,
+  onOpen,
+  onNew,
+}: ProblemTableProps) {
   return (
-    <table className="problem-table">
-      <thead>
-        <tr>
+    <div className="problem-table-scroll" data-density={density}>
+      <div className="problem-table-grid">
+        <div className="problem-table-header">
           {COLUMNS.map((column) => (
-            <th key={column.label} aria-sort={ariaSort(column.key, sort)}>
-              {column.key ? (
-                <button type="button" onClick={() => onSort(column.key as SortKey)}>
-                  {column.label}
-                  {sort.key === column.key ? (sort.dir === "asc" ? " ↑" : " ↓") : ""}
-                </button>
-              ) : (
-                column.label
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={row.problemId}>
-            <td className="cell-title">
-              <button type="button" onClick={() => onOpen(row.problemId)} title="Open notes">
-                {row.title}
-              </button>{" "}
-              <a
-                href={row.url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Open ${row.title} on LeetCode`}
-                className="cell-external"
+            <div key={column.key}>
+              <button
+                type="button"
+                aria-label={`${column.label}, ${sortDescription(column.key, sort)}`}
+                onClick={() => onSort(column.key)}
               >
-                ↗
-              </a>
-            </td>
-            <td>
-              <StatusPill status={row.status} />
-            </td>
-            <td className={isDue(row.nextReview) ? "due-now" : "cell-muted"}>
-              {isDue(row.nextReview) ? "Due" : formatShortDate(row.nextReview)}
-            </td>
-            <td className="cell-muted">{formatShortDate(row.lastReview)}</td>
-            <td>
-              <ScoreChip score={row.lastScore} />
-            </td>
-            <td className="cell-muted">{row.reviewCount}</td>
-            <td className="cell-muted">{row.tags.join(", ") || "—"}</td>
-            <td>
-              <DifficultyText difficulty={row.difficulty} />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                {column.label}
+                <span aria-hidden="true">
+                  {sort.key === column.key ? (sort.dir === "asc" ? " ↑" : " ↓") : ""}
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="problem-table-rows">
+          {rows.map((row, index) => (
+            <ProblemTableRow
+              key={row.problemId}
+              row={row}
+              number={index + 1}
+              onOpen={() => onOpen(row.problemId)}
+            />
+          ))}
+        </div>
+
+        {rows.length === 0 && <div className="problem-table-empty">{emptyMessage}</div>}
+
+        <button type="button" className="problem-table-new" onClick={onNew}>
+          + New
+        </button>
+      </div>
+    </div>
   );
 }
 
-function ariaSort(key: SortKey | null, sort: SortState): "ascending" | "descending" | undefined {
-  if (key === null || key !== sort.key) return undefined;
-  return sort.dir === "asc" ? "ascending" : "descending";
+function sortDescription(key: SortKey, sort: SortState): string {
+  if (key !== sort.key) return "not sorted";
+  return `sorted ${sort.dir === "asc" ? "ascending" : "descending"}`;
 }

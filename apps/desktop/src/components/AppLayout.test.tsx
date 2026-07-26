@@ -81,7 +81,9 @@ describe("App shell", () => {
     await userEvent.click(screen.getByRole("button", { name: /Due Today/ }));
     await userEvent.click(await screen.findByRole("button", { name: "Graphs 1" }));
 
-    expect(screen.getByText("Nothing due in this category.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Nothing here yet — nothing due in this category."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Untouched")).not.toBeInTheDocument();
   });
 
@@ -89,6 +91,16 @@ describe("App shell", () => {
     await renderApp();
     await userEvent.click(screen.getByRole("button", { name: /Due Today/ }));
     expect(screen.getByRole("heading", { name: "Due Today" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Old Fail")).toBeInTheDocument());
+    expect(screen.queryByText("Untouched")).not.toBeInTheDocument();
+  });
+
+  it("switches All Problems and Due Today from the table tabs", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("tab", { name: "Due Today" }));
+
+    expect(screen.getByRole("heading", { name: "Due Today" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Due Today" })).toHaveAttribute("aria-selected", "true");
     await waitFor(() => expect(screen.getByText("Old Fail")).toBeInTheDocument());
     expect(screen.queryByText("Untouched")).not.toBeInTheDocument();
   });

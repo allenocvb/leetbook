@@ -36,7 +36,7 @@ describe("AddProblemDialog on the All Problems page", () => {
         <AllProblemsPage onOpenProblem={() => {}} />
       </DbProvider>,
     );
-    await waitFor(() => expect(screen.getByText(/0 of 0 problems/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("0 problems")).toBeInTheDocument());
   }
 
   it("adds a problem via URL and refreshes the table", async () => {
@@ -75,6 +75,6 @@ describe("AddProblemDialog on the All Problems page", () => {
     await userEvent.click(screen.getByRole("button", { name: "+ New problem" }));
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByText(/0 of 0 problems/)).toBeInTheDocument();
+    expect(screen.getByText("0 problems")).toBeInTheDocument();
   });
 });

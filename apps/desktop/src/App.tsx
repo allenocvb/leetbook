@@ -4,6 +4,7 @@ import { useCaptureListener } from "./capture/useCaptureListener.js";
 import { AppLayout } from "./components/AppLayout.js";
 import { PagePlaceholder } from "./components/PagePlaceholder.js";
 import type { ViewId } from "./components/Sidebar.js";
+import type { ProblemsView } from "./components/table/ProblemsHeader.js";
 import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
@@ -76,11 +77,13 @@ function Shell() {
       activeCategory={activeCategory}
       onPickCategory={pickCategory}
       listener={listener}
+      flushMain={route.view === "all-problems" || route.view === "due-today"}
     >
       <Page
         route={route}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
+        onViewChange={(view) => setRoute({ view: view === "all" ? "all-problems" : "due-today" })}
         onOpenProblem={openProblem}
         onBack={() => setRoute({ view: activeView })}
         onExitReview={() => setRoute({ view: "due-today" })}
@@ -93,6 +96,7 @@ function Page({
   route,
   activeCategory,
   onCategoryChange,
+  onViewChange,
   onOpenProblem,
   onBack,
   onExitReview,
@@ -100,6 +104,7 @@ function Page({
   route: Route;
   activeCategory: string | null;
   onCategoryChange: (category: string | null) => void;
+  onViewChange: (view: ProblemsView) => void;
   onOpenProblem: (id: string) => void;
   onBack: () => void;
   onExitReview: () => void;
@@ -111,12 +116,20 @@ function Page({
       return (
         <AllProblemsPage
           onOpenProblem={onOpenProblem}
+          onViewChange={onViewChange}
           category={activeCategory}
           onCategoryChange={onCategoryChange}
         />
       );
     case "due-today":
-      return <DueTodayPage onOpenProblem={onOpenProblem} category={activeCategory} />;
+      return (
+        <DueTodayPage
+          onOpenProblem={onOpenProblem}
+          onViewChange={onViewChange}
+          category={activeCategory}
+          onCategoryChange={onCategoryChange}
+        />
+      );
     case "review":
       return <ReviewSessionPage onExit={onExitReview} />;
     case "capture":

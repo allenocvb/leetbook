@@ -98,7 +98,7 @@ no editor embeds/databases. Local-first is a feature.
       intro, and flexible behavior beyond the 1280×820 reference size
 - [x] 9.4 Sidebar: final 236px layout, nav states/counts, category counts/filtering, version,
       and truthful extension/listener footer
-- [ ] 9.5 Problem table: final header/tabs/grid/rows/chips, full-row navigation, search,
+- [x] 9.5 Problem table: final header/tabs/grid/rows/chips, full-row navigation, search,
       sorting, category/filter states, density, empty state, and new-problem affordances
 - [ ] 9.6 External links: shared Tauri opener integration for table, notes, and review-session
       LeetCode actions, with browser/test fallback and desktop-shell verification

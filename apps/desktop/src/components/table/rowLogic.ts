@@ -7,6 +7,7 @@ export type SortKey =
   | "lastReview"
   | "lastScore"
   | "reviewCount"
+  | "category"
   | "difficulty";
 
 export interface SortState {
@@ -25,6 +26,8 @@ function compare(a: TableRow, b: TableRow, key: SortKey): number {
       return DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty];
     case "status":
       return STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+    case "category":
+      return (a.tags[0] ?? "").localeCompare(b.tags[0] ?? "");
     case "reviewCount":
       return a.reviewCount - b.reviewCount;
     case "lastScore":

@@ -13,3 +13,8 @@
   padding: 32px;
   background: var(--lb-surf);
 }
+
+.app-layout__main--flush {
+  padding: 0;
+  overflow: hidden;
+}
