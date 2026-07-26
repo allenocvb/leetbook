@@ -88,7 +88,6 @@ export function AddProblemDialog({ open, onClose, onSaved }: AddProblemDialogPro
 
   return (
     <div
-      role="presentation"
       style={{
         position: "fixed",
         inset: 0,
@@ -96,14 +95,19 @@ export function AddProblemDialog({ open, onClose, onSaved }: AddProblemDialogPro
         display: "grid",
         placeItems: "center",
       }}
-      onClick={onClose}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
+      <button
+        type="button"
+        aria-label="Close dialog"
+        onClick={onClose}
+        style={{ position: "absolute", inset: 0, cursor: "default" }}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-label="New problem"
         style={{
+          position: "relative",
           width: 420,
           background: "var(--bg)",
           border: "1px solid var(--border)",
@@ -111,8 +115,7 @@ export function AddProblemDialog({ open, onClose, onSaved }: AddProblemDialogPro
           boxShadow: "0 12px 32px rgba(17, 17, 17, 0.12)",
           padding: 24,
         }}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.key === "Escape" && onClose()}
       >
         <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>New problem</h2>
 

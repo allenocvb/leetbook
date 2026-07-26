@@ -36,9 +36,7 @@ async function setup(withNote = false) {
       <ProblemNotesPage problemId={problem.id} onBack={onBack} saveDelayMs={0} />
     </DbProvider>,
   );
-  await waitFor(() =>
-    expect(screen.getByRole("heading", { name: "Two Sum" })).toBeInTheDocument(),
-  );
+  await waitFor(() => expect(screen.getByRole("heading", { name: "Two Sum" })).toBeInTheDocument());
   return { db, problem, onBack };
 }
 

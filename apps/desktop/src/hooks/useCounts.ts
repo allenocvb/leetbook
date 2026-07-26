@@ -12,6 +12,7 @@ export function useCounts(dep: unknown): Counts {
   const db = useDb();
   const [counts, setCounts] = useState<Counts>({ all: 0, due: 0 });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `dep` is an intentional refresh trigger (re-count on view change)
   useEffect(() => {
     let cancelled = false;
     void (async () => {

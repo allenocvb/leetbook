@@ -34,7 +34,11 @@ function Shell() {
       onNavigate={(view) => setRoute({ view })}
       counts={{ "all-problems": counts.all, "due-today": counts.due }}
     >
-      <Page route={route} onOpenProblem={openProblem} onBack={() => setRoute({ view: activeView })} />
+      <Page
+        route={route}
+        onOpenProblem={openProblem}
+        onBack={() => setRoute({ view: activeView })}
+      />
     </AppLayout>
   );
 }
