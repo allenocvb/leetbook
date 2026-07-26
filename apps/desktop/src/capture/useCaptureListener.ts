@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ListenerSummary } from "../components/Sidebar.js";
 import { useDb } from "../db/DbContext.js";
 import { ingestCapture } from "./ingest.js";
@@ -19,6 +19,7 @@ export interface CaptureRuntime {
   pairingError: string | null;
   queued: number | null;
   lastCapture: LastCapture | null;
+  regenerateToken: () => Promise<boolean>;
 }
 
 /** True when running inside the real Tauri shell (not vite dev / tests). */
@@ -38,6 +39,23 @@ export function useCaptureListener(onIngested: (slug: string) => void): CaptureR
   );
   const [queued, setQueued] = useState<number | null>(null);
   const [lastCapture, setLastCapture] = useState<LastCapture | null>(null);
+  const regenerateToken = useCallback(async () => {
+    if (!inTauri()) {
+      setPairingError("Pairing is available in the desktop app.");
+      return false;
+    }
+    try {
+      const info = await invoke<PairingInfo>("regenerate_pairing_token");
+      setPairing(info);
+      setPairingError(null);
+      setQueued(typeof info.queued === "number" ? info.queued : null);
+      setListener({ state: info.listening ? "listening" : "offline", port: info.port });
+      return true;
+    } catch {
+      setPairingError("The pairing token could not be regenerated.");
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     let disposed = false;
@@ -98,5 +116,5 @@ export function useCaptureListener(onIngested: (slug: string) => void): CaptureR
     };
   }, [db, onIngested]);
 
-  return { listener, pairing, pairingError, queued, lastCapture };
+  return { listener, pairing, pairingError, queued, lastCapture, regenerateToken };
 }

@@ -7,7 +7,10 @@
 use std::{
     fs,
     path::PathBuf,
-    sync::atomic::{AtomicBool, AtomicUsize, Ordering},
+    sync::{
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+        Mutex,
+    },
     thread,
 };
 
@@ -30,6 +33,7 @@ pub struct ListenerState {
     listening: AtomicBool,
     queued: AtomicUsize,
     queue_reported: AtomicBool,
+    token: Mutex<String>,
 }
 
 #[derive(serde::Deserialize)]
@@ -42,43 +46,56 @@ pub fn get_pairing_info(
     app: AppHandle,
     state: State<'_, ListenerState>,
 ) -> Result<PairingInfo, String> {
-    Ok(PairingInfo {
+    let token = current_token(&app, &state)?;
+    Ok(pairing_info(&state, token))
+}
+
+#[tauri::command]
+pub fn regenerate_pairing_token(
+    app: AppHandle,
+    state: State<'_, ListenerState>,
+) -> Result<PairingInfo, String> {
+    let token = generate_token();
+    fs::write(token_path(&app)?, &token).map_err(|error| error.to_string())?;
+    replace_pairing_token(&state, token.clone())?;
+    Ok(pairing_info(&state, token))
+}
+
+fn pairing_info(state: &ListenerState, token: String) -> PairingInfo {
+    PairingInfo {
         port: PORT,
-        token: load_or_create_token(&app)?,
+        token,
         listening: state.listening.load(Ordering::Relaxed),
         queued: state
             .queue_reported
             .load(Ordering::Relaxed)
             .then(|| state.queued.load(Ordering::Relaxed)),
-    })
+    }
 }
 
 pub fn start(app: AppHandle) -> Result<(), String> {
     let token = load_or_create_token(&app)?;
+    set_current_token(&app.state::<ListenerState>(), token)?;
     let server = Server::http(("127.0.0.1", PORT)).map_err(|e| e.to_string())?;
     app.state::<ListenerState>()
         .listening
         .store(true, Ordering::Relaxed);
     thread::spawn(move || {
         for mut request in server.incoming_requests() {
-            let response = handle(&app, &token, &mut request);
+            let response = handle(&app, &mut request);
             let _ = request.respond(response);
         }
     });
     Ok(())
 }
 
-fn handle(
-    app: &AppHandle,
-    token: &str,
-    request: &mut tiny_http::Request,
-) -> Response<std::io::Cursor<Vec<u8>>> {
+fn handle(app: &AppHandle, request: &mut tiny_http::Request) -> Response<std::io::Cursor<Vec<u8>>> {
     match (request.method(), request.url()) {
         // CORS preflight from the leetcode.com content script
         (Method::Options, _) => cors(Response::from_string("").with_status_code(204)),
         (Method::Get, "/ping") => cors(json_response(200, r#"{"ok":true,"app":"leetbook"}"#)),
         (Method::Post, "/capture") => {
-            if !has_valid_token(request, token) {
+            if !has_valid_token(app, request) {
                 return cors(json_response(401, r#"{"ok":false,"error":"bad token"}"#));
             }
 
@@ -93,7 +110,7 @@ fn handle(
             }
         }
         (Method::Post, "/status") => {
-            if !has_valid_token(request, token) {
+            if !has_valid_token(app, request) {
                 return cors(json_response(401, r#"{"ok":false,"error":"bad token"}"#));
             }
 
@@ -123,8 +140,8 @@ fn handle(
     }
 }
 
-fn has_valid_token(request: &tiny_http::Request, token: &str) -> bool {
-    request
+fn has_valid_token(app: &AppHandle, request: &tiny_http::Request) -> bool {
+    let provided = request
         .headers()
         .iter()
         .find(|header| {
@@ -134,7 +151,9 @@ fn has_valid_token(request: &tiny_http::Request, token: &str) -> bool {
                 .as_str()
                 .eq_ignore_ascii_case(TOKEN_HEADER)
         })
-        .is_some_and(|header| header.value.as_str() == token)
+        .map(|header| header.value.as_str());
+    let state = app.state::<ListenerState>();
+    token_matches(&state, provided)
 }
 
 fn read_json_body(
@@ -193,6 +212,42 @@ fn load_or_create_token(app: &AppHandle) -> Result<String, String> {
     Ok(token)
 }
 
+fn current_token(app: &AppHandle, state: &ListenerState) -> Result<String, String> {
+    let existing = state
+        .token
+        .lock()
+        .map_err(|_| "pairing token lock is unavailable".to_string())?
+        .clone();
+    if !existing.is_empty() {
+        return Ok(existing);
+    }
+    let token = load_or_create_token(app)?;
+    set_current_token(state, token.clone())?;
+    Ok(token)
+}
+
+fn set_current_token(state: &ListenerState, token: String) -> Result<(), String> {
+    *state
+        .token
+        .lock()
+        .map_err(|_| "pairing token lock is unavailable".to_string())? = token;
+    Ok(())
+}
+
+fn replace_pairing_token(state: &ListenerState, token: String) -> Result<(), String> {
+    set_current_token(state, token)?;
+    state.queue_reported.store(false, Ordering::Relaxed);
+    state.queued.store(0, Ordering::Relaxed);
+    Ok(())
+}
+
+fn token_matches(state: &ListenerState, provided: Option<&str>) -> bool {
+    state
+        .token
+        .lock()
+        .is_ok_and(|token| provided == Some(token.as_str()))
+}
+
 fn generate_token() -> String {
     use rand::Rng;
     rand::thread_rng()
@@ -201,4 +256,23 @@ fn generate_token() -> String {
         .map(char::from)
         .collect::<String>()
         .to_uppercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replacing_pairing_token_invalidates_the_old_token_and_connection_report() {
+        let state = ListenerState::default();
+        set_current_token(&state, "OLDTOKEN".to_string()).unwrap();
+        state.queued.store(3, Ordering::Relaxed);
+        state.queue_reported.store(true, Ordering::Relaxed);
+
+        replace_pairing_token(&state, "NEWTOKEN".to_string()).unwrap();
+
+        assert!(!token_matches(&state, Some("OLDTOKEN")));
+        assert!(token_matches(&state, Some("NEWTOKEN")));
+        assert_eq!(pairing_info(&state, "NEWTOKEN".to_string()).queued, None);
+    }
 }

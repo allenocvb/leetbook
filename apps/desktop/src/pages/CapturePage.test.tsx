@@ -13,6 +13,7 @@ const READY: CaptureRuntime = {
     title: "Two Sum",
     reviewedAt: "2026-07-25T12:00:00.000Z",
   },
+  regenerateToken: async () => true,
 };
 
 describe("CapturePage", () => {
@@ -37,6 +38,7 @@ describe("CapturePage", () => {
           pairingError: "Pairing is available in the desktop app.",
           queued: null,
           lastCapture: null,
+          regenerateToken: async () => false,
         }}
       />,
     );

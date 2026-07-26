@@ -145,4 +145,14 @@ describe("App shell", () => {
     expect(screen.getByText("Waiting for an extension report")).toBeInTheDocument();
     expect(screen.queryByText(/arrives in Phase 7/i)).not.toBeInTheDocument();
   });
+
+  it("navigates to the final settings cards", async () => {
+    await renderApp();
+    await userEvent.click(screen.getByRole("button", { name: /Settings & Pairing/ }));
+
+    expect(screen.getByRole("heading", { name: "Settings & Pairing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Scheduling" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Data" })).toBeInTheDocument();
+    expect(await screen.findByText(/Local SQLite · 2 problems/)).toBeInTheDocument();
+  });
 });

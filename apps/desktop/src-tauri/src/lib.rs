@@ -8,7 +8,10 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .manage(capture_server::ListenerState::default())
-        .invoke_handler(tauri::generate_handler![capture_server::get_pairing_info])
+        .invoke_handler(tauri::generate_handler![
+            capture_server::get_pairing_info,
+            capture_server::regenerate_pairing_token
+        ])
         .setup(|app| {
             if let Err(error) = capture_server::start(app.handle().clone()) {
                 // Port taken (e.g. second instance): the app still works, capture doesn't.

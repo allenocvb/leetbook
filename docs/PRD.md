@@ -123,7 +123,7 @@ no editor embeds/databases. Local-first is a feature.
       skip-as-Good behavior, offline flush feedback, and fixture-page verification
 - [x] 9.16 Desktop Capture view: replace the stale Phase 7 placeholder with real pairing,
       listener, queue, capture-status, and extension-setup information
-- [ ] 9.17 Settings & Pairing fidelity: final connection/scheduling/data cards, real status and
+- [x] 9.17 Settings & Pairing fidelity: final connection/scheduling/data cards, real status and
       last capture, token regeneration, queued count, daily limit, stats, import, and exports
 - [ ] 9.18 Import follow-through: clearer import limitations/results, duplicate handling,
       skipped-row details, and a direct action to view and work with imported problems

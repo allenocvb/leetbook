@@ -81,7 +81,8 @@ function Shell() {
         route.view === "all-problems" ||
         route.view === "due-today" ||
         route.view === "problem" ||
-        route.view === "review"
+        route.view === "review" ||
+        route.view === "settings"
       }
     >
       <Page
@@ -143,6 +144,6 @@ function Page({
     case "capture":
       return <CapturePage runtime={capture} />;
     case "settings":
-      return <SettingsPage />;
+      return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
   }
 }
