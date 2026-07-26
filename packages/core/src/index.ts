@@ -14,6 +14,7 @@ export {
 } from "./db/repositories/reviews.js";
 export { createSchedulingRepo, type SchedulingRepo } from "./db/repositories/scheduling.js";
 export { scheduleReview } from "./fsrs.js";
+export { importNotionCsv, type NotionImportResult } from "./import/notion.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {
   type Difficulty,

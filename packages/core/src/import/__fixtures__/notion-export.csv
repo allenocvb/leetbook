@@ -1,0 +1,48 @@
+﻿Name,Status,Next Review,Last Review Date,Performance Score,Review Count,Category,Difficulty,URL
+Contains Duplicate,todo,"October 15, 2025","September 7, 2025",5,5,Array,Easy,https://leetcode.com/problems/contains-duplicate/description/
+Valid Anagram,todo,"October 7, 2025","September 7, 2025",4,5,HashTable,Easy,https://leetcode.com/problems/valid-anagram/submissions/1620707549/
+Two Sum,todo,"March 29, 2026","January 31, 2026",5,6,HashTable,Easy,https://leetcode.com/problems/two-sum/
+Group Anagrams,todo,"October 30, 2025","September 14, 2025",4,6,HashTable,Medium,https://leetcode.com/problems/group-anagrams/
+Top K Frequent Elements,todo,"October 11, 2025","August 26, 2025",4,6,Array,Medium,https://leetcode.com/problems/top-k-frequent-elements/
+Encode and Decode Strings,todo,"March 27, 2026","January 29, 2026",5,6,String,Medium,https://leetcode.com/problems/encode-and-decode-strings/description/
+LRU Cache,todo,"October 23, 2025","September 2, 2025",3,7,LinkedList,Medium,https://leetcode.com/problems/lru-cache/description/
+"Product of Array Except Self ",todo,"October 22, 2025","September 14, 2025",5,5,Array,Medium,https://leetcode.com/problems/product-of-array-except-self/description/
+Range Sum Query - Immutable,todo,"November 11, 2025","September 26, 2025",4,6,Array,Easy,https://leetcode.com/problems/range-sum-query-immutable/
+Find Pivot Index,todo,"October 15, 2025","September 7, 2025",5,5,Array,Easy,https://leetcode.com/problems/find-pivot-index/description/
+Longest Consecutive Sequence,todo,"November 11, 2025","September 26, 2025",4,6,Array,Medium,https://leetcode.com/problems/longest-consecutive-sequence/description/
+Valid Palindrome,todo,"November 11, 2025","September 26, 2025",4,6,Array,Easy,https://leetcode.com/problems/valid-palindrome/description/
+Two Sum II - Input Array Is Sorted,todo,"April 25, 2026","March 18, 2026",5,5,Array,Medium,https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/
+Remove Duplicates from Sorted Array II,todo,"February 10, 2026","January 7, 2026",3,6,Array,Medium,https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/
+3Sum,redo,"October 10, 2025","September 17, 2025",2,6,Array,Medium,https://leetcode.com/problems/3sum/description/
+Container with Most Water,todo,"November 3, 2025","September 26, 2025",5,5,Array,Medium,https://leetcode.com/problems/container-with-most-water/
+Best Time to Buy and Sell Stock,todo,"October 17, 2025","September 22, 2025",5,4,Array,Easy,https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/
+Contains Duplicate II,todo,"November 3, 2025","September 26, 2025",5,5,Array,Easy,https://leetcode.com/problems/contains-duplicate-ii/description/
+Minimum Size Subarray Sum,todo,"October 19, 2025","September 11, 2025",5,5,Array,Medium,https://leetcode.com/problems/minimum-size-subarray-sum/description/
+Longest Substring Without Repeating Characters,todo,"October 14, 2025","September 14, 2025",4,5,String,Medium,https://leetcode.com/problems/longest-substring-without-repeating-characters/description/
+Longest Repeating Character Replacement,redo,"February 8, 2026","January 31, 2026",1,4,String,Medium,https://leetcode.com/problems/longest-repeating-character-replacement/description/
+Minimum Window Substring,todo,"October 7, 2025","September 7, 2025",4,5,String,Hard,https://leetcode.com/problems/minimum-window-substring/
+Valid Parentheses,todo,"February 15, 2026","January 8, 2026",5,5,Stack,Easy,https://leetcode.com/problems/valid-parentheses/description/
+Min stack,todo,"October 31, 2025","October 1, 2025",4,5,Stack,Medium,https://leetcode.com/problems/min-stack/description/
+Binary Search,todo,"October 17, 2025","September 22, 2025",5,4,Array,Easy,https://leetcode.com/problems/binary-search/description/
+Search a 2D matrix,todo,"October 14, 2025","September 19, 2025",5,4,BinarySearch,Medium,https://leetcode.com/problems/search-a-2d-matrix/description/
+Guess Number Higher or Lower,todo,"October 21, 2025","September 26, 2025",5,4,BinarySearch,Easy,https://leetcode.com/problems/guess-number-higher-or-lower/description/
+First Bad Version,todo,"October 21, 2025","September 26, 2025",5,4,BinarySearch,Easy,https://leetcode.com/problems/first-bad-version/description/
+Koko Eating Bananas,todo,"October 23, 2025","September 30, 2025",3,5,BinarySearch,Medium,https://leetcode.com/problems/koko-eating-bananas/description/
+Find Minimum in Rotated Sorted Array,todo,"October 7, 2025","September 17, 2025",4,4,BinarySearch,Medium,https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/
+Search in Rotated Sorted Array,todo,"October 8, 2025","September 18, 2025",4,4,BinarySearch,Medium,https://leetcode.com/problems/search-in-rotated-sorted-array/description/
+Reverse Linked List,todo,"October 23, 2025","September 28, 2025",5,4,LinkedList,Easy,https://leetcode.com/problems/reverse-linked-list/
+Merge Two Sorted Lists,todo,"October 21, 2025","September 26, 2025",5,4,LinkedList,Easy,https://leetcode.com/problems/merge-two-sorted-lists/description/
+Linked List Cycle Detection,todo,"October 25, 2025","September 30, 2025",5,4,LinkedList,Easy,https://leetcode.com/problems/linked-list-cycle/description/
+Middle of the Linked List,todo,"October 25, 2025","September 30, 2025",5,4,LinkedList,Easy,https://leetcode.com/problems/middle-of-the-linked-list/
+Reorder Linked List,todo,"October 13, 2025","September 28, 2025",3,4,LinkedList,Medium,https://leetcode.com/problems/reorder-list/description/
+Remove Nth Node From End of List,todo,"October 17, 2025","September 27, 2025",4,4,LinkedList,Medium,https://leetcode.com/problems/remove-nth-node-from-end-of-list/
+Merge K sorted Linked Lists,todo,"October 6, 2025","September 27, 2025",4,2,LinkedList,Hard,https://leetcode.com/problems/merge-k-sorted-lists/description/
+"Sort an array (merge sort) ",todo,"October 10, 2025","September 26, 2025",4,3,Array,Medium,https://leetcode.com/problems/sort-an-array/description/
+Remove All Adjacent Duplicates In String,todo,"October 13, 2025","September 26, 2025",5,3,Stack,Easy,https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/description/
+Kth largest element in stream,todo,"October 17, 2025","September 30, 2025",5,3,Heap,Easy,https://leetcode.com/problems/kth-largest-element-in-a-stream/description/
+Last Stone Weight,todo,"October 7, 2025","September 26, 2025",5,2,Heap,Easy,https://leetcode.com/problems/last-stone-weight/description/
+Kth largest element in array,todo,"October 7, 2025","September 26, 2025",5,2,Heap,Medium,https://leetcode.com/problems/kth-largest-element-in-an-array/description/
+K Closest Point to Origin,todo,"February 14, 2026","January 31, 2026",4,3,Heap,Medium,https://leetcode.com/problems/k-closest-points-to-origin/description/
+Search in a Binary Search Tree,todo,"October 6, 2025","September 27, 2025",4,2,Tree,Easy,https://leetcode.com/problems/search-in-a-binary-search-tree/
+Insert into a Binary Search Tree,todo,"October 7, 2025","September 26, 2025",5,2,Tree,Medium,https://leetcode.com/problems/insert-into-a-binary-search-tree/description/
+Delete Node in a BST,redo,"February 5, 2026","January 31, 2026",2,2,Tree,Medium,https://leetcode.com/problems/delete-node-in-a-bst/description/
