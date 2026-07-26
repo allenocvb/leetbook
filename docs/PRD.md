@@ -92,7 +92,7 @@ no editor embeds/databases. Local-first is a feature.
 
 - [x] 9.1 Restore the green repository gate: fix the current `node:sqlite` typecheck failure,
       then verify `pnpm lint && pnpm typecheck && pnpm test`
-- [ ] 9.2 Design foundation: semantic light/dark CSS tokens, self-hosted Chewy/Quicksand/
+- [x] 9.2 Design foundation: semantic light/dark CSS tokens, self-hosted Chewy/Quicksand/
       JetBrains Mono fonts, persisted theme, focus styles, and shared primitives
 - [ ] 9.3 Window shell and intro: final titlebar/window treatment, theme toggle, first-run
       intro, and flexible behavior beyond the 1280×820 reference size

@@ -1,20 +1,119 @@
-/* LeetBook design system — see .claude/skills/frontend-design/SKILL.md */
+/* Final LeetBook design foundation — see docs/UI_SPEC.md. */
 
-:root {
-  --bg: #ffffff;
-  --surface: #fafafa;
-  --text: #111111;
-  --text-secondary: #666666;
-  --border: #ebebea;
-  --accent: #5b5bd6;
-  --easy: #1a8917;
-  --medium: #b54708;
-  --hard: #c92a2a;
-  --danger: #c92a2a;
-  --danger-bg: #fdecec;
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
 
-  --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --lb-bg: #efedf3;
+  --lb-surf: #ffffff;
+  --lb-surf-2: #fbfafc;
+  --lb-surf-3: #f7f6fa;
+  --lb-code: #fdfdfe;
+  --lb-chip: #f4f2f8;
+  --lb-tint: #f1eefb;
+  --lb-bd: #efeef2;
+  --lb-bd-2: #e8e6ee;
+  --lb-ink: #191720;
+  --lb-text-2: #33313c;
+  --lb-text-3: #57545f;
+  --lb-muted: #8b8896;
+  --lb-muted-2: #a5a2b0;
+  --lb-muted-3: #b3b0bd;
+  --lb-muted-4: #c2bfcc;
+  --lb-accent: #6d4aff;
+  --lb-accent-text: #5638d8;
+  --lb-green: #3d7a52;
+  --lb-amber: #9a6b1f;
+  --lb-red: #a63b4c;
+  --lb-soft-red: #fdeef0;
+  --lb-keyword: #8b5cf6;
+
+  --lb-status-mastered-bg: #eef7f0;
+  --lb-status-mastered-fg: #3d7a52;
+  --lb-status-learning-bg: #f1eefb;
+  --lb-status-learning-fg: #5638d8;
+  --lb-status-leech-bg: #fdeef0;
+  --lb-status-leech-fg: #a63b4c;
+  --lb-status-new-bg: #f4f2f8;
+  --lb-status-new-fg: #57545f;
+
+  --lb-font-display: "Chewy", cursive;
+  --lb-font-body: "Quicksand", "Helvetica Neue", sans-serif;
+  --lb-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --lb-radius-1: 5px;
+  --lb-radius-2: 6px;
+  --lb-radius-3: 7px;
+  --lb-radius-4: 8px;
+  --lb-radius-5: 9px;
+  --lb-radius-6: 11px;
+  --lb-radius-7: 12px;
+  --lb-radius-8: 14px;
+  --lb-radius-pill: 20px;
+
+  --lb-space-1: 4px;
+  --lb-space-2: 6px;
+  --lb-space-3: 9px;
+  --lb-space-4: 12px;
+  --lb-space-5: 16px;
+  --lb-space-6: 22px;
+  --lb-space-7: 26px;
+  --lb-space-8: 34px;
+
+  --lb-shadow-window: 0 24px 60px rgba(25, 23, 32, 0.18), 0 2px 6px rgba(25, 23, 32, 0.08);
+  --lb-shadow-floating: 0 18px 40px rgba(25, 23, 32, 0.16);
+
+  /* Temporary compatibility aliases while screens migrate in PRD order. */
+  --bg: var(--lb-surf);
+  --surface: var(--lb-surf-2);
+  --text: var(--lb-ink);
+  --text-secondary: var(--lb-muted);
+  --border: var(--lb-bd);
+  --accent: var(--lb-accent);
+  --easy: var(--lb-green);
+  --medium: var(--lb-amber);
+  --hard: var(--lb-red);
+  --danger: var(--lb-red);
+  --danger-bg: var(--lb-soft-red);
+  --font-ui: var(--lb-font-body);
+  --font-mono: var(--lb-font-mono);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --lb-bg: #0e0d11;
+  --lb-surf: #18171d;
+  --lb-surf-2: #1c1b22;
+  --lb-surf-3: #212028;
+  --lb-code: #141319;
+  --lb-chip: #272631;
+  --lb-tint: #2a2340;
+  --lb-bd: #252430;
+  --lb-bd-2: #2f2e3b;
+  --lb-ink: #f2f1f6;
+  --lb-text-2: #dcdae3;
+  --lb-text-3: #a8a5b3;
+  --lb-muted: #8b8896;
+  --lb-muted-2: #7d7a89;
+  --lb-muted-3: #6a6776;
+  --lb-muted-4: #565364;
+  --lb-accent: #8b6bff;
+  --lb-accent-text: #bda6ff;
+  --lb-green: #6cba86;
+  --lb-amber: #cfa04c;
+  --lb-red: #e0808f;
+  --lb-soft-red: #301c22;
+  --lb-keyword: #a98bff;
+
+  --lb-status-mastered-bg: #1c2a21;
+  --lb-status-mastered-fg: #6cba86;
+  --lb-status-learning-bg: #241f3a;
+  --lb-status-learning-fg: #bda6ff;
+  --lb-status-leech-bg: #301c22;
+  --lb-status-leech-fg: #e0808f;
+  --lb-status-new-bg: #272631;
+  --lb-status-new-fg: #a8a5b3;
 }
 
 * {
@@ -28,19 +127,50 @@ body,
   height: 100%;
 }
 
+html {
+  background: var(--lb-bg);
+}
+
+body,
+#root {
+  background: var(--lb-surf);
+}
+
 body {
-  font-family: var(--font-ui);
+  font-family: var(--lb-font-body);
   font-size: 14px;
-  color: var(--text);
-  background: var(--bg);
+  font-weight: 400;
+  color: var(--lb-ink);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  color: var(--lb-ink);
+  background: var(--lb-tint);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 button {
-  font: inherit;
   color: inherit;
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--lb-accent);
+  outline-offset: 2px;
+}
+
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }

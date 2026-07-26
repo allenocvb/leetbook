@@ -20,6 +20,15 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@fontsource/chewy':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/quicksand':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@leetbook/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -661,6 +670,15 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fontsource/chewy@5.3.0':
+    resolution: {integrity: sha512-9p1c7sTqudOEP3RFbcI0h4r3Mq5+Atr6VBF70LGFegU0FAOt63asVt5ufBlojPF5+YFbSqq5iXjRdNt+k2l+2A==}
+
+  '@fontsource/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==}
+
+  '@fontsource/quicksand@5.3.0':
+    resolution: {integrity: sha512-epmMUyXI39f88bZSCyKlHTZqUWg4O7DqrTXOKqsqbVKMLshX9RtIYCUIw+G2nOfEwdIHIjYbeWdwHRcEzRXBRQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -3549,6 +3567,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.12':
     optional: true
+
+  '@fontsource/chewy@5.3.0': {}
+
+  '@fontsource/jetbrains-mono@5.3.0': {}
+
+  '@fontsource/quicksand@5.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
