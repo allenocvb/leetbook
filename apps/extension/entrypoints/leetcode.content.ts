@@ -3,11 +3,12 @@ import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/rubik/latin-400.css";
 import "@fontsource/rubik/latin-500.css";
 import {
-  extractCode,
   extractStats,
   fetchProblemMeta,
+  fetchSubmissionDetails,
   isAcceptedResult,
   slugFromLocation,
+  submissionIdFromLocation,
 } from "../capture/adapter.js";
 import { isCaptureDeliveryResult, type QueueStatusMessage } from "../capture/delivery.js";
 import type { CapturePayload } from "../capture/payload.js";
@@ -54,8 +55,16 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
   const meta = await fetchProblemMeta(slug);
   if (!meta) return null; // metadata unavailable — don't guess
 
-  const stats = extractStats(document);
-  const code = extractCode(slug, localStorage);
+  /*
+   * Prefer the submission API: it returns the exact code, language and stats LeetCode
+   * recorded. The DOM stats remain a fallback for when the submission id is not in the URL
+   * (an older result still on screen, or a navigation we did not follow).
+   */
+  const submissionId = submissionIdFromLocation(location.href);
+  const submission = submissionId === null ? null : await fetchSubmissionDetails(submissionId);
+  const domStats = extractStats(document);
+  const runtimeMs = submission?.runtimeMs ?? domStats.runtimeMs;
+  const memoryMb = submission?.memoryMb ?? domStats.memoryMb;
   const sendScore = async (score: CapturePayload["score"]) => {
     const payload: CapturePayload = {
       version: 1,
@@ -64,10 +73,10 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
       difficulty: meta.difficulty,
       tags: meta.tags,
       score,
-      runtimeMs: stats.runtimeMs,
-      memoryMb: stats.memoryMb,
-      language: code?.language ?? null,
-      codeSnapshot: code?.code ?? null,
+      runtimeMs,
+      memoryMb,
+      language: submission?.language ?? null,
+      codeSnapshot: submission?.code ?? null,
       capturedAt: new Date().toISOString(),
     };
     const result: unknown = await browser.runtime.sendMessage({
@@ -83,9 +92,9 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
     {
       title: meta.title,
       difficulty: meta.difficulty,
-      runtimeMs: stats.runtimeMs,
-      memoryMb: stats.memoryMb,
-      codeSaved: code !== null,
+      runtimeMs,
+      memoryMb,
+      codeSaved: submission?.code != null,
     },
     { onRate: sendScore },
   );

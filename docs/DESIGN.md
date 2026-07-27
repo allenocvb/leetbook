@@ -77,7 +77,11 @@ leetbook/
 ### 4.2 Capture Flow
 
 1. Content script detects an **Accepted** submission on leetcode.com.
-2. Pulls: slug, title, difficulty, topics (LeetCode public GraphQL), runtime/memory + submitted code (from page).
+2. Pulls slug and problem metadata (title, difficulty, topics) from LeetCode's public GraphQL,
+   then reads the submission itself — code, language, runtime, memory — from the authenticated
+   `submissionDetails` query, keyed by the id LeetCode puts in the URL. Scraping was tried and
+   abandoned: the editor buffer is not in localStorage, and Monaco virtualises its lines, so
+   DOM capture truncates long solutions. DOM stats remain a fallback when there is no id.
 3. In-page toast: "Rate your recall 0–5."
 4. Payload sent to app → upsert problem → log review (with code snapshot + perf stats) → FSRS computes next due date.
 

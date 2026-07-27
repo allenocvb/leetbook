@@ -112,7 +112,11 @@ pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
       while unpaired, and hides them once connected.
 - [ ] Sidebar footer shows `Listener ready :7749`.
 - [ ] Submit a real Accepted solution on leetcode.com. **A toast appears bottom-right.**
-- [ ] Toast shows the real title, difficulty, runtime/memory, and code status.
+- [ ] Toast shows the real title, difficulty, runtime/memory, and **code saved** — not
+      "code unavailable". Runtime and memory must match what LeetCode displays.
+- [ ] Open the problem's notes page: the captured solution appears as a read-only code
+      snapshot, syntax-highlighted for the submitted language, and complete rather than
+      truncated. Try a long solution to be sure.
 - [ ] Choosing a score creates or updates the problem in the app with a review and a code
       snapshot.
 - [ ] Quit the app, submit again: the toast reports queued. Reopen the app; the queue
@@ -123,3 +127,7 @@ pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
 GraphQL failure and `offerCapture` then bails silently, which is indistinguishable from a
 broken extension. That is the most likely failure and the first thing worth making
 degrade gracefully.
+
+**If the toast appears but says code unavailable**, the submission id was missing from the
+URL or `submissionDetails` failed. Both are logged nowhere today — worth checking the
+console on the LeetCode tab.

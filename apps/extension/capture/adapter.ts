@@ -25,14 +25,7 @@ export interface SubmissionStats {
   memoryMb: number | null;
 }
 
-/** Parses "61 ms" / "18.4 MB" out of the result panel's text. */
-export function extractStats(root: ParentNode): SubmissionStats {
-  // climb a few ancestors from the verdict so sibling stat rows are in scope
-  let scope: Element | null = root.querySelector(RESULT_LOCATOR);
-  for (let i = 0; i < 3 && scope?.parentElement; i++) {
-    scope = scope.parentElement;
-  }
-  const text = scope?.textContent ?? "";
+function parseStats(text: string): SubmissionStats {
   const runtime = /(\d+(?:\.\d+)?)\s*ms/i.exec(text);
   const memory = /(\d+(?:\.\d+)?)\s*MB/i.exec(text);
   return {
@@ -41,36 +34,27 @@ export function extractStats(root: ParentNode): SubmissionStats {
   };
 }
 
-export interface CodeCapture {
-  language: string;
-  code: string;
-}
-
-type StorageLike = Pick<Storage, "length" | "key" | "getItem">;
+/** Far enough to reach the stats cards, short of scanning unrelated page chrome. */
+const MAX_STATS_ANCESTORS = 10;
 
 /**
- * LeetCode persists the editor buffer in localStorage under keys shaped like
- * `<questionId>_<slug>_<language>`. We scan for the slug and take the newest-
- * looking entry. Values are usually JSON-encoded strings.
+ * Parses "61 ms" / "18.4 MB" from the smallest ancestor of the verdict that contains both.
+ *
+ * Climbs until it finds them rather than a fixed number of levels. The previous fixed climb
+ * of 3 was one short of the real page — measured at 4 — so live captures silently recorded
+ * no runtime or memory at all while the fixture test kept passing.
  */
-export function extractCode(slug: string, storage: StorageLike): CodeCapture | null {
-  const needle = `_${slug}_`;
-  for (let i = storage.length - 1; i >= 0; i--) {
-    const key = storage.key(i);
-    if (!key?.includes(needle)) continue;
-    const raw = storage.getItem(key);
-    if (!raw) continue;
-    const language = key.slice(key.lastIndexOf("_") + 1);
-    try {
-      const decoded: unknown = JSON.parse(raw);
-      if (typeof decoded === "string" && decoded.trim() !== "") {
-        return { language, code: decoded };
-      }
-    } catch {
-      if (raw.trim() !== "") return { language, code: raw };
-    }
+export function extractStats(root: ParentNode): SubmissionStats {
+  let scope: Element | null = root.querySelector(RESULT_LOCATOR);
+  let best: SubmissionStats = { runtimeMs: null, memoryMb: null };
+
+  for (let i = 0; i < MAX_STATS_ANCESTORS && scope; i++) {
+    const stats = parseStats(scope.textContent ?? "");
+    if (stats.runtimeMs !== null && stats.memoryMb !== null) return stats;
+    if (stats.runtimeMs !== null || stats.memoryMb !== null) best = stats;
+    scope = scope.parentElement;
   }
-  return null;
+  return best;
 }
 
 export interface ProblemMeta {
@@ -115,6 +99,77 @@ export async function fetchProblemMeta(
       title: question.title,
       difficulty,
       tags: (question.topicTags ?? []).map((tag) => tag.name ?? "").filter(Boolean),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** `/problems/binary-search/submissions/7325539/` → `7325539`. */
+export function submissionIdFromLocation(href: string): number | null {
+  const match = /\/submissions\/(\d+)/.exec(href);
+  const id = match?.[1] ? Number(match[1]) : Number.NaN;
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+export interface SubmissionDetails {
+  runtimeMs: number | null;
+  memoryMb: number | null;
+  language: string | null;
+  code: string | null;
+}
+
+interface GraphQlSubmission {
+  data?: {
+    submissionDetails?: {
+      runtime?: number | null;
+      memory?: number | null;
+      code?: string | null;
+      lang?: { name?: string | null } | null;
+    } | null;
+  };
+}
+
+const SUBMISSION_QUERY = `query submissionDetails($submissionId: Int!) {
+  submissionDetails(submissionId: $submissionId) {
+    runtime
+    memory
+    code
+    lang { name }
+  }
+}`;
+
+/**
+ * Reads the submission LeetCode just recorded, rather than scraping the page for it.
+ *
+ * The editor buffer is not in localStorage — keys there are numeric ids holding only the
+ * selected language — and the Monaco editor virtualises its lines, so scraping the DOM would
+ * silently truncate long solutions. This is an authenticated same-origin call, so the
+ * content script's cookies carry it.
+ */
+export async function fetchSubmissionDetails(
+  submissionId: number,
+  fetchFn: typeof fetch = fetch,
+): Promise<SubmissionDetails | null> {
+  try {
+    const response = await fetchFn(GRAPHQL_URL, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: SUBMISSION_QUERY, variables: { submissionId } }),
+    });
+    if (!response.ok) return null;
+
+    const details = ((await response.json()) as GraphQlSubmission).data?.submissionDetails;
+    if (!details) return null;
+
+    return {
+      runtimeMs: typeof details.runtime === "number" ? details.runtime : null,
+      // `memory` is bytes, and LeetCode reports decimal MB: 20460000 shows as "20.5 MB".
+      memoryMb:
+        typeof details.memory === "number" ? Math.round(details.memory / 100_000) / 10 : null,
+      language: details.lang?.name ?? null,
+      code: details.code?.trim() ? details.code : null,
     };
   } catch {
     return null;
