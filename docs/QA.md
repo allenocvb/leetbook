@@ -128,6 +128,9 @@ GraphQL failure and `offerCapture` then bails silently, which is indistinguishab
 broken extension. That is the most likely failure and the first thing worth making
 degrade gracefully.
 
-**If the toast appears but says code unavailable**, the submission id was missing from the
-URL or `submissionDetails` failed. Both are logged nowhere today — worth checking the
-console on the LeetCode tab.
+Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
+
+- **No toast at all** — metadata could not be read, so nothing was captured. Bailing is
+  deliberate (difficulty and topics cannot be invented), but the warning says so.
+- **Toast without a code snapshot** — the warning distinguishes a missing submission id in
+  the URL from a `submissionDetails` call that returned nothing.

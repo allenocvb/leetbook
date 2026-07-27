@@ -51,9 +51,19 @@ export default defineContentScript({
   },
 });
 
+/** Prefix so a user glancing at the console can tell these apart from LeetCode's own logs. */
+const LOG = "[LeetBook]";
+
 async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
   const meta = await fetchProblemMeta(slug);
-  if (!meta) return null; // metadata unavailable — don't guess
+  if (!meta) {
+    // Bailing here is deliberate — difficulty and topics cannot be invented — but silence
+    // here is indistinguishable from a broken extension, so say so.
+    console.warn(
+      `${LOG} No toast: could not read problem metadata for "${slug}". The submission was not captured.`,
+    );
+    return null;
+  }
 
   /*
    * Prefer the submission API: it returns the exact code, language and stats LeetCode
@@ -62,6 +72,15 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
    */
   const submissionId = submissionIdFromLocation(location.href);
   const submission = submissionId === null ? null : await fetchSubmissionDetails(submissionId);
+  if (!submission?.code) {
+    console.warn(
+      `${LOG} Capturing "${slug}" without a code snapshot${
+        submissionId === null
+          ? ": no submission id in the URL."
+          : ": submissionDetails returned nothing."
+      }`,
+    );
+  }
   const domStats = extractStats(document);
   const runtimeMs = submission?.runtimeMs ?? domStats.runtimeMs;
   const memoryMb = submission?.memoryMb ?? domStats.memoryMb;
