@@ -5,7 +5,13 @@ import StarterKit from "@tiptap/starter-kit";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Callout } from "./Callout.js";
 import { codeBlockNodeView } from "./codeBlockNodeView.js";
-import { INDENT_UNIT, indentAfterNewline, lineStart, outdentWidth } from "./codeIndent.js";
+import {
+  INDENT_UNIT,
+  indentAfterNewline,
+  lineStart,
+  outdentWidth,
+  shiftLines,
+} from "./codeIndent.js";
 import { codeLowlight } from "./codeLanguages.js";
 import { SlashCommandMenu, type SlashMenuState } from "./SlashCommandMenu.js";
 import { filterSlashCommands, type SlashCommand } from "./slashCommands.js";
@@ -49,14 +55,47 @@ const EditorCodeBlock = CodeBlockLowlight.extend({
         return true;
       });
 
+    /**
+     * Tab/Shift-Tab over a selection shifts whole lines rather than replacing the selection,
+     * which is what a code editor does — and what the old handler got wrong, silently
+     * deleting whatever was highlighted.
+     */
+    const shiftSelection = (direction: "in" | "out") => {
+      const { $from, from, to } = this.editor.state.selection;
+      const blockStart = $from.start();
+      const text = $from.parent.textContent;
+
+      const shifted = shiftLines(text, from - blockStart, to - blockStart, direction);
+      // Already flush left: swallow the key rather than moving focus to the language select.
+      if (shifted.text === text.slice(shifted.from, shifted.to)) return true;
+
+      const absFrom = blockStart + shifted.from;
+      return (
+        this.editor
+          .chain()
+          .command(({ tr }) => {
+            tr.insertText(shifted.text, absFrom, blockStart + shifted.to);
+            return true;
+          })
+          // Reselect the shifted lines so Tab can be pressed repeatedly.
+          .setTextSelection({ from: absFrom, to: absFrom + shifted.text.length })
+          .run()
+      );
+    };
+
     return {
       ...this.parent?.(),
 
       // Returning true stops the browser moving focus to the language select.
-      Tab: () => inCodeBlock() && insertText(INDENT_UNIT),
+      Tab: () => {
+        if (!inCodeBlock()) return false;
+        if (!this.editor.state.selection.empty) return shiftSelection("in");
+        return insertText(INDENT_UNIT);
+      },
 
       "Shift-Tab": () => {
         if (!inCodeBlock()) return false;
+        if (!this.editor.state.selection.empty) return shiftSelection("out");
 
         const { $from } = this.editor.state.selection;
         const textBefore = codeTextBefore(this.editor);

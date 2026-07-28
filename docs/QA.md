@@ -76,6 +76,8 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       the block, not underneath it.
 - [ ] In a code block: Tab indents (does not jump to the language picker), Shift-Tab
       outdents, Enter after `for i in range(10):` indents the next line.
+- [ ] Select several lines in a code block and press Tab: every line shifts right and stays
+      selected, so Tab can be pressed again. Shift-Tab brings them back. Nothing is deleted.
 - [ ] Typing `l` at the start of a code line is **not** auto-capitalised; quotes stay
       straight, `--` is not turned into an en dash.
 - [ ] `/` inside a code block does not open the slash menu.

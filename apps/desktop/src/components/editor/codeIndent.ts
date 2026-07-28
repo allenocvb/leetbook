@@ -51,3 +51,43 @@ export function outdentWidth(textBefore: string): number {
 export function lineStart(blockStart: number, textBefore: string): number {
   return blockStart + textBefore.lastIndexOf("\n") + 1;
 }
+
+export interface ShiftedLines {
+  text: string;
+  /** Offsets of the replaced span, relative to the block's text. */
+  from: number;
+  to: number;
+}
+
+/**
+ * Indent or outdent every line the selection touches, the way any code editor does.
+ *
+ * Tab with a selection used to replace it with two spaces — deleting whatever was
+ * highlighted. Whole lines are rewritten and reselected so repeated Tab presses keep
+ * working on the same block of code.
+ *
+ * Blank lines are left alone rather than filled with trailing whitespace.
+ */
+export function shiftLines(
+  text: string,
+  from: number,
+  to: number,
+  direction: "in" | "out",
+): ShiftedLines {
+  const start = from === 0 ? 0 : text.lastIndexOf("\n", from - 1) + 1;
+  const lineEnd = text.indexOf("\n", to);
+  const end = lineEnd === -1 ? text.length : lineEnd;
+
+  const shifted = text
+    .slice(start, end)
+    .split("\n")
+    .map((line) => {
+      if (line.trim() === "") return line;
+      if (direction === "in") return INDENT_UNIT + line;
+      const width = outdentWidth(line);
+      return width === 0 ? line : line.slice(width);
+    })
+    .join("\n");
+
+  return { text: shifted, from: start, to: end };
+}

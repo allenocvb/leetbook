@@ -229,6 +229,9 @@ Editor:
 - An editable code block behaves like a code editor: Tab inserts two spaces rather than moving
   focus to the language picker, Shift-Tab removes one level, and Enter carries the current
   indentation onto the next line, stepping in once after a line ending in `:`, `{`, `(`, or `[`.
+- With a selection, Tab and Shift-Tab shift **every line the selection touches** and reselect
+  them, so the keys can be pressed repeatedly. They must never replace the selection — doing so
+  deletes the highlighted code. Blank lines are skipped rather than filled with whitespace.
   Tab is therefore captured while the caret is in code; the language picker stays reachable by
   pointer and from adjacent focus stops.
 - `/` inside a code block is division or a comment, never a command — the slash menu stays shut.

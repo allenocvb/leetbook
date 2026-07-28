@@ -167,7 +167,9 @@ no editor embeds/databases. Local-first is a feature.
 - [x] 9.32 Capture the real submission: read code, language and stats from LeetCode's
       submission API instead of localStorage and a fixed DOM climb, both of which silently
       returned nothing on the live page
-- [ ] 9.33 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.33 Indent a selection in a code block: Tab and Shift-Tab shift whole lines instead of
+      replacing the selection, which deleted the highlighted code
+- [ ] 9.34 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.

@@ -243,6 +243,29 @@ describe("NoteEditor", () => {
     expect(surface).toHaveAttribute("spellcheck", "true");
   });
 
+  it("indents a selection instead of replacing it", async () => {
+    const { editor } = await renderEditor(null);
+    const surface = screen.getByRole("textbox", { name: "Problem notes" });
+    await userEvent.click(surface);
+    await userEvent.keyboard("/code{Enter}");
+    await waitFor(() => {
+      expect(editor.isActive("codeBlock")).toBe(true);
+      expect(document.querySelector(".code-block__code")).toBeInTheDocument();
+    });
+    await userEvent.keyboard("a = 1{Enter}b = 2");
+
+    // Select both lines, the way you would before pressing Tab.
+    const block = editor.state.selection.$from.start();
+    editor.commands.setTextSelection({ from: block, to: block + "a = 1\nb = 2".length });
+    await userEvent.keyboard("{Tab}");
+
+    // Both lines shift; nothing is deleted.
+    expect(codeBlockTexts(editor)).toEqual(["  a = 1\n  b = 2"]);
+
+    await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(codeBlockTexts(editor)).toEqual(["a = 1\nb = 2"]);
+  });
+
   it("keeps tab inside the code block instead of moving focus to the language picker", async () => {
     const { editor } = await renderEditor(null);
     const surface = screen.getByRole("textbox", { name: "Problem notes" });
