@@ -169,7 +169,9 @@ no editor embeds/databases. Local-first is a feature.
       returned nothing on the live page
 - [x] 9.33 Indent a selection in a code block: Tab and Shift-Tab shift whole lines instead of
       replacing the selection, which deleted the highlighted code
-- [ ] 9.34 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.34 Selection format bar: floating bold/italic/underline/strike/code/link/clear over a
+      text selection, suppressed inside code blocks
+- [ ] 9.35 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.

@@ -81,6 +81,10 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Typing `l` at the start of a code line is **not** auto-capitalised; quotes stay
       straight, `--` is not turned into an en dash.
 - [ ] `/` inside a code block does not open the slash menu.
+- [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and
+      inline code all apply and show as active. Clear formatting removes them.
+- [ ] Link prompts for a URL, applies, and an empty value removes it.
+- [ ] Selecting inside a code block shows **no** format bar.
 - [ ] Language picker changes highlighting and persists after reload.
 - [ ] Delete a problem: first click arms, Cancel backs out, Delete removes it and returns
       to the table. The problem is gone after a restart.

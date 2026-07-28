@@ -13,6 +13,7 @@ import {
   shiftLines,
 } from "./codeIndent.js";
 import { codeLowlight } from "./codeLanguages.js";
+import { SelectionToolbar } from "./SelectionToolbar.js";
 import { SlashCommandMenu, type SlashMenuState } from "./SlashCommandMenu.js";
 import { filterSlashCommands, type SlashCommand } from "./slashCommands.js";
 import "./CodeBlock.css";
@@ -288,6 +289,7 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
 
   return (
     <div ref={container} className="note-editor" onKeyDownCapture={handleKeyDown}>
+      {editor && <SelectionToolbar editor={editor} />}
       <EditorContent editor={editor} />
       {slashMenu && (
         <SlashCommandMenu

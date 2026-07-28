@@ -330,6 +330,32 @@ describe("NoteEditor", () => {
     expect(surface).toHaveFocus();
   });
 
+  it("offers formatting over a selection, and not inside code", async () => {
+    const { editor } = await renderEditor(RICH_TEXT);
+
+    // No selection yet: nothing to format.
+    expect(screen.queryByRole("toolbar", { name: "Format selection" })).not.toBeInTheDocument();
+
+    editor.commands.setTextSelection({ from: 1, to: 5 });
+    await waitFor(() => {
+      expect(screen.getByRole("toolbar", { name: "Format selection" })).toBeInTheDocument();
+    });
+    for (const name of ["Bold", "Italic", "Underline", "Strikethrough", "Inline code", "Link"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+  });
+
+  it("applies a mark to the selected text", async () => {
+    const { editor } = await renderEditor(RICH_TEXT);
+    editor.commands.setTextSelection({ from: 7, to: 13 });
+    await waitFor(() => {
+      expect(screen.getByRole("toolbar", { name: "Format selection" })).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Underline" }));
+    expect(editor.isActive("underline")).toBe(true);
+  });
+
   it("renders stored recall callouts", async () => {
     await renderEditor(CALLOUT);
     const callout = document.querySelector('.note-callout[data-type="callout"]');
