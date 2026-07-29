@@ -356,6 +356,60 @@ describe("NoteEditor", () => {
     expect(editor.isActive("underline")).toBe(true);
   });
 
+  it("colours the selected text and clears it again", async () => {
+    const { editor, onChange } = await renderEditor(RICH_TEXT);
+    editor.commands.setTextSelection({ from: 7, to: 13 });
+    await waitFor(() => {
+      expect(screen.getByRole("toolbar", { name: "Format selection" })).toBeInTheDocument();
+    });
+
+    // The swatches live behind a menu, so nothing is offered until it is opened.
+    expect(screen.queryByRole("button", { name: "Text colour: Green" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Text colour" }));
+    await userEvent.click(screen.getByRole("button", { name: "Text colour: Green" }));
+
+    /*
+     * A `var()` reference rather than resolved hex: the point of the palette is that a note
+     * coloured in light mode is still legible in dark mode.
+     */
+    expect(editor.getAttributes("textStyle").color).toBe("var(--lb-note-green)");
+    expect(onChange.mock.calls.at(-1)?.[0]).toContain("var(--lb-note-green)");
+    // Picking closes the grid, so the toolbar is not left obscuring the document.
+    expect(screen.queryByRole("button", { name: "Text colour: Green" })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Text colour" }));
+    await userEvent.click(screen.getByRole("button", { name: "Default colour" }));
+    expect(editor.getAttributes("textStyle").color).toBeUndefined();
+  });
+
+  it("highlights the selected text", async () => {
+    const { editor } = await renderEditor(RICH_TEXT);
+    editor.commands.setTextSelection({ from: 7, to: 13 });
+    await waitFor(() => {
+      expect(screen.getByRole("toolbar", { name: "Format selection" })).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Highlight" }));
+    await userEvent.click(screen.getByRole("button", { name: "Highlight: Amber" }));
+
+    expect(editor.getAttributes("textStyle").backgroundColor).toBe("var(--lb-mark-amber)");
+  });
+
+  it("closes an open swatch grid when the selection moves", async () => {
+    const { editor } = await renderEditor(RICH_TEXT);
+    editor.commands.setTextSelection({ from: 7, to: 13 });
+    await waitFor(() => {
+      expect(screen.getByRole("toolbar", { name: "Format selection" })).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Text colour" }));
+    expect(screen.getByRole("button", { name: "Text colour: Red" })).toBeInTheDocument();
+
+    editor.commands.setTextSelection({ from: 1, to: 5 });
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Text colour: Red" })).not.toBeInTheDocument();
+    });
+  });
+
   it("renders stored recall callouts", async () => {
     await renderEditor(CALLOUT);
     const callout = document.querySelector('.note-callout[data-type="callout"]');

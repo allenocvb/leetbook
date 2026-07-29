@@ -22,8 +22,13 @@ Accepted submissions so users never retype a problem; the app is fully usable wi
 
 ## Non-goals (v1)
 
-No cloud sync, no accounts, no social features, no mobile, no NeetCode-specific capture,
-no editor embeds/databases. Local-first is a feature.
+No cloud sync, no accounts, no social features, no mobile, no editor embeds/databases.
+Local-first is a feature.
+
+NeetCode capture was on this list and has been promoted to Phase 12. The reasoning that
+retired it — that NeetCode practice mostly links out to LeetCode — describes the site, not the
+user: solving in NeetCode's own editor never touches leetcode.com, so capture saw nothing at
+all.
 
 ---
 
@@ -171,7 +176,12 @@ no editor embeds/databases. Local-first is a feature.
       replacing the selection, which deleted the highlighted code
 - [x] 9.34 Selection format bar: floating bold/italic/underline/strike/code/link/clear over a
       text selection, suppressed inside code blocks
-- [ ] 9.35 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
+- [x] 9.35 Text and highlight colour: a five-swatch palette on each, stored as `var(--lb-*)`
+      references so a note coloured in one theme stays legible in the other
+- [x] 9.36 Documentation: `docs/OVERVIEW.md` explaining the product and the architecture, and
+      a README with prerequisites, a clone-to-running walkthrough, extension setup, every
+      command, and troubleshooting
+- [ ] 9.37 Desktop acceptance: work through `docs/QA.md` in a real `tauri dev` build —
       window shell, external links, file dialogs, editor and review flows — then capture
       reference screenshots and record known limitations. The automated gate cannot reach
       any of it; the window rounding and fullscreen behaviour are unverified so far.
@@ -185,3 +195,32 @@ no editor embeds/databases. Local-first is a feature.
 
 - [ ] 11.1 Launch README with demo GIF, extension setup, CONTRIBUTING.md, and issue templates
 - [ ] 11.2 v0.1.0 release
+
+## Phase 12 — NeetCode as a second capture source
+
+> Promoted from the v1 non-goals. Someone working the NeetCode 150 in NeetCode's own editor
+> never touches leetcode.com, so capture saw nothing — the automation silently did not apply
+> to a large share of real practice.
+>
+> **Do not write selectors from memory.** The LeetCode adapter cost four wrong guesses before
+> anyone looked at the live page; the fix came from two console diagnostics. 12.2 exists to
+> make sure that happens first this time.
+
+- [x] 12.1 Capture source seam: define the `CaptureSource` contract (match, slug, verdict,
+      metadata, submission), move LeetCode behind it, and drive the content script from the
+      registry rather than from LeetCode's functions directly
+- [ ] 12.2 NeetCode reconnaissance: on a real solved problem in NeetCode's own editor, record
+      the URL shape, how an Accepted verdict appears in the DOM, whether the solution is
+      reachable without scraping the editor, and whether runtime/memory exist at all. Write
+      the findings into this task before writing any code
+- [ ] 12.3 NeetCode adapter: implement `CaptureSource` from 12.2's findings, in its own module
+      with its own fixture tests, and register it. Map NeetCode's problem identity onto the
+      shared LeetCode slug so a problem solved on either site lands on one row
+- [ ] 12.4 Manifest and content script: add the NeetCode host to `matches` and to the extension
+      permissions, and confirm the single content script serves both sites
+- [ ] 12.5 Degrade honestly: NeetCode may expose no runtime, memory, or retrievable code. The
+      toast and the notes page must read as "not available here" rather than as a failure, and
+      a capture missing those fields must still create the review
+- [ ] 12.6 Cross-source acceptance: solve the same problem on both sites, confirm one problem
+      row with two reviews and a correctly replayed schedule, and add the walkthrough to
+      `docs/QA.md`

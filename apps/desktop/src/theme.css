@@ -37,6 +37,23 @@
   --lb-status-new-bg: #f4f2f8;
   --lb-status-new-fg: #57545f;
 
+  /*
+   * Note text and highlight palette. Stored in the document as `var(--lb-note-*)` rather
+   * than as literal hex, so a note written in light mode stays legible in dark mode — the
+   * value is resolved at paint time against whichever theme is active.
+   */
+  --lb-note-purple: #6d4aff;
+  --lb-note-blue: #2563b0;
+  --lb-note-green: #3d7a52;
+  --lb-note-amber: #9a6b1f;
+  --lb-note-red: #a63b4c;
+
+  --lb-mark-purple: #e6e0ff;
+  --lb-mark-blue: #dbe9fb;
+  --lb-mark-green: #d9f0e0;
+  --lb-mark-amber: #fbeecd;
+  --lb-mark-red: #fbdde2;
+
   --lb-font-display: "Chewy", cursive;
   --lb-font-body: "Rubik", "Helvetica Neue", sans-serif;
   --lb-font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -114,6 +131,19 @@
   --lb-status-leech-fg: #e0808f;
   --lb-status-new-bg: #272631;
   --lb-status-new-fg: #a8a5b3;
+
+  /* Lifted for contrast against the dark surface; highlights become deep tints. */
+  --lb-note-purple: #a98bff;
+  --lb-note-blue: #74aae8;
+  --lb-note-green: #6cba86;
+  --lb-note-amber: #cfa04c;
+  --lb-note-red: #e0808f;
+
+  --lb-mark-purple: #322a52;
+  --lb-mark-blue: #1e3149;
+  --lb-mark-green: #1c3325;
+  --lb-mark-amber: #3a2e18;
+  --lb-mark-red: #3d2027;
 }
 
 * {

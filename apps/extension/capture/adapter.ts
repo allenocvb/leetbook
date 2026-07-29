@@ -1,4 +1,6 @@
-import { type Difficulty, isDifficulty, slugFromUrl } from "@leetbook/core";
+import { isDifficulty, slugFromUrl } from "@leetbook/core";
+// Type-only, so this does not create a runtime cycle with the source registry below it.
+import type { ProblemMeta } from "./source.js";
 
 /**
  * ⚠️ The ONLY module that knows LeetCode's page internals (DOM locators,
@@ -55,12 +57,6 @@ export function extractStats(root: ParentNode): SubmissionStats {
     scope = scope.parentElement;
   }
   return best;
-}
-
-export interface ProblemMeta {
-  title: string;
-  difficulty: Difficulty;
-  tags: string[];
 }
 
 interface GraphQlQuestion {

@@ -44,3 +44,68 @@
   margin: 0 3px;
   background: var(--lb-bd);
 }
+
+.selection-toolbar__menu {
+  position: relative;
+}
+
+.selection-toolbar__swatch-label {
+  font-weight: 600;
+  font-size: 13px;
+  /* An underline in the accent reads as "this button is about colour" at 28px. */
+  border-bottom: 2px solid var(--lb-note-purple);
+  line-height: 1.1;
+}
+
+.selection-toolbar__swatch-label--marked {
+  border-bottom: none;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--lb-mark-amber);
+  color: var(--lb-ink);
+}
+
+.selection-toolbar__swatches {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-4);
+  box-shadow: var(--lb-shadow-floating);
+}
+
+.selection-toolbar__swatch {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--lb-radius-2);
+  transition: background-color 120ms ease;
+}
+
+.selection-toolbar__swatch:hover,
+.selection-toolbar__swatch[aria-pressed="true"] {
+  background: var(--lb-surf-3);
+}
+
+.selection-toolbar__swatch-chip {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* The reset swatch shows plain body text, which is exactly what it restores. */
+.selection-toolbar__swatch--clear .selection-toolbar__swatch-chip {
+  color: var(--lb-text-2);
+  border: 1px dashed var(--lb-muted-3);
+}

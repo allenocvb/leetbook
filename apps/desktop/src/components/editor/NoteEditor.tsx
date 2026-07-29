@@ -1,5 +1,6 @@
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyleKit } from "@tiptap/extension-text-style";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
@@ -204,6 +205,16 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ codeBlock: false }),
+      /*
+       * Colour only. The kit also offers font family, font size and line height, which are
+       * document-level decisions the typography scale already makes — exposing them would
+       * let a note drift away from the rest of the app.
+       */
+      TextStyleKit.configure({
+        fontFamily: false,
+        fontSize: false,
+        lineHeight: false,
+      }),
       EditorCodeBlock,
       Placeholder.configure({ placeholder: NOTE_PLACEHOLDER }),
       Callout,

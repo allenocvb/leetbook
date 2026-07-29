@@ -84,6 +84,13 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and
       inline code all apply and show as active. Clear formatting removes them.
 - [ ] Link prompts for a URL, applies, and an empty value removes it.
+- [ ] Text colour opens a swatch grid; picking one recolours the selection and closes the grid.
+      The reset swatch returns it to body text.
+- [ ] Highlight does the same for the background.
+- [ ] Colour some text, then toggle the theme: it stays legible in both, and the swatches
+      themselves restyle. Reload — the colour survives and still follows the theme.
+- [ ] With a swatch grid open, select different text: the grid closes rather than following
+      the bar to its new position.
 - [ ] Selecting inside a code block shows **no** format bar.
 - [ ] Language picker changes highlighting and persists after reload.
 - [ ] Delete a problem: first click arms, Cancel backs out, Delete removes it and returns

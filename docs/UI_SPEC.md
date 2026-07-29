@@ -210,11 +210,17 @@ Editor:
 - Support headings, paragraphs, bold, italic, inline code, bullets, numbered lists, blockquote,
   callout, and syntax-highlighted code blocks.
 - Empty editor placeholder: `Type “/” for commands…`.
-- Selecting text raises a floating format bar: bold, italic, underline, strikethrough, inline
-  code, link, and clear formatting. Every mark already shipped with the editor; the bar exists
-  because keyboard shortcuts alone left them undiscoverable. Buttons suppress mousedown so the
-  selection survives the click, and the bar never appears inside a code block, where marking up
-  source is meaningless.
+- Selecting text raises a floating format bar: bold, italic, underline, strikethrough, text
+  colour, highlight, inline code, link, and clear formatting. Every mark but colour already
+  shipped with the editor; the bar exists because keyboard shortcuts alone left them
+  undiscoverable. Buttons suppress mousedown so the selection survives the click, and the bar
+  never appears inside a code block, where marking up source is meaningless.
+- Text colour and highlight each open a five-swatch grid — purple, blue, green, amber, red —
+  ending in a dashed reset swatch. Picking closes the grid; moving the selection closes it too,
+  since the bar repositions and would otherwise leave a stale grid over the document. Colours
+  are written into the note as `var(--lb-note-*)` / `var(--lb-mark-*)` references rather than
+  resolved hex, so a passage coloured in light mode stays legible in dark mode instead of
+  freezing at whichever palette was active when it was written.
 - Slash menu exposes the supported block types and is fully keyboard operable. Exactly one item
   is ever highlighted: hovering adopts the active index rather than styling a second row, so the
   item under the pointer is always the one Enter will insert. Keeping the active item in view

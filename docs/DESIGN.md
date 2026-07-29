@@ -47,7 +47,12 @@ Internal FSRS mapping: 0–1 → Again, 2 → Hard, 3–4 → Good, 5 → Easy. 
 
 **Key principle:** the app is fully usable with manual entry alone. The extension is an automation layer, not a dependency. If LeetCode changes their DOM and capture breaks, the product still works.
 
-**v1 explicitly excludes:** cloud sync, accounts, social features, mobile, NeetCode-specific capture (most NeetCode practice links to LeetCode anyway → v1.5).
+**v1 explicitly excludes:** cloud sync, accounts, social features, mobile, editor embeds and databases.
+
+**NeetCode is now in scope (Phase 12).** The original reasoning — that most NeetCode practice
+links out to LeetCode anyway — held for the roadmap but not for the user: someone working the
+NeetCode 150 in NeetCode's own editor submits there and never touches leetcode.com, so capture
+saw nothing. Both sites are first-class sources behind one pipeline (§4.2).
 
 ## 4. Architecture
 
@@ -61,12 +66,12 @@ leetbook/
 │   ├── data-access layer
 │   └── import/export (Notion CSV, JSON, Markdown)
 ├── apps/desktop         # Tauri 2 + React. SQLite via Tauri SQL plugin.
-└── apps/extension       # Manifest V3, built with WXT. Content script on leetcode.com.
+└── apps/extension       # Manifest V3, built with WXT. Content scripts on the practice sites.
 ```
 
 - **Why Tauri over Electron:** ~10MB binaries vs ~150MB, lower memory, enforced UI/system separation.
 - **`packages/core` is portable** — a future web version reuses it wholesale.
-- **All scraping logic lives in one isolated adapter module** in the extension, with tests. It's the only part that breaks when LeetCode changes; keep the blast radius small.
+- **Each site's page knowledge lives in one isolated adapter module** in the extension, with tests. When a site changes, exactly one adapter breaks; keep the blast radius small.
 
 ### 4.1 Extension → App Bridge
 
@@ -76,14 +81,24 @@ leetbook/
 
 ### 4.2 Capture Flow
 
-1. Content script detects an **Accepted** submission on leetcode.com.
-2. Pulls slug and problem metadata (title, difficulty, topics) from LeetCode's public GraphQL,
-   then reads the submission itself — code, language, runtime, memory — from the authenticated
-   `submissionDetails` query, keyed by the id LeetCode puts in the URL. Scraping was tried and
-   abandoned: the editor buffer is not in localStorage, and Monaco virtualises its lines, so
-   DOM capture truncates long solutions. DOM stats remain a fallback when there is no id.
+Every practice site implements one `CaptureSource` interface (`capture/source.ts`): match a
+URL, find the slug, recognise an Accepted verdict, read the metadata, read the submission.
+Everything downstream — toast, queue, delivery relay, desktop listener — is source-agnostic.
+
+1. Content script asks the registry which source handles the current page, then watches for
+   that source's **Accepted** verdict.
+2. The source returns problem metadata (title, difficulty, topics) and the submission itself
+   (code, language, runtime, memory). On LeetCode both come from GraphQL: the public
+   `question` query and the authenticated `submissionDetails` query, keyed by the id LeetCode
+   puts in the URL. Scraping was tried and abandoned — the editor buffer is not in
+   localStorage, and Monaco virtualises its lines, so DOM capture truncates long solutions.
+   DOM stats remain a fallback when there is no id.
 3. In-page toast: "Rate your recall 0–5."
 4. Payload sent to app → upsert problem → log review (with code snapshot + perf stats) → FSRS computes next due date.
+
+**Slugs are shared across sources.** `two-sum` solved on NeetCode and `two-sum` solved on
+LeetCode are the same problem and must land on the same row, or the review history splits in
+two and the schedule stops meaning anything.
 
 ### 4.3 Notes Editor
 

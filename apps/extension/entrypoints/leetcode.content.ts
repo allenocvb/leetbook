@@ -2,16 +2,9 @@ import "@fontsource/chewy/latin-400.css";
 import "@fontsource/jetbrains-mono/latin-400.css";
 import "@fontsource/rubik/latin-400.css";
 import "@fontsource/rubik/latin-500.css";
-import {
-  extractStats,
-  fetchProblemMeta,
-  fetchSubmissionDetails,
-  isAcceptedResult,
-  slugFromLocation,
-  submissionIdFromLocation,
-} from "../capture/adapter.js";
 import { isCaptureDeliveryResult, type QueueStatusMessage } from "../capture/delivery.js";
 import type { CapturePayload } from "../capture/payload.js";
+import { type CaptureSource, sourceForUrl } from "../capture/source.js";
 import { type CaptureToastHandle, showCaptureToast } from "../capture/toast.js";
 
 export default defineContentScript({
@@ -21,14 +14,19 @@ export default defineContentScript({
     let activeToast: CaptureToastHandle | null = null;
 
     const checkForCapture = () => {
-      if (!isAcceptedResult(document)) {
+      // Resolved per check, not once at startup: a single-page app can navigate between
+      // hosts without the content script being torn down and re-injected.
+      const source = sourceForUrl(location.href);
+      if (!source) return;
+
+      if (!source.isAccepted(document)) {
         capturedForSlug = null; // verdict gone → ready for the next submission
         return;
       }
-      const slug = slugFromLocation(location.href);
+      const slug = source.slugFrom(location.href);
       if (!slug || slug === capturedForSlug) return;
       capturedForSlug = slug;
-      void offerCapture(slug).then((toast) => {
+      void offerCapture(source, slug).then((toast) => {
         activeToast?.host.remove();
         activeToast = toast;
       });
@@ -54,36 +52,25 @@ export default defineContentScript({
 /** Prefix so a user glancing at the console can tell these apart from LeetCode's own logs. */
 const LOG = "[LeetBook]";
 
-async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
-  const meta = await fetchProblemMeta(slug);
+async function offerCapture(
+  source: CaptureSource,
+  slug: string,
+): Promise<CaptureToastHandle | null> {
+  const meta = await source.readMeta(slug);
   if (!meta) {
     // Bailing here is deliberate — difficulty and topics cannot be invented — but silence
     // here is indistinguishable from a broken extension, so say so.
     console.warn(
-      `${LOG} No toast: could not read problem metadata for "${slug}". The submission was not captured.`,
+      `${LOG} No toast: could not read problem metadata for "${slug}" on ${source.name}. The submission was not captured.`,
     );
     return null;
   }
 
-  /*
-   * Prefer the submission API: it returns the exact code, language and stats LeetCode
-   * recorded. The DOM stats remain a fallback for when the submission id is not in the URL
-   * (an older result still on screen, or a navigation we did not follow).
-   */
-  const submissionId = submissionIdFromLocation(location.href);
-  const submission = submissionId === null ? null : await fetchSubmissionDetails(submissionId);
-  if (!submission?.code) {
-    console.warn(
-      `${LOG} Capturing "${slug}" without a code snapshot${
-        submissionId === null
-          ? ": no submission id in the URL."
-          : ": submissionDetails returned nothing."
-      }`,
-    );
+  const submission = await source.readSubmission(location.href, document);
+  if (submission.warning) {
+    console.warn(`${LOG} Capturing "${slug}" without a code snapshot: ${submission.warning}.`);
   }
-  const domStats = extractStats(document);
-  const runtimeMs = submission?.runtimeMs ?? domStats.runtimeMs;
-  const memoryMb = submission?.memoryMb ?? domStats.memoryMb;
+  const { runtimeMs, memoryMb } = submission;
   const sendScore = async (score: CapturePayload["score"]) => {
     const payload: CapturePayload = {
       version: 1,
@@ -94,8 +81,8 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
       score,
       runtimeMs,
       memoryMb,
-      language: submission?.language ?? null,
-      codeSnapshot: submission?.code ?? null,
+      language: submission.language,
+      codeSnapshot: submission.code,
       capturedAt: new Date().toISOString(),
     };
     const result: unknown = await browser.runtime.sendMessage({
@@ -113,7 +100,7 @@ async function offerCapture(slug: string): Promise<CaptureToastHandle | null> {
       difficulty: meta.difficulty,
       runtimeMs,
       memoryMb,
-      codeSaved: submission?.code != null,
+      codeSaved: submission.code != null,
     },
     { onRate: sendScore },
   );
