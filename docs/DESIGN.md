@@ -88,17 +88,36 @@ Everything downstream — toast, queue, delivery relay, desktop listener — is 
 1. Content script asks the registry which source handles the current page, then watches for
    that source's **Accepted** verdict.
 2. The source returns problem metadata (title, difficulty, topics) and the submission itself
-   (code, language, runtime, memory). On LeetCode both come from GraphQL: the public
+   (code, language, runtime, memory).
+
+   The two sites need opposite techniques. On LeetCode both come from GraphQL: the public
    `question` query and the authenticated `submissionDetails` query, keyed by the id LeetCode
    puts in the URL. Scraping was tried and abandoned — the editor buffer is not in
    localStorage, and Monaco virtualises its lines, so DOM capture truncates long solutions.
-   DOM stats remain a fallback when there is no id.
+   DOM stats remain a fallback when there is no id. On NeetCode the reverse holds: the
+   submission is rendered as static text and there is no equivalent API, so the DOM is both
+   the simplest and the only source.
+
+   NeetCode's metadata lookup runs in the **background worker**. A content script on
+   neetcode.io calling leetcode.com is cross-origin and LeetCode sends no permissive
+   `Access-Control-Allow-Origin`; the worker holds the host permission and is exempt.
 3. In-page toast: "Rate your recall 0–5."
 4. Payload sent to app → upsert problem → log review (with code snapshot + perf stats) → FSRS computes next due date.
 
-**Slugs are shared across sources.** `two-sum` solved on NeetCode and `two-sum` solved on
-LeetCode are the same problem and must land on the same row, or the review history splits in
-two and the schedule stops meaning anything.
+**Identity is always LeetCode's slug.** A problem solved on NeetCode and the same problem
+solved on LeetCode must land on one row, or the review history splits in two and the schedule
+stops meaning anything.
+
+NeetCode makes this non-trivial: it renames URL slugs (`two-integer-sum`) but keeps the
+displayed title ("Two Sum"). Since LeetCode's slugs are slugified titles, the join is
+`slugify(title)` — **then verified** by looking that slug up on LeetCode and confirming the
+returned title matches. A mismatch abandons the capture.
+
+The asymmetry is deliberate. A skipped capture is an inconvenience the user can fix by hand; a
+wrong merge fuses two problems' review histories and nothing in the app can separate them
+again. Fuzzy title matching was rejected for the same reason — "Subarray Sum Equals K" and
+"Minimum Size Subarray Sum" are different problems. A shipped 150-row mapping table was
+rejected as strictly worse: more to maintain, and no self-check.
 
 ### 4.3 Notes Editor
 

@@ -136,6 +136,22 @@ pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
       flushes and the capture lands.
 - [ ] Dismiss/skip schedules as Good.
 
+### Capture — NeetCode
+
+- [ ] Submit a real Accepted solution on neetcode.io. **A toast appears bottom-right**, with
+      the runtime and memory NeetCode shows in the submission header ("Memory: 7.7 MB ·
+      Time: 28ms") and **code saved**.
+- [ ] The notes page shows the full solution, indentation intact — Python is unreadable
+      otherwise.
+- [ ] **The row is LeetCode's.** A problem NeetCode calls `two-integer-sum` must land on
+      `two-sum`, with the LeetCode URL and LeetCode's difficulty and topics.
+- [ ] Solve the same problem on both sites. There is **one** row with **two** reviews, not two
+      rows. This is the acceptance test for the whole cross-site design.
+- [ ] Rate a NeetCode-exclusive problem (one with no LeetCode counterpart): no toast, and the
+      console explains that LeetCode could not confirm it. It must not create a row.
+- [ ] Queue a NeetCode capture with the app closed, then reopen: the NeetCode tab's toast
+      reports the flush, not just a LeetCode tab.
+
 **If no toast appears at all**, check `fetchProblemMeta` first: it returns null on any
 GraphQL failure and `offerCapture` then bails silently, which is indistinguishable from a
 broken extension. That is the most likely failure and the first thing worth making

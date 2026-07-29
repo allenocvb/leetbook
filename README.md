@@ -51,7 +51,8 @@ Your database lives in the OS application-data directory (on macOS,
 
 ### Setting up the extension
 
-The extension watches leetcode.com and offers you a 0–5 rating when a submission is Accepted.
+The extension watches leetcode.com and neetcode.io, and offers you a 0–5 rating when a
+submission is Accepted. Solving the same problem on either site lands on one row.
 
 ```bash
 pnpm --filter extension dev
@@ -152,9 +153,13 @@ window, native dialogs, external links, or a live LeetCode page. Work through
 [`docs/QA.md`](./docs/QA.md) by hand for those.
 
 **Extension captures nothing.** Open the page's devtools console and look for `[LeetBook]`
-lines. Capture depends on LeetCode's own submission API, so if they change it,
-`apps/extension/capture/adapter.ts` is the single file that needs updating. Note that only
-leetcode.com is captured today — solving inside NeetCode's editor records nothing yet.
+lines — they say which check failed. Each site's page knowledge lives in one file:
+`apps/extension/capture/adapter.ts` for LeetCode, `capture/neetcode.ts` for NeetCode.
+
+**A NeetCode problem never captures.** NeetCode captures are identified by looking the problem
+up on LeetCode by title, so anything NeetCode-exclusive is skipped by design, as is a problem
+whose title doesn't match LeetCode's. The console says which. This is deliberate: guessing
+would merge two problems' review histories together, and there's no way to separate them after.
 
 ---
 

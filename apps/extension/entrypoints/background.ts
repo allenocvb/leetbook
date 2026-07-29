@@ -1,5 +1,7 @@
+import { fetchProblemMeta } from "../capture/adapter.js";
 import { DEFAULT_PORT, type PairingSettings, sendQueueStatus } from "../capture/client.js";
 import { deliverCapture, flushCaptureQueue, type QueueStatusMessage } from "../capture/delivery.js";
+import { isProblemMetaRequest } from "../capture/metaRelay.js";
 import type { CapturePayload } from "../capture/payload.js";
 import { createQueue, type KvStorage } from "../capture/queue.js";
 
@@ -37,7 +39,10 @@ async function flushQueue(): Promise<void> {
 
 async function notifyQueueStatus(result: { sent: number; remaining: number }): Promise<void> {
   const message: QueueStatusMessage = { type: "leetbook-queue-status", ...result };
-  const tabs = await browser.tabs.query({ url: "*://leetcode.com/*" });
+  // Both practice sites, or a NeetCode toast never hears that its queued capture went out.
+  const tabs = await browser.tabs.query({
+    url: ["*://leetcode.com/*", "*://neetcode.io/*"],
+  });
   await Promise.allSettled(
     tabs.flatMap((tab) =>
       tab.id === undefined ? [] : [browser.tabs.sendMessage(tab.id, message)],
@@ -60,6 +65,17 @@ export default defineBackground(() => {
     if (typed?.type === "leetbook-capture" && typed.payload) {
       const payload = typed.payload;
       return serialized(() => deliver(payload));
+    }
+    /*
+     * A NeetCode content script cannot call leetcode.com itself — that is cross-origin and
+     * LeetCode sends no permissive CORS header. The worker holds the host permission, so the
+     * lookup happens here and the result is passed back.
+     *
+     * Not serialized: this is a read with no shared state, and queueing it behind capture
+     * delivery would stall the toast on an unrelated retry.
+     */
+    if (isProblemMetaRequest(message)) {
+      return fetchProblemMeta(message.slug);
     }
   });
 

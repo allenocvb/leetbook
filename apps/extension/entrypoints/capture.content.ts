@@ -8,7 +8,8 @@ import { type CaptureSource, sourceForUrl } from "../capture/source.js";
 import { type CaptureToastHandle, showCaptureToast } from "../capture/toast.js";
 
 export default defineContentScript({
-  matches: ["*://leetcode.com/*"],
+  // One script for both sites; which one it is gets resolved per check, below.
+  matches: ["*://leetcode.com/*", "*://neetcode.io/*"],
   main() {
     let capturedForSlug: string | null = null;
     let activeToast: CaptureToastHandle | null = null;
@@ -23,7 +24,7 @@ export default defineContentScript({
         capturedForSlug = null; // verdict gone → ready for the next submission
         return;
       }
-      const slug = source.slugFrom(location.href);
+      const slug = source.slugFrom(location.href, document);
       if (!slug || slug === capturedForSlug) return;
       capturedForSlug = slug;
       void offerCapture(source, slug).then((toast) => {
@@ -56,12 +57,16 @@ async function offerCapture(
   source: CaptureSource,
   slug: string,
 ): Promise<CaptureToastHandle | null> {
-  const meta = await source.readMeta(slug);
+  const meta = await source.readMeta(slug, document);
   if (!meta) {
-    // Bailing here is deliberate — difficulty and topics cannot be invented — but silence
-    // here is indistinguishable from a broken extension, so say so.
+    /*
+     * Bailing is deliberate — difficulty and topics cannot be invented, and on NeetCode a
+     * null here also means the title check disagreed, so capturing anyway would merge this
+     * submission into some other problem's history. Silence would be indistinguishable from
+     * a broken extension, so say which it was.
+     */
     console.warn(
-      `${LOG} No toast: could not read problem metadata for "${slug}" on ${source.name}. The submission was not captured.`,
+      `${LOG} No toast: could not confirm "${slug}" on ${source.name}. Either LeetCode has no such problem, or its title did not match this page. The submission was not captured.`,
     );
     return null;
   }

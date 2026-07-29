@@ -209,18 +209,48 @@ all.
 - [x] 12.1 Capture source seam: define the `CaptureSource` contract (match, slug, verdict,
       metadata, submission), move LeetCode behind it, and drive the content script from the
       registry rather than from LeetCode's functions directly
-- [ ] 12.2 NeetCode reconnaissance: on a real solved problem in NeetCode's own editor, record
-      the URL shape, how an Accepted verdict appears in the DOM, whether the solution is
-      reachable without scraping the editor, and whether runtime/memory exist at all. Write
-      the findings into this task before writing any code
-- [ ] 12.3 NeetCode adapter: implement `CaptureSource` from 12.2's findings, in its own module
-      with its own fixture tests, and register it. Map NeetCode's problem identity onto the
-      shared LeetCode slug so a problem solved on either site lands on one row
-- [ ] 12.4 Manifest and content script: add the NeetCode host to `matches` and to the extension
+- [x] 12.2 NeetCode reconnaissance: run `docs/recon/neetcode.js` — step 1 before submitting,
+      step 2 after the verdict, step 3 for the network and slug questions — and record the
+      findings here before writing any code.
+
+      **Confirmed** (neetcode.io, `two-integer-sum`, July 2026):
+
+      - Angular SPA (`app-prompt`, `app-output-tab`, `app-modal`). No `data-*` hooks; class
+        names are the only locators available.
+      - URL is `/problems/<neetcode-slug>`, with `/history?submissionIndex=N` after a
+        submission. The slug is **not** in the last path segment.
+      - Verdict: `.submission-result-accepted`, on an `h1.submission-status-title` in the
+        history pane and on a `p` inside `.output-header` in the console pane. One class
+        serves both.
+      - `Passed test cases: 23 / 23` sits in `p.test-case-count`.
+      - **Title is `h1.problem-title`, and it matches LeetCode's title exactly** — "Two Sum",
+        despite the slug being `two-integer-sum`. Only the URL is renamed.
+      - **Runtime and memory are on the page**: "Memory: 7.7 MB · Time: 28ms" in the
+        submission header, plus Beats-% cards. No API call needed.
+      - **The submitted code is rendered as static text** under a "Code | Python" heading on
+        the submissions pane — not inside a virtualised editor, so unlike LeetCode it can be
+        read straight from the DOM.
+
+- [x] 12.3 Cross-site problem identity: NeetCode renames the URL slug (`two-integer-sum`) but
+      **not the title** (`Two Sum`), and LeetCode's slugs are slugified titles. So the join is
+      `slugify(neetcodeTitle)` → LeetCode slug, then **verified** by fetching LeetCode's
+      metadata for that slug and comparing the returned title. A mismatch means don't merge.
+
+      Self-checking beats a shipped mapping table: no 150-row file to maintain, no silent
+      wrong merge, and the failure mode is a skipped capture rather than a corrupted history.
+      Fuzzy title matching is rejected outright — "Subarray Sum Equals K" and "Minimum Size
+      Subarray Sum" are different problems and the app has no un-merge path.
+
+      Note: the verification fetch must run in the **background worker**, not the content
+      script. A content script on neetcode.io calling leetcode.com is cross-origin and CORS
+      will block it; the worker has host permissions and is not subject to it.
+- [x] 12.4 NeetCode adapter: implement `CaptureSource` from 12.2's findings, in its own module
+      with its own fixture tests, and register it
+- [x] 12.5 Manifest and content script: add the NeetCode host to `matches` and to the extension
       permissions, and confirm the single content script serves both sites
-- [ ] 12.5 Degrade honestly: NeetCode may expose no runtime, memory, or retrievable code. The
-      toast and the notes page must read as "not available here" rather than as a failure, and
-      a capture missing those fields must still create the review
-- [ ] 12.6 Cross-source acceptance: solve the same problem on both sites, confirm one problem
+- [ ] 12.6 Degrade honestly: a NeetCode problem with no LeetCode counterpart, or one whose
+      title verification fails, must not be silently dropped or silently merged. Say which it
+      is in the toast, and keep a capture that is missing runtime or memory working anyway
+- [ ] 12.7 Cross-source acceptance: solve the same problem on both sites, confirm one problem
       row with two reviews and a correctly replayed schedule, and add the walkthrough to
       `docs/QA.md`

@@ -20,10 +20,10 @@ rate your recall once, and the schedule takes care of itself.
 date from your actual recall history — not a fixed ladder. Getting something right pushes it
 weeks out; forgetting it pulls it back to days.
 
-**Automatic capture.** A browser extension notices an Accepted submission on leetcode.com and
-offers a 0–5 toast in the corner. Rating it creates or updates the problem in the app with the
-submitted code, language, runtime and memory attached. You never retype a problem. NeetCode is
-the next source in (Phase 12).
+**Automatic capture.** A browser extension notices an Accepted submission on leetcode.com or
+neetcode.io and offers a 0–5 toast in the corner. Rating it creates or updates the problem in
+the app with the submitted code, language, runtime and memory attached. You never retype a
+problem, and solving the same problem on either site lands on one row.
 
 **Notes worth rereading.** A Notion-style editor per problem: headings, lists, quotes, a purple
 recall callout for the one insight you want to remember, and syntax-highlighted code blocks
@@ -63,7 +63,7 @@ out much further than your memory deserves.
 leetbook/
 ├── packages/core      pure TypeScript — schema, FSRS, data access, import/export
 ├── apps/desktop       Tauri 2 + React shell over core
-└── apps/extension     MV3 browser extension (WXT), leetcode.com content script
+└── apps/extension     MV3 browser extension (WXT), LeetCode + NeetCode content script
 ```
 
 ### packages/core
@@ -114,9 +114,24 @@ One content script and a background relay.
 Every practice site implements the `CaptureSource` contract in `capture/source.ts`: match a
 URL, find the slug, recognise an Accepted verdict, read the metadata, read the submission.
 Everything downstream — the toast, the offline queue, the relay, the desktop listener — is
-source-agnostic. **All LeetCode knowledge lives in `capture/adapter.ts`**: the DOM locator for
-the verdict, the GraphQL queries, the URL shapes. When LeetCode changes, that file breaks and
-nothing else does, and it has its own tests. NeetCode arrives as a sibling adapter in Phase 12.
+source-agnostic. Each site's page knowledge lives in exactly one module (`capture/adapter.ts`
+for LeetCode, `capture/neetcode.ts` for NeetCode), each with its own tests, so a site redesign
+breaks one file and nothing else.
+
+The two sites need opposite techniques. LeetCode keeps the solution in a virtualised Monaco
+editor, so scraping truncates it and capture goes through the authenticated `submissionDetails`
+GraphQL query instead. NeetCode renders the submission as static text, so the DOM is the
+simplest correct source — and it has no equivalent API to fall back on.
+
+**Cross-site identity.** NeetCode renames URL slugs (`two-integer-sum` for LeetCode's
+`two-sum`) but keeps the displayed title. Since LeetCode's slugs are slugified titles, a
+NeetCode capture derives the LeetCode slug from the title and then *verifies* it by looking the
+problem up on LeetCode and comparing titles. A mismatch abandons the capture. That direction
+matters: a missed capture is an inconvenience, whereas a wrong merge fuses two review histories
+into one and nothing in the app can separate them again.
+
+The verification fetch runs in the background worker rather than the content script — a page on
+neetcode.io calling leetcode.com is cross-origin, and LeetCode sends no permissive CORS header.
 
 Capture reads the submission from LeetCode's authenticated `submissionDetails` API rather than
 scraping: the editor buffer is not in `localStorage`, and Monaco virtualises its lines, so DOM
@@ -165,7 +180,9 @@ have hidden behind a green suite; the checklist exists because of them.
 - macOS only in practice. Nothing is deliberately platform-specific except the titlebar inset,
   but nothing else has been tested.
 - The extension is loaded unpacked; it is not in the Chrome Web Store yet.
-- Capture depends on LeetCode's page and API staying put. The blast radius is one file.
-- Only LeetCode is captured today. Solving in NeetCode's own editor records nothing.
+- Capture depends on each site's page and API staying put. The blast radius is one file per
+  site, and NeetCode offers only class names to hang selectors on.
+- A NeetCode problem with no LeetCode counterpart is not captured at all, because identity is
+  established by looking it up on LeetCode.
 - Imported problems arrive with their original due dates, so a Notion import can land entirely
   overdue.
