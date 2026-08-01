@@ -9,6 +9,7 @@ import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
+import { DesignTopicsPage } from "./pages/DesignTopicsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
@@ -69,6 +70,7 @@ function Shell() {
         route.view === "due-today" ||
         route.view === "problem" ||
         route.view === "review" ||
+        route.view === "system-design" ||
         route.view === "settings"
       }
     >
@@ -136,6 +138,12 @@ function Page({
       );
     case "review":
       return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
+    case "system-design":
+      /*
+       * Topics do not open anywhere yet — the notes page is 13.4. Wired to a no-op rather
+       * than left unhandled so the table renders and the switch stays exhaustive.
+       */
+      return <DesignTopicsPage onOpenTopic={() => undefined} refreshKey={refreshKey} />;
     case "settings":
       return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
   }

@@ -189,6 +189,23 @@ Dark status pills:
   (`height: 100%`); the flush main pane is a block container, so relying on `flex: 1` collapses
   the page to content height and the table is clipped instead of scrolled.
 
+### System design table
+
+- Reached from a fifth sidebar item, `System Design`, placed after `Review Session`.
+- Reuses the problem table's card, rows, hover, chips and pills outright. Only the grid
+  template differs: `2.1fr .9fr .8fr .8fr .5fr .5fr 1.1fr 28px`, min-width 760px. Two tables
+  that look subtly different for no reason is worse than one shared stylesheet.
+- Columns: Topic, Status, Next Review, Last Review, Score, Reps, Tags. **No difficulty** — a
+  design topic has none, and an empty column would imply otherwise.
+- Header carries a search field and a solid `+ New topic`. No tabs, no category rail, no
+  density toggle: there is only one design view, and tags are not a canonical taxonomy.
+- Search matches title, prompt and tags. The prompt is where the distinguishing words live.
+- Status uses the same `deriveStatus` as problems, so `Mastered` means the same thing in both.
+- Never-reviewed topics show an em dash for both dates rather than a blank cell.
+- Tags are free text, comma-separated in the dialog, rather than the closed dropdown problems
+  use. There is no agreed system design taxonomy to pick from, and inventing one would bake a
+  guess into the UI; duplicates differing only by case or spacing are still folded on write.
+
 ### Problem notes
 
 - Centered 720px column with `26px 40px 80px` padding.

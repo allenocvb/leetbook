@@ -1,0 +1,13 @@
+/*
+ * The only structural difference from the problem table: no difficulty column, and the topic
+ * title gets the space that frees up. Everything else — card, rows, hover, chips, pills — is
+ * inherited from ProblemTable.css rather than restated.
+ */
+.design-table .problem-table-header,
+.design-table .problem-row {
+  grid-template-columns: 2.1fr 0.9fr 0.8fr 0.8fr 0.5fr 0.5fr 1.1fr 28px;
+}
+
+.design-table .problem-table-grid {
+  min-width: 760px;
+}

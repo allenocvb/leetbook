@@ -12,6 +12,7 @@ import { createTestDb } from "./db/test-helpers.js";
 import { applyDesignReview, previewDesignReview } from "./designReview.js";
 import { scheduleReview } from "./fsrs.js";
 import { applyReview } from "./review.js";
+import { listDesignTableRows, listDueDesignRows } from "./views/designTable.js";
 
 const NOW = new Date("2026-08-01T09:00:00.000Z");
 
@@ -156,6 +157,51 @@ describe("applyDesignReview", () => {
     const soon = new Date(NOW.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const due = await createDesignSchedulingRepo(db).listDueBy(soon);
     expect(due.map((s) => s.topicId)).toEqual([topic.id]);
+  });
+});
+
+describe("design table rows", () => {
+  it("reports a never-reviewed topic as new with no dates", async () => {
+    await addTopic();
+    const [row] = await listDesignTableRows(db);
+    expect(row).toMatchObject({
+      title: "URL shortener",
+      status: "new",
+      nextReview: null,
+      lastReview: null,
+      lastScore: null,
+      reviewCount: 0,
+    });
+  });
+
+  it("derives status from the review log, exactly as problems do", async () => {
+    const topic = await addTopic();
+    // Two consecutive failures is the leech rule, shared with problems.
+    await applyDesignReview(db, { topicId: topic.id, score: 1 }, NOW);
+    await applyDesignReview(db, { topicId: topic.id, score: 0 }, new Date("2026-08-02T09:00:00Z"));
+
+    const [row] = await listDesignTableRows(db);
+    expect(row?.status).toBe("leech");
+    expect(row?.lastScore).toBe(0);
+    expect(row?.reviewCount).toBe(2);
+  });
+
+  it("orders by title", async () => {
+    await addTopic({ title: "Rate limiter" });
+    await addTopic({ title: "Chat system" });
+    const rows = await listDesignTableRows(db);
+    expect(rows.map((r) => r.title)).toEqual(["Chat system", "Rate limiter"]);
+  });
+
+  it("lists only topics that are actually due", async () => {
+    const due = await addTopic({ title: "Due topic" });
+    await addTopic({ title: "Never reviewed" });
+    await applyDesignReview(db, { topicId: due.id, score: 0 }, NOW);
+
+    const soon = new Date(NOW.getTime() + 30 * 86_400_000).toISOString();
+    const rows = await listDueDesignRows(db, soon);
+    // A topic with no schedule at all must not appear as due.
+    expect(rows.map((r) => r.title)).toEqual(["Due topic"]);
   });
 });
 

@@ -75,5 +75,10 @@ export {
   type Review,
   type SchedulingState,
 } from "./types.js";
+export {
+  type DesignTableRow,
+  listDesignTableRows,
+  listDueDesignRows,
+} from "./views/designTable.js";
 export { deriveStatus, type ProblemStatus, type StatusInput } from "./views/status.js";
 export { listDueRows, listTableRows, type TableRow } from "./views/table.js";

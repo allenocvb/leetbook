@@ -96,6 +96,20 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       distinguishable from the page behind them.
 - [ ] Scroll a long list: the sticky header stays put and rows pass cleanly beneath it.
 
+### System design table
+
+- [ ] The sidebar has **five** items; `System Design` sits after `Review Session`.
+- [ ] Add a topic with a title, prompt and two tags. It appears without a reload.
+- [ ] Tags typed as `Caching, caching` produce **one** chip, not two.
+- [ ] Adding with an empty title is refused with a visible message.
+- [ ] Search matches a word that appears only in a prompt, not in any title.
+- [ ] Sorting by each column works and reverses on a second click.
+- [ ] There is **no** Difficulty column.
+- [ ] Delete a topic: it confirms in a dialog, disappears, and stays gone after a restart.
+- [ ] Toggle dark mode: the table matches the problem table exactly.
+- [ ] Export JSON from Settings and open it: the `designTopics`, `designReviews`,
+      `designScheduling` and `designNotes` keys are present, and populated if you have topics.
+
 ### Notes editor
 
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and

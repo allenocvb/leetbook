@@ -286,11 +286,11 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 - [x] 13.2 Scheduling reuse: point `design_scheduling` at the existing FSRS wrapper untouched.
       A design topic is a memory like any other; the scheduler should not know the difference.
       Prove it with tests that replay a design history through the same `scheduleReview`
-- [ ] 13.3 Topics table: a second table view listing design topics with status, next review and
+- [x] 13.3 Topics table: a second table view listing design topics with status, next review and
       tags, reusing the restyled problem table's row treatment rather than a second style
 - [ ] 13.4 Topic notes page: reuse the TipTap editor wholesale. Prose, headings, code blocks
       and callouts are exactly as useful for a design write-up as for a LeetCode note
-- [ ] 13.5 Sidebar and navigation: a System design section that does not disturb the existing
+- [x] 13.5 Sidebar and navigation: a System design section that does not disturb the existing
       four items or their counts
 
 ## Phase 14 — Diagram canvas

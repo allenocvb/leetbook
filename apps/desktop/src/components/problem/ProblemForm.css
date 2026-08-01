@@ -33,6 +33,13 @@
   color: var(--lb-muted-2);
 }
 
+/* Textarea variant: the browser default font is monospace, which breaks the form's rhythm. */
+.problem-form__control--multiline {
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 .problem-form__control:hover {
   border-color: var(--lb-muted-3);
 }
