@@ -19,7 +19,13 @@ export function ProblemTableRow({
   onDelete: () => void;
 }) {
   const nextReview = isDue(row.nextReview) ? "Today" : formatShortDate(row.nextReview);
-  const category = row.tags.join(", ") || "—";
+  /*
+   * The column is one line tall, so only the first two tags are drawn and the rest collapse
+   * into a count. The full list stays in the title attribute for anyone who needs it.
+   */
+  const category = row.tags.join(", ");
+  const shownTags = row.tags.slice(0, 2);
+  const hiddenTagCount = row.tags.length - shownTags.length;
 
   return (
     <div className="problem-row">
@@ -54,9 +60,20 @@ export function ProblemTableRow({
         <ScoreChip score={row.lastScore} />
       </span>
       <span className="problem-row__mono">{row.reviewCount}</span>
-      <span className="problem-row__category" title={category}>
-        {category}
-      </span>
+      {row.tags.length === 0 ? (
+        <span className="problem-row__category--empty">—</span>
+      ) : (
+        <span className="problem-row__category" title={category}>
+          {shownTags.map((tag) => (
+            <span key={tag} className="problem-row__tag">
+              {tag}
+            </span>
+          ))}
+          {hiddenTagCount > 0 && (
+            <span className="problem-row__tag problem-row__tag--more">+{hiddenTagCount}</span>
+          )}
+        </span>
+      )}
       <span>
         <DifficultyText difficulty={row.difficulty} />
       </span>

@@ -2,12 +2,23 @@
   min-width: 0;
   min-height: 0;
   flex: 1;
-  padding: 0 34px;
+  padding: 16px 34px 24px;
+  /* One step below the card so its edge reads without needing a shadow. */
+  background: var(--lb-surf-2);
   overflow: auto;
 }
 
+/*
+ * The rows sit in a bordered card rather than running flush against the page. It gives the
+ * table an edge to breathe inside, and it lets row hover be a rounded block set in from that
+ * edge instead of a full-bleed stripe, which is what made the list read as a spreadsheet.
+ */
 .problem-table-grid {
   min-width: 820px;
+  padding: 0 10px 6px;
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-7);
 }
 
 .problem-table-header,
@@ -16,18 +27,22 @@
   grid-template-columns: 1.7fr 0.9fr 0.8fr 0.8fr 0.5fr 0.5fr 1fr 0.7fr 28px;
   column-gap: 16px;
   align-items: center;
+  /* Matches the row hover inset, so every column lines up with its header. */
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
 .problem-table-header {
   position: sticky;
   z-index: 5;
   top: 0;
-  padding: 10px 0;
-  color: var(--lb-muted-2);
+  padding-top: 14px;
+  padding-bottom: 11px;
+  color: var(--lb-muted);
   background: var(--lb-surf);
-  border-bottom: 1px solid var(--lb-bd);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--lb-bd-2);
+  font-size: 11px;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -53,22 +68,51 @@
 .problem-row {
   position: relative;
   width: 100%;
-  padding: 11px 0;
+  padding-top: 16px;
+  padding-bottom: 16px;
   color: var(--lb-text-2);
   background: transparent;
-  border-bottom: 1px solid var(--lb-bd);
-  border-radius: 0;
+  border-radius: var(--lb-radius-4);
   font-size: 13.5px;
   text-align: left;
   transition: background-color 100ms ease;
 }
 
+/*
+ * A hairline between rows rather than under each one: an inset pseudo-element, drawn on the
+ * top edge and skipped on the first row. A real border-bottom would show through the rounded
+ * hover fill and sit proud of its corners.
+ *
+ * Top rather than bottom so hover can suppress both adjacent dividers using only forward
+ * combinators — CSS has no previous-sibling selector.
+ */
+.problem-row::before {
+  position: absolute;
+  top: 0;
+  right: 12px;
+  left: 12px;
+  height: 1px;
+  background: var(--lb-bd);
+  content: "";
+}
+
+.problem-row:first-child::before {
+  display: none;
+}
+
 .problem-table-scroll[data-density="compact"] .problem-row {
-  padding: 7px 0;
+  padding-top: 9px;
+  padding-bottom: 9px;
 }
 
 .problem-row:hover {
-  background: var(--lb-surf-2);
+  background: var(--lb-surf-3);
+}
+
+/* The divider would cut across the rounded fill of the row being hovered. */
+.problem-row:hover::before,
+.problem-row:hover + .problem-row::before {
+  opacity: 0;
 }
 
 /*
@@ -78,8 +122,11 @@
  */
 .problem-row__open {
   min-width: 0;
-  color: inherit;
+  color: var(--lb-ink);
   font: inherit;
+  /* The title is the row's subject; everything else is metadata about it. */
+  font-size: 14px;
+  font-weight: 500;
   text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -161,11 +208,46 @@
   font-size: 10.5px;
 }
 
-.problem-row__title,
-.problem-row__category {
+.problem-row__title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/*
+ * Categories are chips, matching how the notes page already shows them. As comma-separated
+ * grey text they read as one long string rather than a set of tags.
+ */
+.problem-row__category {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.problem-row__tag {
+  padding: 2px 8px;
+  color: var(--lb-text-3);
+  background: var(--lb-chip);
+  border-radius: var(--lb-radius-pill);
+  font-size: 11.5px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* "+2" rather than a row that grows: the column has one line to work with. */
+.problem-row__tag--more {
+  flex: 0 0 auto;
+  color: var(--lb-muted-2);
+  background: transparent;
+  padding-left: 0;
+}
+
+.problem-row__category--empty {
+  color: var(--lb-muted-3);
+  font-size: 12.5px;
 }
 
 .problem-row__arrow {
@@ -181,8 +263,10 @@
   font-size: 12.5px;
 }
 
+/* Due today is the one thing worth spotting while scanning, so it gets weight as well as hue. */
 .problem-row__date--due {
   color: var(--lb-accent);
+  font-weight: 500;
 }
 
 .problem-row__date--muted,
@@ -190,35 +274,37 @@
   color: var(--lb-muted);
 }
 
-.problem-row__category {
-  color: var(--lb-text-3);
-  font-size: 12.5px;
-}
-
 .problem-table-empty {
-  padding: 44px 0;
+  padding: 52px 0;
   color: var(--lb-muted-2);
   font-size: 13.5px;
   text-align: center;
 }
 
+/* Inside the card now, so it needs its own inset to line up with the rows above it. */
 .problem-table-new {
-  padding: 14px 0 30px;
+  padding: 13px 12px;
   color: var(--lb-muted-3);
+  border-radius: var(--lb-radius-4);
   font-size: 12.5px;
   text-align: left;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
 }
 
 .problem-table-new:hover {
   color: var(--lb-accent-text);
+  background: var(--lb-surf-3);
 }
 
 .pill {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--lb-radius-pill);
   font-size: 11.5px;
-  line-height: 1.25;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 .pill--new {
@@ -241,10 +327,28 @@
   background: var(--lb-status-leech-bg);
 }
 
+/*
+ * Difficulty gets a dot rather than a pill. Status is already a pill, and two pills side by
+ * side compete; the dot carries the same colour coding at a fraction of the weight.
+ */
 .difficulty--easy,
 .difficulty--medium,
 .difficulty--hard {
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.difficulty--easy::before,
+.difficulty--medium::before,
+.difficulty--hard::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentcolor;
+  content: "";
 }
 
 .difficulty--easy {
@@ -260,16 +364,16 @@
 }
 
 .score-chip {
-  width: 19px;
-  height: 19px;
+  width: 23px;
+  height: 23px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--lb-muted-4);
   background: var(--lb-surf-3);
-  border-radius: var(--lb-radius-1);
+  border-radius: var(--lb-radius-2);
   font-family: var(--lb-font-mono);
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1;
 }
 

@@ -81,6 +81,23 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Typing `l` at the start of a code line is **not** auto-capitalised; quotes stay
       straight, `--` is not turned into an en dash.
 - [ ] `/` inside a code block does not open the slash menu.
+### Problem table
+
+- [ ] Rows sit in a bordered card with visible breathing room, not flush to the page edge.
+- [ ] Hovering a row fills a **rounded** block inset from the card edge, and the hairlines
+      above and below that row disappear — no rule cutting through the rounded corners.
+- [ ] The first row has no rule above it; the last has none below.
+- [ ] Categories show as chips. A problem with 4+ categories shows two chips and `+2`, stays
+      one line tall, and reveals the full list on hover.
+- [ ] A problem with no categories shows an em dash, not an empty cell.
+- [ ] Difficulty is a coloured dot plus label; only Status is a pill.
+- [ ] Switch to compact density: rows tighten, and nothing overlaps or clips.
+- [ ] Toggle dark mode: the card, its border, the chips and the hover fill all remain
+      distinguishable from the page behind them.
+- [ ] Scroll a long list: the sticky header stays put and rows pass cleanly beneath it.
+
+### Notes editor
+
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and
       inline code all apply and show as active. Clear formatting removes them.
 - [ ] Link prompts for a URL, applies, and an empty value removes it.

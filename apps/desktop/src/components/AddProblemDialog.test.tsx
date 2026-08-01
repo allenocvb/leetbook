@@ -60,7 +60,9 @@ describe("AddProblemDialog on the All Problems page", () => {
     // dialog closes, table refreshes with derived title
     await waitFor(() => expect(screen.getByText("Two Sum")).toBeInTheDocument());
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByText("Array, Hash Table")).toBeInTheDocument();
+    // Categories render as one chip each, not a comma-joined string.
+    expect(screen.getByText("Array")).toBeInTheDocument();
+    expect(screen.getByText("Hash Table")).toBeInTheDocument();
     expect(screen.getByText("New")).toBeInTheDocument();
   });
 

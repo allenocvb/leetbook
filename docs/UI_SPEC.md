@@ -152,8 +152,26 @@ Dark status pills:
 - Grid columns: `1.7fr .9fr .8fr .8fr .5fr .5fr 1fr .7fr 28px`; 16px gap. The trailing
   28px track is the row action column and is reserved on the header too, so it stays aligned.
 - Columns: Name, Status, Next Review, Last Review, Score, Reps, Category, Difficulty.
-- Sticky header uses 10.5px uppercase labels. Rows use 11px vertical padding in comfortable
-  density and 7px in compact density.
+- The rows sit in a `surf` card — 1px `bd2` border, `radius-7`, `0 10px 6px` padding — on a
+  `surf2` scroll area inset `16px 34px 24px`. One surface step is what makes the card edge
+  read without a shadow.
+- Header and rows share a 12px horizontal inset so columns line up with the row hover fill.
+- Sticky header uses 11px uppercase `muted` labels, `14px/11px` padding, `bd2` underline.
+  Rows use 16px vertical padding in comfortable density and 9px in compact.
+- Row separators are an inset pseudo-element on the row's **top** edge, hidden on the first
+  row. Top rather than bottom so `:hover` can suppress both adjacent rules with forward
+  combinators only — CSS has no previous-sibling selector, and a real `border-bottom` would
+  cut across the rounded hover fill.
+- Row hover is `surf3` filled to `radius-4`, inset from the card edge — a full-bleed stripe is
+  what made the table read as a spreadsheet.
+- Row title: 14px/500 `ink`. It is the row's subject; every other cell is metadata.
+- Category renders as chips (`chip` background, pill radius, 11.5px), capped at two with the
+  remainder collapsing to `+N`. The column is one line tall, and the full list stays in the
+  cell's `title`. No categories shows an em dash.
+- Difficulty is a 6px dot plus a 12.5px label, not a pill. Status is already a pill and two
+  pills side by side compete for the same attention.
+- `Next Review` reads `Today` in `accent` at weight 500 when due — the one value worth
+  spotting while scanning.
 - Clicking anywhere in a row opens the notes page, but the row is **not** a button: the name
   is the only real control and stretches its hit area across the row with `::after`. A button
   cannot legally contain another button, and the row needs to carry actions. The arrow glyph
@@ -163,8 +181,9 @@ Dark status pills:
   never navigates. Deleting confirms in a dialog rather than inline — a 28px column cannot
   hold a Cancel/Delete pair — and removes the problem with all its reviews, notes and
   scheduling.
-- Score chip: 19×19px. Scores 0–1 use `softRed/red`, 2–3 use `surf3/txt3`, 4–5 use
+- Score chip: 23×23px, `radius-2`. Scores 0–1 use `softRed/red`, 2–3 use `surf3/txt3`, 4–5 use
   `tint/accTxt`, and missing uses `surf3/mut4`.
+- Status pill: `4px 10px` padding, 11.5px at weight 500.
 - Provide sort, search, category filtering, filter clearing, empty state, and `+ New`.
 - The row area scrolls under a sticky header. The page must take its height explicitly
   (`height: 100%`); the flush main pane is a block container, so relying on `flex: 1` collapses
