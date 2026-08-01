@@ -16,6 +16,10 @@ Accepted submissions so users never retype a problem; the app is fully usable wi
 
 **Users:** students grinding LeetCode who want honest review scheduling and notes worth rereading.
 
+From Phase 13 the same scheduling engine also covers **system design** — a notebook with a
+diagram canvas and its own review format. Interview prep is both halves, and only one of them
+has an Accepted verdict to capture.
+
 **The rubric (0–5 recall score, UX-facing; maps internally to FSRS Again/Hard/Good/Easy):**
 0 blackout · 1 familiar-after-seeing · 2 knew-approach-after-hint · 3 correct-with-struggle ·
 4 correct-with-hesitation · 5 perfect recall
@@ -29,6 +33,11 @@ NeetCode capture was on this list and has been promoted to Phase 12. The reasoni
 retired it — that NeetCode practice mostly links out to LeetCode — describes the site, not the
 user: solving in NeetCode's own editor never touches leetcode.com, so capture saw nothing at
 all.
+
+**"No servers" survives Phase 16; "no network" does not.** The AI quiz calls a provider with
+the user's own key — there is still no LeetBook backend and no account — but notes do leave the
+machine when questions are generated. Off by default, cached so reviews stay offline, and the
+docs must say so plainly rather than keeping a promise that has quietly stopped being true.
 
 ---
 
@@ -254,3 +263,113 @@ all.
 - [ ] 12.7 Cross-source acceptance: solve the same problem on both sites, confirm one problem
       row with two reviews and a correctly replayed schedule, and add the walkthrough to
       `docs/QA.md`
+
+---
+
+# System design
+
+> LeetCode practice is recall of a known answer. System design is not — there is no Accepted
+> verdict, no single solution, and the thing worth remembering is a diagram and a set of
+> trade-offs. It needs its own notebook, its own review format, and its own entity. What it
+> reuses is the part that matters most: FSRS scheduling, unchanged.
+>
+> **Sequencing rule.** Each phase below must be independently useful. Phase 13 without 14 is
+> still a notebook; 14 without 15 is still a diagram tool; 15 without 16 is still a working
+> review loop. Nothing here may leave the app in a state that only pays off two phases later.
+
+## Phase 13 — System design topics and notes
+
+- [ ] 13.1 Domain and schema: a `DesignTopic` entity (id, title, prompt, tags, created_at) with
+      its own migration, repository and tests in `packages/core`. Deliberately **not** a
+      `Problem`: there is no slug, URL, difficulty or runtime, and forcing it into that table
+      would put six always-null columns on every LeetCode row
+- [ ] 13.2 Scheduling reuse: point `design_scheduling` at the existing FSRS wrapper untouched.
+      A design topic is a memory like any other; the scheduler should not know the difference.
+      Prove it with tests that replay a design history through the same `scheduleReview`
+- [ ] 13.3 Topics table: a second table view listing design topics with status, next review and
+      tags, reusing the restyled problem table's row treatment rather than a second style
+- [ ] 13.4 Topic notes page: reuse the TipTap editor wholesale. Prose, headings, code blocks
+      and callouts are exactly as useful for a design write-up as for a LeetCode note
+- [ ] 13.5 Sidebar and navigation: a System design section that does not disturb the existing
+      four items or their counts
+
+## Phase 14 — Diagram canvas
+
+> Excalidraw is MIT and ships as a React component with React 19 in its peer range. Writing a
+> drawing engine — freehand smoothing, shape binding, selection, undo — is months of work to
+> land somewhere worse. This phase is an integration, not an implementation.
+
+- [ ] 14.1 Embed `@excalidraw/excalidraw` behind our own thin wrapper component, so the rest of
+      the app imports a LeetBook interface rather than a vendor one and the dependency can be
+      replaced without touching call sites
+- [ ] 14.2 Lazy-load it. The package is large and must not sit in the initial bundle; the
+      problem table's startup time is not allowed to regress because of a feature it never uses.
+      Measure before and after and record both numbers
+- [ ] 14.3 Persist the scene: `getSceneElements()` + `getAppState()` serialised to JSON on the
+      topic, autosaved on the same debounce as notes, restored on open. Round-trip test with a
+      scene containing every element type
+- [ ] 14.4 Theme binding: drive Excalidraw's `theme` prop from our own toggle so the canvas does
+      not stay light while the app goes dark
+- [ ] 14.5 Asset and offline check: Excalidraw pulls fonts and assets, which must resolve inside
+      a packaged Tauri build with no network. Verify in a real `tauri build`, not `dev`
+- [ ] 14.6 Peer-dependency reality check: its Radix transitive deps warn against React 19.
+      Confirm warnings only, no runtime breakage, and record the finding so the next person does
+      not re-investigate
+
+## Phase 15 — Design review sessions
+
+> Deliberately before any AI. A review loop with questions you wrote yourself is a complete,
+> working feature; if the loop is wrong, no model fixes it.
+
+- [ ] 15.1 Design review session: same shape as the LeetCode session — one topic at a time,
+      progress bar, keyboard flow, summary — showing the prompt, then your notes and diagram
+- [ ] 15.2 Self-rated 0–5 against the existing rubric, appended to the review log and scheduled
+      through the same FSRS path
+- [ ] 15.3 Authored questions: write your own questions per topic (multiple choice or free
+      text) and store them. This is the data model the AI layer will later populate, so getting
+      it right without a model in the loop is the point
+- [ ] 15.4 Quiz run-through: answer each question, see the model answer, then rate recall.
+      Multiple choice is graded locally with no network at all
+- [ ] 15.5 Due Today includes design topics alongside problems, or the schedule is invisible
+
+## Phase 16 — AI quiz
+
+> **This is the first feature that breaks "works with no network", and the first that sends
+> user content anywhere.** `docs/DESIGN.md` and the README both promise local-first with no
+> servers and no telemetry. That promise has to be rewritten honestly before this ships, not
+> quietly bent.
+>
+> Two decisions taken up front:
+>
+> 1. **Bring your own key.** The user supplies an API key, stored locally, and the app calls the
+>    provider directly. No LeetBook server ever exists, so "no accounts, no backend" stays
+>    literally true. Written behind a provider interface so a local Ollama backend is a later
+>    addition rather than a rewrite.
+> 2. **Generated once, cached forever.** Questions are stored on the topic. Reviews then run
+>    fully offline, and the network is touched only when authoring or explicitly regenerating.
+>    This keeps the daily loop local even though the feature is not.
+
+- [ ] 16.1 Provider interface: `QuizProvider` with `generateQuestions(notes)` and
+      `gradeAnswer(question, answer)`. One implementation (Anthropic), fully tested against
+      recorded fixtures so the suite never makes a network call
+- [ ] 16.2 Key handling: entered in Settings, stored in the OS keychain rather than SQLite or
+      plain config, never logged, never included in exports. Absent key degrades to Phase 15's
+      authored questions rather than erroring
+- [ ] 16.3 Question generation: produce a mix of multiple choice and free text from a topic's
+      notes, reviewed and editable by the user before they are saved. A model writing directly
+      into stored content with no human pass is how bad questions become permanent
+- [ ] 16.4 Free-text grading: the model returns a score with reasoning. **It proposes; the user
+      confirms or overrides, and the user's number is what is stored.** The entire review log
+      rests on honest self-rating, and a lenient grader would push a topic weeks out while
+      looking like it worked — corrupting the schedule invisibly. This constraint is not
+      negotiable for a convenience win
+- [ ] 16.5 Failure behaviour: no network, bad key, rate limit and malformed response each say
+      what happened and fall back to self-rating. A quiz must never block a review
+- [ ] 16.6 Cost and consent: show what a generation will cost before it runs, and state plainly
+      in the UI that notes are sent to the provider. Off by default
+- [ ] 16.7 Honest documentation: update `DESIGN.md` §3 non-goals, `OVERVIEW.md`, and the
+      README's "your data stays yours" claim to describe what actually happens, including
+      exactly what is sent and when
+- [ ] 16.8 Acceptance: generate, edit, quiz, grade, override and reschedule a real topic
+      end to end; then pull the network cable and confirm the whole loop still runs on cached
+      questions. Add both walkthroughs to `docs/QA.md`
