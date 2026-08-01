@@ -135,6 +135,8 @@ export interface NoteEditorProps {
   onChange: (contentJson: string) => void;
   /** Test/integration hook: receive the editor instance once it exists. */
   onReady?: (editor: Editor) => void;
+  /** What a screen reader calls this field. Design topics are not problems. */
+  ariaLabel?: string;
 }
 
 const EMPTY_DOC = { type: "doc", content: [{ type: "paragraph" }] };
@@ -192,7 +194,12 @@ function findSlashMenu(editor: Editor, container: HTMLElement | null): SlashMenu
  * lists, blockquotes, and syntax-highlighted code blocks. v1 scope on purpose —
  * no embeds, no tables, no databases.
  */
-export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditorProps) {
+export function NoteEditor({
+  initialContentJson,
+  onChange,
+  onReady,
+  ariaLabel = "Problem notes",
+}: NoteEditorProps) {
   const container = useRef<HTMLDivElement>(null);
   const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -222,7 +229,7 @@ export function NoteEditor({ initialContentJson, onChange, onReady }: NoteEditor
     content: parseInitialContent(initialContentJson),
     editorProps: {
       attributes: {
-        "aria-label": "Problem notes",
+        "aria-label": ariaLabel,
         "aria-multiline": "true",
         role: "textbox",
         spellcheck: "true",

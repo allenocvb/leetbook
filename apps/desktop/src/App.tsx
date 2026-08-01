@@ -9,6 +9,7 @@ import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
+import { DesignTopicNotesPage } from "./pages/DesignTopicNotesPage.js";
 import { DesignTopicsPage } from "./pages/DesignTopicsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
@@ -23,11 +24,12 @@ export function App({ db }: { db: SqlExecutor }) {
   );
 }
 
-/** Either the launch intro, a sidebar view, or a specific problem's notes page. */
+/** The launch intro, a sidebar view, or one subject's notes page. */
 type Route =
   | { view: "intro" }
   | { view: ViewId }
-  | { view: "problem"; problemId: string; from: ViewId };
+  | { view: "problem"; problemId: string; from: ViewId }
+  | { view: "design-topic"; topicId: string };
 
 function Shell() {
   // The intro is launch behaviour, not first-run: every start lands here, and nothing is
@@ -48,7 +50,12 @@ function Shell() {
     );
   }
 
-  const activeView = route.view === "problem" ? route.from : route.view;
+  const activeView =
+    route.view === "problem"
+      ? route.from
+      : route.view === "design-topic"
+        ? "system-design"
+        : route.view;
   const openProblem = (problemId: string) =>
     setRoute({ view: "problem", problemId, from: activeView });
   const pickCategory = (category: string) => {
@@ -71,6 +78,7 @@ function Shell() {
         route.view === "problem" ||
         route.view === "review" ||
         route.view === "system-design" ||
+        route.view === "design-topic" ||
         route.view === "settings"
       }
     >
@@ -84,6 +92,7 @@ function Shell() {
         onCategoryChange={setActiveCategory}
         onViewChange={(view) => setRoute({ view: view === "all" ? "all-problems" : "due-today" })}
         onOpenProblem={openProblem}
+        onOpenTopic={(topicId) => setRoute({ view: "design-topic", topicId })}
         onBack={() => setRoute({ view: activeView })}
         onExitReview={() => setRoute({ view: "due-today" })}
         capture={capture}
@@ -99,6 +108,7 @@ function Page({
   onCategoryChange,
   onViewChange,
   onOpenProblem,
+  onOpenTopic,
   onBack,
   onExitReview,
   capture,
@@ -109,6 +119,7 @@ function Page({
   onCategoryChange: (category: string | null) => void;
   onViewChange: (view: ProblemsView) => void;
   onOpenProblem: (id: string) => void;
+  onOpenTopic: (id: string) => void;
   onBack: () => void;
   onExitReview: () => void;
   capture: CaptureRuntime;
@@ -139,11 +150,9 @@ function Page({
     case "review":
       return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
     case "system-design":
-      /*
-       * Topics do not open anywhere yet — the notes page is 13.4. Wired to a no-op rather
-       * than left unhandled so the table renders and the switch stays exhaustive.
-       */
-      return <DesignTopicsPage onOpenTopic={() => undefined} refreshKey={refreshKey} />;
+      return <DesignTopicsPage onOpenTopic={onOpenTopic} refreshKey={refreshKey} />;
+    case "design-topic":
+      return <DesignTopicNotesPage topicId={route.topicId} onBack={onBack} />;
     case "settings":
       return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
   }

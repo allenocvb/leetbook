@@ -1,0 +1,13 @@
+/*
+ * The prompt sits between the title and the metadata list, set apart by a rule rather than a
+ * box: it is the question being asked, not a field of the topic.
+ */
+.design-topic-header__prompt {
+  margin: var(--lb-space-4) 0 0;
+  padding-left: var(--lb-space-4);
+  color: var(--lb-text-3);
+  border-left: 2px solid var(--lb-bd-2);
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}

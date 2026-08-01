@@ -1,4 +1,4 @@
-import { createNotesRepo, type SqlExecutor } from "@leetbook/core";
+import { createDesignNotesRepo, createNotesRepo, type SqlExecutor } from "@leetbook/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type NoteSaveState = "idle" | "pending" | "saved" | "error";
@@ -9,20 +9,60 @@ interface PendingSave {
   problemId: string;
 }
 
-export function useNoteAutosave(
-  db: SqlExecutor,
-  problemId: string,
-  delayMs: number,
-): {
+export interface NoteAutosave {
   saveState: NoteSaveState;
   handleChange: (contentJson: string) => void;
   /**
-   * Drop any queued autosave and settle work already in flight. Deleting a problem must
+   * Drop any queued autosave and settle work already in flight. Deleting a subject must
    * call this first: the unmount flush would otherwise write the note back and leave an
-   * orphan row pointing at a problem that no longer exists.
+   * orphan row pointing at something that no longer exists.
    */
   discardPending: () => Promise<void>;
-} {
+}
+
+/** Autosave for a problem's notes. */
+export function useNoteAutosave(db: SqlExecutor, problemId: string, delayMs: number): NoteAutosave {
+  return useAutosave(
+    problemId,
+    delayMs,
+    useCallback(
+      async (id, contentJson) => {
+        await createNotesRepo(db).put(id, contentJson, new Date());
+      },
+      [db],
+    ),
+  );
+}
+
+/**
+ * Autosave for a design topic's notes.
+ *
+ * Shares the debounce, revision tracking and unmount-flush logic rather than restating it.
+ * That logic carries the subtlety — a delete has to discard before removing the row, or the
+ * flush recreates the note it just deleted — and two copies would mean fixing it twice.
+ */
+export function useDesignNoteAutosave(
+  db: SqlExecutor,
+  topicId: string,
+  delayMs: number,
+): NoteAutosave {
+  return useAutosave(
+    topicId,
+    delayMs,
+    useCallback(
+      async (id, contentJson) => {
+        await createDesignNotesRepo(db).put(id, contentJson, new Date());
+      },
+      [db],
+    ),
+  );
+}
+
+function useAutosave(
+  problemId: string,
+  delayMs: number,
+  write: (subjectId: string, contentJson: string) => Promise<void>,
+): NoteAutosave {
   const [saveState, setSaveState] = useState<NoteSaveState>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<PendingSave | null>(null);
@@ -36,7 +76,7 @@ export function useNoteAutosave(
       queue.current = queue.current
         .catch(() => undefined)
         .then(async () => {
-          await createNotesRepo(db).put(save.problemId, save.contentJson, new Date());
+          await write(save.problemId, save.contentJson);
           if (
             mounted.current &&
             activeProblemId.current === save.problemId &&
@@ -55,7 +95,7 @@ export function useNoteAutosave(
           }
         });
     },
-    [db],
+    [write],
   );
 
   const flushPending = useCallback(() => {

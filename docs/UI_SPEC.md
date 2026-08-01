@@ -206,6 +206,22 @@ Dark status pills:
   use. There is no agreed system design taxonomy to pick from, and inventing one would bake a
   guess into the UI; duplicates differing only by case or spacing are still folded on write.
 
+### System design topic notes
+
+- Same 720px shell, editor, autosave and save-status treatment as problem notes. The editor is
+  reused outright — headings, code blocks, callouts and the selection bar earn their place in a
+  design write-up too, and a second editor would drift from the first.
+- Back link reads `← System Design`.
+- No difficulty, no external link, no runtime or memory: a design topic has none of them.
+- The prompt sits between the title and the metadata list, indented behind a 2px `bd-2` rule
+  and preserving newlines. It is the question being asked, not a field of the topic, and the
+  block is omitted entirely when empty rather than rendering a dash.
+- Metadata: Tags, Next review, Last review. Unreviewed reads `Not reviewed yet`.
+- Actions are `Edit topic` and `Delete topic`. Delete confirms inline, replacing the trigger
+  with Cancel/Delete, matching the problem notes page rather than the table's dialog.
+- The editor's accessible name is `Topic notes`, not `Problem notes`.
+- Reviewing is **not** available here; that is the Phase 15 review session.
+
 ### Problem notes
 
 - Centered 720px column with `26px 40px 80px` padding.

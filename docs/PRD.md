@@ -288,7 +288,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
       Prove it with tests that replay a design history through the same `scheduleReview`
 - [x] 13.3 Topics table: a second table view listing design topics with status, next review and
       tags, reusing the restyled problem table's row treatment rather than a second style
-- [ ] 13.4 Topic notes page: reuse the TipTap editor wholesale. Prose, headings, code blocks
+- [x] 13.4 Topic notes page: reuse the TipTap editor wholesale. Prose, headings, code blocks
       and callouts are exactly as useful for a design write-up as for a LeetCode note
 - [x] 13.5 Sidebar and navigation: a System design section that does not disturb the existing
       four items or their counts

@@ -110,6 +110,17 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Export JSON from Settings and open it: the `designTopics`, `designReviews`,
       `designScheduling` and `designNotes` keys are present, and populated if you have topics.
 
+### System design topic notes
+
+- [ ] Click a topic row: its notes page opens with the prompt shown behind a rule.
+- [ ] A topic with an empty prompt shows no prompt block at all — not a dash, not a gap.
+- [ ] Type notes: the status reads Saving… then Saved. Navigate away and back — they persist.
+- [ ] Slash commands, code blocks and the selection colour bar all work, same as problem notes.
+- [ ] Edit topic changes the title in the header without leaving the page.
+- [ ] **Type something, then delete the topic without pausing.** It returns to the table and the
+      topic is gone. Restart the app: it must still be gone, with no orphaned note behind it.
+- [ ] The back link reads `← System Design` and returns to the table.
+
 ### Notes editor
 
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and
