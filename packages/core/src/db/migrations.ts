@@ -91,4 +91,17 @@ export const MIGRATIONS: readonly Migration[] = [
       )`,
     ],
   },
+  {
+    version: 3,
+    name: "design-canvas",
+    /*
+     * The diagram lives beside the prose, not in it. An Excalidraw scene is a flat list of
+     * elements plus view state — a different shape from a ProseMirror document, and one the
+     * editor would have to treat as an opaque blob anyway. A separate nullable column keeps
+     * both readable, and lets a topic have notes without a diagram or the reverse.
+     *
+     * Added as its own migration rather than folded into version 2, which has shipped.
+     */
+    statements: ["ALTER TABLE design_notes ADD COLUMN scene_json TEXT"],
+  },
 ];

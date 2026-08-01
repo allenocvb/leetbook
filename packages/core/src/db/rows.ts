@@ -115,6 +115,7 @@ export interface DesignSchedulingRow {
 export interface DesignNoteRow {
   topic_id: string;
   content_json: string;
+  scene_json: string | null;
   updated_at: string;
 }
 
@@ -151,6 +152,7 @@ export function toDesignNote(row: DesignNoteRow): DesignNote {
   return {
     topicId: row.topic_id,
     contentJson: row.content_json,
+    sceneJson: row.scene_json,
     updatedAt: row.updated_at,
   };
 }

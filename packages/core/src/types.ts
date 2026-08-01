@@ -93,10 +93,18 @@ export interface DesignSchedulingState {
   fsrsCard: FsrsCardSnapshot;
 }
 
-/** Notes document for one design topic (TipTap JSON). */
+/** Notes document plus diagram for one design topic. */
 export interface DesignNote {
   topicId: string;
+  /** Serialized TipTap document. */
   contentJson: string;
+  /**
+   * Serialized Excalidraw scene, or null when the topic has no diagram.
+   *
+   * Opaque to core: only the canvas component reads its internals. Kept beside the prose
+   * rather than inside it because a scene is a flat element list, not a ProseMirror node.
+   */
+  sceneJson: string | null;
   updatedAt: IsoDateTime;
 }
 

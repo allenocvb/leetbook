@@ -115,6 +115,62 @@ describe("design notes repo", () => {
     expect(stored?.contentJson).toContain("second");
     expect(stored?.updatedAt).toBe(later.toISOString());
   });
+
+  it("starts with no diagram", async () => {
+    const topic = await addTopic();
+    const notes = createDesignNotesRepo(db);
+    const stored = await notes.put(topic.id, '{"type":"doc"}', NOW);
+    expect(stored.sceneJson).toBeNull();
+  });
+
+  it("stores a diagram for a topic that has no prose yet", async () => {
+    const topic = await addTopic();
+    const notes = createDesignNotesRepo(db);
+
+    const stored = await notes.putScene(topic.id, '{"elements":[]}', NOW);
+
+    expect(stored.sceneJson).toBe('{"elements":[]}');
+    expect(stored.contentJson).toBe("");
+  });
+
+  /*
+   * Prose and diagram autosave independently and at different moments. If either writer
+   * replaced the whole row, typing a sentence would erase a diagram drawn a second earlier —
+   * silently, with no way to get it back.
+   */
+  it("does not let prose overwrite the diagram", async () => {
+    const topic = await addTopic();
+    const notes = createDesignNotesRepo(db);
+
+    await notes.putScene(topic.id, '{"elements":["rect"]}', NOW);
+    await notes.put(topic.id, '{"type":"doc","content":["prose"]}', NOW);
+
+    const stored = await notes.get(topic.id);
+    expect(stored?.sceneJson).toBe('{"elements":["rect"]}');
+    expect(stored?.contentJson).toContain("prose");
+  });
+
+  it("does not let the diagram overwrite prose", async () => {
+    const topic = await addTopic();
+    const notes = createDesignNotesRepo(db);
+
+    await notes.put(topic.id, '{"type":"doc","content":["prose"]}', NOW);
+    await notes.putScene(topic.id, '{"elements":["rect"]}', NOW);
+
+    const stored = await notes.get(topic.id);
+    expect(stored?.contentJson).toContain("prose");
+    expect(stored?.sceneJson).toBe('{"elements":["rect"]}');
+  });
+
+  it("clears the diagram when the scene is emptied", async () => {
+    const topic = await addTopic();
+    const notes = createDesignNotesRepo(db);
+
+    await notes.putScene(topic.id, '{"elements":["rect"]}', NOW);
+    await notes.putScene(topic.id, null, NOW);
+
+    expect((await notes.get(topic.id))?.sceneJson).toBeNull();
+  });
 });
 
 describe("applyDesignReview", () => {

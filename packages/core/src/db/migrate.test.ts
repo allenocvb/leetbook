@@ -25,6 +25,42 @@ describe("migrate", () => {
     expect(second.applied).toEqual([]);
   });
 
+  /*
+   * The upgrade path, not the install path. Every existing user's database is at some earlier
+   * version, and a migration that only works on a fresh schema fails exactly where it matters
+   * — on a machine that already holds data.
+   */
+  it("upgrades a database stopped at an earlier version", async () => {
+    const db = createTestDb();
+    const earlier = MIGRATIONS.slice(0, -1);
+    await migrate(db, earlier);
+
+    const { applied } = await migrate(db);
+
+    const last = MIGRATIONS.at(-1);
+    expect(applied).toEqual([last?.version]);
+    // Applying the rest a second time must still be a no-op.
+    expect((await migrate(db)).applied).toEqual([]);
+  });
+
+  it("adds the design canvas column to an existing design_notes table", async () => {
+    const db = createTestDb();
+    await migrate(
+      db,
+      MIGRATIONS.filter((m) => m.version <= 2),
+    );
+    await db.execute("INSERT INTO design_topics VALUES ('t1', 'Existing', '', '[]', '2026-01-01')");
+    await db.execute("INSERT INTO design_notes VALUES ('t1', '{}', '2026-01-01')");
+
+    await migrate(db);
+
+    const rows = await db.select<{ scene_json: string | null }>(
+      "SELECT scene_json FROM design_notes WHERE topic_id = 't1'",
+    );
+    // Existing rows survive the ALTER and default to no diagram.
+    expect(rows[0]?.scene_json).toBeNull();
+  });
+
   it("records history with names and timestamps", async () => {
     const db = createTestDb();
     await migrate(db);
