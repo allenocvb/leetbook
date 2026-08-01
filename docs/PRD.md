@@ -279,11 +279,11 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 
 ## Phase 13 — System design topics and notes
 
-- [ ] 13.1 Domain and schema: a `DesignTopic` entity (id, title, prompt, tags, created_at) with
+- [x] 13.1 Domain and schema: a `DesignTopic` entity (id, title, prompt, tags, created_at) with
       its own migration, repository and tests in `packages/core`. Deliberately **not** a
       `Problem`: there is no slug, URL, difficulty or runtime, and forcing it into that table
       would put six always-null columns on every LeetCode row
-- [ ] 13.2 Scheduling reuse: point `design_scheduling` at the existing FSRS wrapper untouched.
+- [x] 13.2 Scheduling reuse: point `design_scheduling` at the existing FSRS wrapper untouched.
       A design topic is a memory like any other; the scheduler should not know the difference.
       Prove it with tests that replay a design history through the same `scheduleReview`
 - [ ] 13.3 Topics table: a second table view listing design topics with status, next review and

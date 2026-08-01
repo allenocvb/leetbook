@@ -16,6 +16,41 @@ const RATING: Record<FsrsRating, Grade> = {
  */
 const scheduler = fsrs(generatorParameters({ enable_fuzz: false, enable_short_term: false }));
 
+/** Everything one review changes about a schedule. Deliberately carries no subject id. */
+export interface ScheduleOutcome {
+  dueAt: string;
+  reviewCount: number;
+  lastReviewedAt: string;
+  fsrsCard: FsrsCardSnapshot;
+}
+
+/**
+ * Advances a schedule by one review.
+ *
+ * The subject's identity plays no part in the calculation — FSRS sees a card, a rating and a
+ * clock — so it is not a parameter. That is what lets system design topics reuse this untouched
+ * rather than growing a parallel scheduler that would drift out of agreement over time.
+ *
+ * @param card Current FSRS card, or null for a first-ever review.
+ * @param score User-facing 0–5 recall score (mapped internally to FSRS ratings).
+ * @param now Review timestamp.
+ */
+export function nextSchedule(
+  card: FsrsCardSnapshot | null,
+  score: PerformanceScore,
+  now: Date,
+): ScheduleOutcome {
+  const current = card === null ? createEmptyCard(now) : (card as unknown as Card);
+  const { card: next } = scheduler.next(current, now, RATING[mapScoreToRating(score)]);
+
+  return {
+    dueAt: new Date(next.due).toISOString(),
+    reviewCount: next.reps,
+    lastReviewedAt: now.toISOString(),
+    fsrsCard: JSON.parse(JSON.stringify(next)) as FsrsCardSnapshot,
+  };
+}
+
 /**
  * Applies one review to a problem's scheduling state.
  *
@@ -31,14 +66,5 @@ export function scheduleReview(
   score: PerformanceScore,
   now: Date,
 ): SchedulingState {
-  const card = state === null ? createEmptyCard(now) : (state.fsrsCard as unknown as Card);
-  const { card: next } = scheduler.next(card, now, RATING[mapScoreToRating(score)]);
-
-  return {
-    problemId,
-    dueAt: new Date(next.due).toISOString(),
-    reviewCount: next.reps,
-    lastReviewedAt: now.toISOString(),
-    fsrsCard: JSON.parse(JSON.stringify(next)) as FsrsCardSnapshot,
-  };
+  return { problemId, ...nextSchedule(state?.fsrsCard ?? null, score, now) };
 }

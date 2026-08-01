@@ -4,9 +4,12 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { SqlExecutor } from "../db/executor.js";
 import { migrate } from "../db/migrate.js";
+import { createDesignNotesRepo } from "../db/repositories/designNotes.js";
+import { createDesignTopicsRepo } from "../db/repositories/designTopics.js";
 import { createNotesRepo } from "../db/repositories/notes.js";
 import { createProblemsRepo } from "../db/repositories/problems.js";
 import { createTestDb } from "../db/test-helpers.js";
+import { applyDesignReview } from "../designReview.js";
 import { importNotionCsv } from "../import/notion.js";
 import { type DatabaseExport, exportDatabaseJson } from "./json.js";
 import { exportNotesMarkdown, tiptapToMarkdown } from "./markdown.js";
@@ -93,7 +96,7 @@ describe("exportDatabaseJson", () => {
     const parsed = JSON.parse(await exportDatabaseJson(db, NOW)) as DatabaseExport;
 
     expect(parsed.format).toBe("leetbook");
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBe(2);
     expect(parsed.exportedAt).toBe(NOW.toISOString());
     expect(parsed.problems).toHaveLength(47);
     expect(parsed.reviews.length).toBeGreaterThan(0);
@@ -101,6 +104,29 @@ describe("exportDatabaseJson", () => {
 
     const twoSum = parsed.problems.find((p) => p.slug === "two-sum");
     expect(twoSum?.title).toBe("Two Sum");
+  });
+
+  it("includes design topics, so the snapshot is actually the whole database", async () => {
+    const topic = await createDesignTopicsRepo(db).add(
+      { title: "URL shortener", prompt: "Design it.", tags: ["Caching"] },
+      NOW,
+    );
+    await applyDesignReview(db, { topicId: topic.id, score: 4 }, NOW);
+    await createDesignNotesRepo(db).put(topic.id, '{"type":"doc"}', NOW);
+
+    const parsed = JSON.parse(await exportDatabaseJson(db, NOW)) as DatabaseExport;
+
+    expect(parsed.designTopics.map((t) => t.title)).toEqual(["URL shortener"]);
+    expect(parsed.designReviews).toHaveLength(1);
+    expect(parsed.designScheduling).toHaveLength(1);
+    expect(parsed.designNotes).toHaveLength(1);
+  });
+
+  it("emits empty design collections rather than omitting them", async () => {
+    // A consumer should never have to distinguish "no topics" from "old export".
+    const parsed = JSON.parse(await exportDatabaseJson(db, NOW)) as DatabaseExport;
+    expect(parsed.designTopics).toEqual([]);
+    expect(parsed.designNotes).toEqual([]);
   });
 });
 

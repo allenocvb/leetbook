@@ -9,6 +9,20 @@ export {
 export type { SqlExecutor } from "./db/executor.js";
 export { migrate } from "./db/migrate.js";
 export { MIGRATIONS, type Migration } from "./db/migrations.js";
+export { createDesignNotesRepo, type DesignNotesRepo } from "./db/repositories/designNotes.js";
+export {
+  createDesignReviewsRepo,
+  createDesignSchedulingRepo,
+  type DesignReviewInput,
+  type DesignReviewsRepo,
+  type DesignSchedulingRepo,
+} from "./db/repositories/designReviews.js";
+export {
+  createDesignTopicsRepo,
+  type DesignTopicInput,
+  type DesignTopicsRepo,
+  normalizeTopicTags,
+} from "./db/repositories/designTopics.js";
 export { createNotesRepo, type NotesRepo } from "./db/repositories/notes.js";
 export {
   createProblemsRepo,
@@ -21,9 +35,14 @@ export {
   type ReviewsRepo,
 } from "./db/repositories/reviews.js";
 export { createSchedulingRepo, type SchedulingRepo } from "./db/repositories/scheduling.js";
+export {
+  type ApplyDesignReviewResult,
+  applyDesignReview,
+  previewDesignReview,
+} from "./designReview.js";
 export { type DatabaseExport, exportDatabaseJson } from "./export/json.js";
 export { exportNotesMarkdown, type NoteExport, tiptapToMarkdown } from "./export/markdown.js";
-export { scheduleReview } from "./fsrs.js";
+export { nextSchedule, type ScheduleOutcome, scheduleReview } from "./fsrs.js";
 export {
   importNotionCsv,
   type NotionImportIssue,
@@ -42,6 +61,10 @@ export {
 } from "./review.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {
+  type DesignNote,
+  type DesignReview,
+  type DesignSchedulingState,
+  type DesignTopic,
   type Difficulty,
   type FsrsCardSnapshot,
   type IsoDateTime,

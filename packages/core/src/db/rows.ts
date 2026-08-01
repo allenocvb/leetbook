@@ -1,4 +1,13 @@
-import type { Note, Problem, Review, SchedulingState } from "../types.js";
+import type {
+  DesignNote,
+  DesignReview,
+  DesignSchedulingState,
+  DesignTopic,
+  Note,
+  Problem,
+  Review,
+  SchedulingState,
+} from "../types.js";
 
 /** Raw snake_case rows as they come back from SQLite. */
 
@@ -75,6 +84,72 @@ export function toSchedulingState(row: SchedulingRow): SchedulingState {
 export function toNote(row: NoteRow): Note {
   return {
     problemId: row.problem_id,
+    contentJson: row.content_json,
+    updatedAt: row.updated_at,
+  };
+}
+
+export interface DesignTopicRow {
+  id: string;
+  title: string;
+  prompt: string;
+  tags: string;
+  created_at: string;
+}
+
+export interface DesignReviewRow {
+  id: string;
+  topic_id: string;
+  score: number;
+  reviewed_at: string;
+}
+
+export interface DesignSchedulingRow {
+  topic_id: string;
+  due_at: string;
+  review_count: number;
+  last_reviewed_at: string | null;
+  fsrs_card: string;
+}
+
+export interface DesignNoteRow {
+  topic_id: string;
+  content_json: string;
+  updated_at: string;
+}
+
+export function toDesignTopic(row: DesignTopicRow): DesignTopic {
+  return {
+    id: row.id,
+    title: row.title,
+    prompt: row.prompt,
+    tags: JSON.parse(row.tags) as string[],
+    createdAt: row.created_at,
+  };
+}
+
+export function toDesignReview(row: DesignReviewRow): DesignReview {
+  return {
+    id: row.id,
+    topicId: row.topic_id,
+    score: row.score as DesignReview["score"],
+    reviewedAt: row.reviewed_at,
+  };
+}
+
+export function toDesignSchedulingState(row: DesignSchedulingRow): DesignSchedulingState {
+  return {
+    topicId: row.topic_id,
+    dueAt: row.due_at,
+    reviewCount: row.review_count,
+    lastReviewedAt: row.last_reviewed_at,
+    fsrsCard: JSON.parse(row.fsrs_card) as DesignSchedulingState["fsrsCard"],
+  };
+}
+
+export function toDesignNote(row: DesignNoteRow): DesignNote {
+  return {
+    topicId: row.topic_id,
     contentJson: row.content_json,
     updatedAt: row.updated_at,
   };
