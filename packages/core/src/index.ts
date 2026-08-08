@@ -11,6 +11,12 @@ export { migrate } from "./db/migrate.js";
 export { MIGRATIONS, type Migration } from "./db/migrations.js";
 export { createDesignNotesRepo, type DesignNotesRepo } from "./db/repositories/designNotes.js";
 export {
+  createDesignQuestionsRepo,
+  type DesignQuestionInput,
+  type DesignQuestionsRepo,
+  gradeChoice,
+} from "./db/repositories/designQuestions.js";
+export {
   createDesignReviewsRepo,
   createDesignSchedulingRepo,
   type DesignReviewInput,
@@ -61,7 +67,9 @@ export {
 } from "./review.js";
 export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
 export {
+  type ChoiceQuestion,
   type DesignNote,
+  type DesignQuestion,
   type DesignReview,
   type DesignSchedulingState,
   type DesignTopic,
@@ -74,6 +82,7 @@ export {
   type Problem,
   type Review,
   type SchedulingState,
+  type TextQuestion,
 } from "./types.js";
 export {
   type DesignTableRow,

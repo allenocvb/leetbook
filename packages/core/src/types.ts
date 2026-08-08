@@ -108,6 +108,37 @@ export interface DesignNote {
   updatedAt: IsoDateTime;
 }
 
+/**
+ * One quiz question about a design topic.
+ *
+ * A discriminated union rather than one shape with nullable fields: a text question has no
+ * choices and no correct index, and letting those be null on every question means every
+ * reader has to re-derive which kind it is.
+ */
+export type DesignQuestion = ChoiceQuestion | TextQuestion;
+
+interface QuestionBase {
+  id: string;
+  topicId: string;
+  prompt: string;
+  /** What a good answer looks like. Shown after answering, never before. */
+  modelAnswer: string;
+  /** Ordering within the topic. */
+  position: number;
+  createdAt: IsoDateTime;
+}
+
+export interface ChoiceQuestion extends QuestionBase {
+  kind: "choice";
+  choices: string[];
+  /** Index into `choices`. Gradeable locally, with no model and no network. */
+  answerIndex: number;
+}
+
+export interface TextQuestion extends QuestionBase {
+  kind: "text";
+}
+
 const DIFFICULTIES: readonly Difficulty[] = ["easy", "medium", "hard"];
 
 export function isDifficulty(value: unknown): value is Difficulty {

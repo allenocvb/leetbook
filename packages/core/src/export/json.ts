@@ -1,4 +1,5 @@
 import type { SqlExecutor } from "../db/executor.js";
+import { createDesignQuestionsRepo } from "../db/repositories/designQuestions.js";
 import {
   type DesignNoteRow,
   type DesignReviewRow,
@@ -19,6 +20,7 @@ import {
 } from "../db/rows.js";
 import type {
   DesignNote,
+  DesignQuestion,
   DesignReview,
   DesignSchedulingState,
   DesignTopic,
@@ -30,8 +32,11 @@ import type {
 
 export interface DatabaseExport {
   format: "leetbook";
-  /** 2 added the design* collections. A version 1 file simply has none of them. */
-  version: 2;
+  /**
+   * 2 added the design* collections; 3 added designQuestions. An older file simply has fewer
+   * keys — readers should treat a missing collection as empty, not as an error.
+   */
+  version: 3;
   exportedAt: string;
   problems: Problem[];
   reviews: Review[];
@@ -41,6 +46,7 @@ export interface DatabaseExport {
   designReviews: DesignReview[];
   designScheduling: DesignSchedulingState[];
   designNotes: DesignNote[];
+  designQuestions: DesignQuestion[];
 }
 
 /**
@@ -70,9 +76,19 @@ export async function exportDatabaseJson(db: SqlExecutor, now: Date): Promise<st
     db.select<DesignNoteRow>("SELECT * FROM design_notes ORDER BY topic_id"),
   ]);
 
+  /*
+   * Read through the repo rather than raw rows: questions are a discriminated union, and the
+   * repo owns the row-to-union mapping. Duplicating it here would be a second place to fix.
+   */
+  const topicIds = designTopics.map((row) => row.id);
+  const questionsRepo = createDesignQuestionsRepo(db);
+  const designQuestions = (
+    await Promise.all(topicIds.map((id) => questionsRepo.listByTopic(id)))
+  ).flat();
+
   const payload: DatabaseExport = {
     format: "leetbook",
-    version: 2,
+    version: 3,
     exportedAt: now.toISOString(),
     problems: problems.map(toProblem),
     reviews: reviews.map(toReview),
@@ -82,6 +98,7 @@ export async function exportDatabaseJson(db: SqlExecutor, now: Date): Promise<st
     designReviews: designReviews.map(toDesignReview),
     designScheduling: designScheduling.map(toDesignSchedulingState),
     designNotes: designNotes.map(toDesignNote),
+    designQuestions,
   };
   return JSON.stringify(payload, null, 2);
 }

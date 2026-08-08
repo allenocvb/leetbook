@@ -333,7 +333,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
       progress bar, keyboard flow, summary — showing the prompt, then your notes and diagram
 - [ ] 15.2 Self-rated 0–5 against the existing rubric, appended to the review log and scheduled
       through the same FSRS path
-- [ ] 15.3 Authored questions: write your own questions per topic (multiple choice or free
+- [x] 15.3 Authored questions (core half): write your own questions per topic (multiple choice or free
       text) and store them. This is the data model the AI layer will later populate, so getting
       it right without a model in the loop is the point
 - [ ] 15.4 Quiz run-through: answer each question, see the model answer, then rate recall.
