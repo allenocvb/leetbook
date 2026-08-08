@@ -1,0 +1,26 @@
+/*
+ * Excalidraw sizes itself to its container and needs an explicit height — given none it
+ * collapses to nothing and the canvas appears blank rather than absent, which is a confusing
+ * way to fail.
+ */
+.design-canvas {
+  height: 460px;
+  margin: var(--lb-space-5) 0;
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-6);
+  overflow: hidden;
+}
+
+.design-canvas__loading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--lb-muted-2);
+  font-size: 12.5px;
+}
+
+/* Excalidraw draws its own white surface; let the app's theme show through instead. */
+.design-canvas .excalidraw {
+  --color-surface-low: var(--lb-surf-2);
+}

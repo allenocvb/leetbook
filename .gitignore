@@ -16,3 +16,6 @@ dist/
 *.local
 .env
 .env.*
+
+# Copied from node_modules before dev/build so Excalidraw fonts resolve offline.
+apps/desktop/public/excalidraw-assets/

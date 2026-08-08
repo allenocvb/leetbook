@@ -9,12 +9,14 @@ import {
   type DesignTopic,
 } from "@leetbook/core";
 import { useEffect, useState } from "react";
+import { DesignCanvas } from "../components/design/DesignCanvas.js";
 import { DesignTopicDialog } from "../components/design/DesignTopicDialog.js";
 import { DesignTopicHeader } from "../components/design/DesignTopicHeader.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
-import { useDesignNoteAutosave } from "../hooks/useNoteAutosave.js";
+import { useDesignNoteAutosave, useDesignSceneAutosave } from "../hooks/useNoteAutosave.js";
+import { useTheme } from "../theme/ThemeProvider.js";
 import "./ProblemNotesPage.css";
 
 export interface DesignTopicNotesPageProps {
@@ -42,15 +44,17 @@ export function DesignTopicNotesPage({
   const [note, setNote] = useState<DesignNote | null | "loading">("loading");
   const [reviews, setReviews] = useState<DesignReview[]>([]);
   const [editing, setEditing] = useState(false);
+  const { theme } = useTheme();
   const { saveState, handleChange, discardPending } = useDesignNoteAutosave(
     db,
     topicId,
     saveDelayMs,
   );
+  const scene = useDesignSceneAutosave(db, topicId, saveDelayMs);
 
-  // Stop autosaving before the row disappears, or the unmount flush recreates its note.
+  // Stop both autosaves before the row disappears, or an unmount flush recreates its note.
   const deleteTopic = async () => {
-    await discardPending();
+    await Promise.all([discardPending(), scene.discardPending()]);
     await createDesignTopicsRepo(db).remove(topicId);
     onBack();
   };
@@ -106,10 +110,17 @@ export function DesignTopicNotesPage({
                   ? "Save failed"
                   : ""}
           </span>
+          {/* Empty string means "row exists, prose never written" — see putScene. */}
           <NoteEditor
-            initialContentJson={note?.contentJson ?? null}
+            initialContentJson={note?.contentJson || null}
             onChange={handleChange}
             ariaLabel="Topic notes"
+          />
+
+          <DesignCanvas
+            sceneJson={note?.sceneJson ?? null}
+            onChange={scene.handleChange}
+            theme={theme}
           />
         </div>
 

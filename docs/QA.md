@@ -121,6 +121,20 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       topic is gone. Restart the app: it must still be gone, with no orphaned note behind it.
 - [ ] The back link reads `← System Design` and returns to the table.
 
+### Design canvas
+
+- [ ] Open a topic: the canvas appears below the notes, briefly showing `Loading canvas…`.
+- [ ] Draw a few boxes and an arrow. Navigate away and back — the diagram is still there.
+- [ ] Toggle dark mode: the canvas follows the app rather than staying light.
+- [ ] Type in the notes **immediately after** drawing. Reload: both the prose and the diagram
+      survived. Then draw immediately after typing and reload again. Neither may erase the other.
+- [ ] Excalidraw's own menu offers no Open/Save-to-file/theme-toggle — the app owns those.
+- [ ] **Offline font check.** Run `pnpm --filter desktop tauri build`, open the packaged app
+      with wifi off, and draw some text. It must render in Excalidraw's handwriting font, not a
+      fallback. This is the one thing `tauri dev` cannot tell you: unset, Excalidraw fetches its
+      fonts from esm.sh, and a dev machine has network so it always looks fine.
+- [ ] Check devtools Network on first canvas open: no request should leave the machine.
+
 ### Notes editor
 
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and

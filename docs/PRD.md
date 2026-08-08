@@ -299,19 +299,27 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 > drawing engine — freehand smoothing, shape binding, selection, undo — is months of work to
 > land somewhere worse. This phase is an integration, not an implementation.
 
-- [ ] 14.1 Embed `@excalidraw/excalidraw` behind our own thin wrapper component, so the rest of
+- [x] 14.1 Embed `@excalidraw/excalidraw` behind our own thin wrapper component, so the rest of
       the app imports a LeetBook interface rather than a vendor one and the dependency can be
       replaced without touching call sites
-- [ ] 14.2 Lazy-load it. The package is large and must not sit in the initial bundle; the
+- [x] 14.2 Lazy-load it. The package is large and must not sit in the initial bundle; the
       problem table's startup time is not allowed to regress because of a feature it never uses.
       Measure before and after and record both numbers
-- [ ] 14.3 Persist the scene: `getSceneElements()` + `getAppState()` serialised to JSON on the
+- [x] 14.3 Persist the scene: `getSceneElements()` + `getAppState()` serialised to JSON on the
       topic, autosaved on the same debounce as notes, restored on open. Round-trip test with a
       scene containing every element type
-- [ ] 14.4 Theme binding: drive Excalidraw's `theme` prop from our own toggle so the canvas does
+- [x] 14.4 Theme binding: drive Excalidraw's `theme` prop from our own toggle so the canvas does
       not stay light while the app goes dark
-- [ ] 14.5 Asset and offline check: Excalidraw pulls fonts and assets, which must resolve inside
-      a packaged Tauri build with no network. Verify in a real `tauri build`, not `dev`
+- [ ] 14.5 Asset and offline check: **confirmed a real problem.** Excalidraw resolves fonts
+      against `window.EXCALIDRAW_ASSET_PATH`, and unset it falls back to
+      `https://esm.sh/@excalidraw/excalidraw@<version>/dist/prod/`. In a packaged offline app
+      that fetch fails and the handwriting fonts silently do not load — and `tauri dev` never
+      shows it, because a dev machine has network.
+
+      Handled by `scripts/copy-excalidraw-assets.mjs`, which copies the bundled fonts into
+      `public/excalidraw-assets/` before dev and build (gitignored, ~18 MB), with the asset
+      path set in `ExcalidrawCanvas.tsx`. **Still needs verifying in a real `tauri build` with
+      the network off** — that is the only test that counts.
 - [ ] 14.6 Peer-dependency reality check: its Radix transitive deps warn against React 19.
       Confirm warnings only, no runtime breakage, and record the finding so the next person does
       not re-investigate

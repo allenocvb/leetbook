@@ -58,6 +58,29 @@ export function useDesignNoteAutosave(
   );
 }
 
+/**
+ * Autosave for a design topic's diagram.
+ *
+ * A separate writer from the prose on purpose: both fire independently, and the repo's
+ * column-scoped upsert is what stops one erasing the other.
+ */
+export function useDesignSceneAutosave(
+  db: SqlExecutor,
+  topicId: string,
+  delayMs: number,
+): NoteAutosave {
+  return useAutosave(
+    topicId,
+    delayMs,
+    useCallback(
+      async (id, sceneJson) => {
+        await createDesignNotesRepo(db).putScene(id, sceneJson, new Date());
+      },
+      [db],
+    ),
+  );
+}
+
 function useAutosave(
   problemId: string,
   delayMs: number,

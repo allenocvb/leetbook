@@ -7,8 +7,21 @@ import {
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+/*
+ * The real canvas is 690kB of Excalidraw and needs a real <canvas>, which jsdom does not
+ * provide. These tests are about the page, so the wrapper is stubbed and DesignCanvas.test
+ * covers the boundary itself.
+ */
+vi.mock("../components/design/DesignCanvas.js", () => ({
+  DesignCanvas: ({ sceneJson }: { sceneJson: string | null }) => (
+    <div data-testid="canvas" data-scene={sceneJson ?? ""} />
+  ),
+}));
+
 import { DbProvider } from "../db/DbContext.js";
 import { makeDb } from "../test-utils.js";
+import { ThemeProvider } from "../theme/ThemeProvider.js";
 import { DesignTopicNotesPage } from "./DesignTopicNotesPage.js";
 
 const AT = new Date("2026-08-01T09:00:00.000Z");
@@ -29,9 +42,11 @@ async function renderPage({ onBack = vi.fn() } = {}) {
   const db = await makeDb();
   const topic = await addTopic(db);
   const view = render(
-    <DbProvider db={db}>
-      <DesignTopicNotesPage topicId={topic.id} onBack={onBack} saveDelayMs={0} />
-    </DbProvider>,
+    <ThemeProvider>
+      <DbProvider db={db}>
+        <DesignTopicNotesPage topicId={topic.id} onBack={onBack} saveDelayMs={0} />
+      </DbProvider>
+    </ThemeProvider>,
   );
   await waitFor(() => expect(screen.getByRole("heading", { name: "URL shortener" })).toBeVisible());
   return { db, topic, onBack, ...view };
@@ -51,9 +66,11 @@ describe("DesignTopicNotesPage", () => {
     const db = await makeDb();
     const topic = await addTopic(db, { prompt: "" });
     render(
-      <DbProvider db={db}>
-        <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
-      </DbProvider>,
+      <ThemeProvider>
+        <DbProvider db={db}>
+          <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
+        </DbProvider>
+      </ThemeProvider>,
     );
 
     await waitFor(() =>
@@ -94,9 +111,11 @@ describe("DesignTopicNotesPage", () => {
     );
 
     render(
-      <DbProvider db={db}>
-        <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
-      </DbProvider>,
+      <ThemeProvider>
+        <DbProvider db={db}>
+          <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
+        </DbProvider>
+      </ThemeProvider>,
     );
 
     await waitFor(() => expect(screen.getByText("Shard by hash.")).toBeInTheDocument());
@@ -108,9 +127,11 @@ describe("DesignTopicNotesPage", () => {
     await applyDesignReview(db, { topicId: topic.id, score: 4 }, AT);
 
     render(
-      <DbProvider db={db}>
-        <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
-      </DbProvider>,
+      <ThemeProvider>
+        <DbProvider db={db}>
+          <DesignTopicNotesPage topicId={topic.id} onBack={vi.fn()} saveDelayMs={0} />
+        </DbProvider>
+      </ThemeProvider>,
     );
 
     await waitFor(() => expect(screen.getByText(/scored 4/)).toBeInTheDocument());
@@ -163,9 +184,11 @@ describe("DesignTopicNotesPage", () => {
   it("says so when the topic does not exist", async () => {
     const db = await makeDb();
     render(
-      <DbProvider db={db}>
-        <DesignTopicNotesPage topicId="missing" onBack={vi.fn()} saveDelayMs={0} />
-      </DbProvider>,
+      <ThemeProvider>
+        <DbProvider db={db}>
+          <DesignTopicNotesPage topicId="missing" onBack={vi.fn()} saveDelayMs={0} />
+        </DbProvider>
+      </ThemeProvider>,
     );
 
     await waitFor(() => expect(screen.getByText("Topic not found.")).toBeInTheDocument());

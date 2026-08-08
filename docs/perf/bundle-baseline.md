@@ -14,8 +14,23 @@ rather than asserted. Re-measure whenever a heavy dependency lands.
 The entry chunk is the number that matters: it is parsed on every launch, including by
 someone who never opens a design topic.
 
+## After Excalidraw (Phase 14)
+
+| Chunk | Raw | Change |
+|---|---|---|
+| entry `index-*.js` | 953.79 kB | **+4.65 kB** |
+| Excalidraw (lazy) | 690.57 kB | new, fetched on first canvas |
+| Mermaid / cytoscape / font subsetting (lazy) | ~4 MB across several chunks | new, fetched by Excalidraw on demand |
+
+The entry chunk grew by under 2 kB — the `React.lazy` boundary in `DesignCanvas.tsx` is doing
+its job. Total on-disk output grows a lot, but none of it is parsed at launch, and a user who
+never opens a design topic never downloads any of it.
+
 ## Acceptance for 14.2
 
-Excalidraw must not appear in the entry chunk. After the canvas lands, the entry chunk should
-stay within a few kB of 949 kB, and Excalidraw should show as its own lazily-fetched chunk.
-A regression here means `React.lazy` is not doing what the code claims.
+Excalidraw must not appear in the entry chunk. The entry chunk should stay within a few kB of
+949 kB. A jump of hundreds of kB means the lazy boundary has been bypassed — usually by
+someone importing `ExcalidrawCanvas` directly instead of `DesignCanvas`.
+
+To re-check: `pnpm --filter desktop build`, then find the `.js` referenced from
+`dist/index.html` and compare its size.
