@@ -329,14 +329,14 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 > Deliberately before any AI. A review loop with questions you wrote yourself is a complete,
 > working feature; if the loop is wrong, no model fixes it.
 
-- [ ] 15.1 Design review session: same shape as the LeetCode session — one topic at a time,
+- [x] 15.1 Design review session: same shape as the LeetCode session — one topic at a time,
       progress bar, keyboard flow, summary — showing the prompt, then your notes and diagram
-- [ ] 15.2 Self-rated 0–5 against the existing rubric, appended to the review log and scheduled
+- [x] 15.2 Self-rated 0–5 against the existing rubric, appended to the review log and scheduled
       through the same FSRS path
 - [x] 15.3 Authored questions: write your own questions per topic (multiple choice or free
       text) and store them. This is the data model the AI layer will later populate, so getting
       it right without a model in the loop is the point
-- [ ] 15.4 Quiz run-through: answer each question, see the model answer, then rate recall.
+- [x] 15.4 Quiz run-through: answer each question, see the model answer, then rate recall.
       Multiple choice is graded locally with no network at all
 - [ ] 15.5 Due Today includes design topics alongside problems, or the schedule is invisible
 

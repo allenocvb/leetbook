@@ -9,13 +9,19 @@ export default defineConfig({
     /*
      * Processes, not worker threads.
      *
-     * Most of this suite opens an in-memory database through `node:sqlite`, which is still
-     * experimental and does not survive being torn down and recreated across many worker
-     * threads — past roughly two dozen files the run stops making progress and hangs with no
-     * failure and no output. Every file passes in isolation, which is what makes it so
-     * misleading. Forks give each file a clean process and the whole suite completes.
+     * Most of this suite opens an in-memory database through `node:sqlite`. Two separate
+     * things went wrong under the default threads pool, and only one was obvious:
      *
-     * Revisit when node:sqlite is stable; until then this is load-bearing, not a preference.
+     * 1. Test databases were never closed. Native handles are not garbage collected, so they
+     *    piled up until the run stopped making progress. Fixed in `test-utils.ts`, which now
+     *    closes every database after each test — that is the real bug, and it was masked by
+     *    switching pools rather than found.
+     * 2. Even with the leak fixed, threads still hangs. `node:sqlite` is experimental and
+     *    does not survive repeated teardown in a worker thread.
+     *
+     * The failure mode is what makes this worth writing down: no error, no output, and every
+     * file passing in isolation. Revisit when node:sqlite is stable; until then this is
+     * load-bearing, not a preference.
      */
     pool: "forks",
   },

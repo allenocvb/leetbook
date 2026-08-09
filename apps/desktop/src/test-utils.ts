@@ -9,11 +9,33 @@ import {
 } from "@leetbook/core";
 import { createTestDb } from "@leetbook/core/testing";
 
-/** Real in-memory SQLite database with migrations applied. */
+/*
+ * Every database opened by a test, so they can all be closed afterwards.
+ *
+ * `node:sqlite` handles are native and are not reclaimed by garbage collection. Left open
+ * they keep the worker alive, and once enough have accumulated the run simply stops making
+ * progress — no failure, no output, every file still passing in isolation. That symptom was
+ * misread twice before the cause was found here.
+ */
+const openDatabases: { close: () => void }[] = [];
+
+/** Real in-memory SQLite database with migrations applied. Closed after each test. */
 export async function makeDb(): Promise<SqlExecutor> {
   const db = createTestDb();
+  openDatabases.push(db.raw);
   await migrate(db);
   return db;
+}
+
+/** Registered as an `afterEach` in `test-setup.ts`. */
+export function closeTestDatabases(): void {
+  for (const db of openDatabases.splice(0)) {
+    try {
+      db.close();
+    } catch {
+      // Already closed, or never fully opened; either way there is nothing to reclaim.
+    }
+  }
 }
 
 export interface SeedProblem {

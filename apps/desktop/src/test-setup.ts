@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+import { closeTestDatabases } from "./test-utils.js";
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();
@@ -40,6 +41,8 @@ Object.defineProperty(window, "localStorage", {
 // cleanup doesn't hook in — do it explicitly.
 afterEach(() => {
   cleanup();
+  // Native SQLite handles are not garbage collected; leaking them stalls the whole run.
+  closeTestDatabases();
 });
 
 // jsdom lacks layout APIs that ProseMirror (TipTap) touches on mount.

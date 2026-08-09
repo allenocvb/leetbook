@@ -9,6 +9,7 @@ import { IntroScreen } from "./components/window/IntroScreen.js";
 import { DbProvider } from "./db/DbContext.js";
 import { useCounts } from "./hooks/useCounts.js";
 import { AllProblemsPage } from "./pages/AllProblemsPage.js";
+import { DesignReviewSessionPage } from "./pages/DesignReviewSessionPage.js";
 import { DesignTopicNotesPage } from "./pages/DesignTopicNotesPage.js";
 import { DesignTopicsPage } from "./pages/DesignTopicsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
@@ -29,7 +30,8 @@ type Route =
   | { view: "intro" }
   | { view: ViewId }
   | { view: "problem"; problemId: string; from: ViewId }
-  | { view: "design-topic"; topicId: string };
+  | { view: "design-topic"; topicId: string }
+  | { view: "design-review" };
 
 function Shell() {
   // The intro is launch behaviour, not first-run: every start lands here, and nothing is
@@ -55,7 +57,9 @@ function Shell() {
       ? route.from
       : route.view === "design-topic"
         ? "system-design"
-        : route.view;
+        : route.view === "design-review"
+          ? "system-design"
+          : route.view;
   const openProblem = (problemId: string) =>
     setRoute({ view: "problem", problemId, from: activeView });
   const pickCategory = (category: string) => {
@@ -79,6 +83,7 @@ function Shell() {
         route.view === "review" ||
         route.view === "system-design" ||
         route.view === "design-topic" ||
+        route.view === "design-review" ||
         route.view === "settings"
       }
     >
@@ -93,6 +98,7 @@ function Shell() {
         onViewChange={(view) => setRoute({ view: view === "all" ? "all-problems" : "due-today" })}
         onOpenProblem={openProblem}
         onOpenTopic={(topicId) => setRoute({ view: "design-topic", topicId })}
+        onStartDesignReview={() => setRoute({ view: "design-review" })}
         onBack={() => setRoute({ view: activeView })}
         onExitReview={() => setRoute({ view: "due-today" })}
         capture={capture}
@@ -109,6 +115,7 @@ function Page({
   onViewChange,
   onOpenProblem,
   onOpenTopic,
+  onStartDesignReview,
   onBack,
   onExitReview,
   capture,
@@ -120,6 +127,7 @@ function Page({
   onViewChange: (view: ProblemsView) => void;
   onOpenProblem: (id: string) => void;
   onOpenTopic: (id: string) => void;
+  onStartDesignReview: () => void;
   onBack: () => void;
   onExitReview: () => void;
   capture: CaptureRuntime;
@@ -150,9 +158,17 @@ function Page({
     case "review":
       return <ReviewSessionPage onExit={onExitReview} onShowNotes={onOpenProblem} />;
     case "system-design":
-      return <DesignTopicsPage onOpenTopic={onOpenTopic} refreshKey={refreshKey} />;
+      return (
+        <DesignTopicsPage
+          onOpenTopic={onOpenTopic}
+          onReview={onStartDesignReview}
+          refreshKey={refreshKey}
+        />
+      );
     case "design-topic":
       return <DesignTopicNotesPage topicId={route.topicId} onBack={onBack} />;
+    case "design-review":
+      return <DesignReviewSessionPage onExit={onBack} onShowNotes={onOpenTopic} />;
     case "settings":
       return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
   }

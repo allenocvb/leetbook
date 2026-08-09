@@ -15,10 +15,11 @@ import "../components/table/ProblemsPage.css";
 
 export interface DesignTopicsPageProps {
   onOpenTopic: (topicId: string) => void;
+  onReview?: () => void;
   refreshKey?: unknown;
 }
 
-export function DesignTopicsPage({ onOpenTopic, refreshKey }: DesignTopicsPageProps) {
+export function DesignTopicsPage({ onOpenTopic, onReview, refreshKey }: DesignTopicsPageProps) {
   const { rows, loading, error, refresh } = useDesignRows(refreshKey);
   const [sort, setSort] = useState<DesignSortState>({ key: "title", dir: "asc" });
   const [query, setQuery] = useState("");
@@ -71,6 +72,11 @@ export function DesignTopicsPage({ onOpenTopic, refreshKey }: DesignTopicsPagePr
                 onChange={(event) => setQuery(event.target.value)}
               />
             </div>
+            {onReview && (
+              <Button variant="outline" onClick={onReview}>
+                Review due
+              </Button>
+            )}
             <Button onClick={() => setDialogOpen(true)}>+ New topic</Button>
           </div>
         </div>

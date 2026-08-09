@@ -50,7 +50,7 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Export JSON: native save dialog, file written, valid JSON.
 - [ ] Export Markdown: native save dialog, notes readable.
 
-## 4. Table
+## 4. Table basics
 
 - [ ] The table **scrolls** with more rows than fit, under a sticky header. (Regression:
       it used to clip instead.)
@@ -229,3 +229,17 @@ Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
 - [ ] Try to save a choice question with one option: it refuses and says why.
 - [ ] Add a written-answer question: no options appear, and it is labelled Written.
 - [ ] Edit and delete both kinds.
+
+## 14. Design review session
+
+- [ ] With nothing overdue, `Review due` says nothing is due rather than showing an empty session.
+- [ ] A topic with no questions goes straight to the 0–5 picker.
+- [ ] A topic **with** questions hides the picker until `Show answers` is pressed. Rating before
+      seeing whether you were right is guesswork, and it feeds the schedule.
+- [ ] Answer two multiple choice, one right and one wrong: after revealing, the right option is
+      green, your wrong one is red, and the tally reads `1 of 2`.
+- [ ] The tally never sets your score — the picker still starts empty.
+- [ ] Written answers show the model answer only after revealing.
+- [ ] Work through two topics: the progress bar advances and the summary counts match.
+- [ ] Answers do not carry over between topics.
+- [ ] The rating lands in the topic's history and pushes its next review out.
