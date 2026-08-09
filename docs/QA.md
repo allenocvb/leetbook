@@ -243,3 +243,13 @@ Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
 - [ ] Work through two topics: the progress bar advances and the summary counts match.
 - [ ] Answers do not carry over between topics.
 - [ ] The rating lands in the topic's history and pushes its next review out.
+
+## 15. Due Today with design topics
+
+- [ ] With no design topics due, Due Today looks exactly as before — no banner.
+- [ ] With topics due, a banner sits above the table: "N system design topics are also due."
+      One topic reads "topic is", not "topics are".
+- [ ] `Review design` from the banner starts the design session.
+- [ ] **The problems table still scrolls** under its sticky header with the banner present.
+      The banner is a sibling of a page that takes `height: 100%`, so this is the thing most
+      likely to have broken.

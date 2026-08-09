@@ -93,6 +93,7 @@ function Shell() {
       <Page
         route={route}
         refreshKey={captureTick}
+        designDue={counts.designDue}
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         onViewChange={(view) => setRoute({ view: view === "all" ? "all-problems" : "due-today" })}
@@ -110,6 +111,7 @@ function Shell() {
 function Page({
   route,
   refreshKey,
+  designDue,
   activeCategory,
   onCategoryChange,
   onViewChange,
@@ -122,6 +124,7 @@ function Page({
 }: {
   route: Route;
   refreshKey: number;
+  designDue: number;
   activeCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   onViewChange: (view: ProblemsView) => void;
@@ -153,6 +156,8 @@ function Page({
           category={activeCategory}
           onCategoryChange={onCategoryChange}
           refreshKey={refreshKey}
+          designDue={designDue}
+          onReviewDesign={onStartDesignReview}
         />
       );
     case "review":

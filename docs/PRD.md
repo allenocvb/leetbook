@@ -338,7 +338,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
       it right without a model in the loop is the point
 - [x] 15.4 Quiz run-through: answer each question, see the model answer, then rate recall.
       Multiple choice is graded locally with no network at all
-- [ ] 15.5 Due Today includes design topics alongside problems, or the schedule is invisible
+- [x] 15.5 Due Today includes design topics alongside problems, or the schedule is invisible
 
 ## Phase 16 — AI quiz
 

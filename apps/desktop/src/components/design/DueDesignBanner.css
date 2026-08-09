@@ -1,0 +1,20 @@
+/* Sits between the Due Today header and the table, inset to match the table's card. */
+.due-design-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lb-space-4);
+  margin: var(--lb-space-5) 34px 0;
+  padding: var(--lb-space-4) var(--lb-space-5);
+  color: var(--lb-accent-text);
+  background: var(--lb-tint);
+  border-radius: var(--lb-radius-6);
+}
+
+.due-design-banner__text {
+  font-size: 13px;
+}
+
+.due-design-banner__text strong {
+  font-weight: 500;
+}

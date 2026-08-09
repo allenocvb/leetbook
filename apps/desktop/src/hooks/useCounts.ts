@@ -1,11 +1,14 @@
-import { listDueRows, listTableRows } from "@leetbook/core";
+import { listDueDesignRows, listDueRows, listTableRows } from "@leetbook/core";
 import { useEffect, useState } from "react";
 import type { CategoryCount } from "../components/Sidebar.js";
 import { useDb } from "../db/DbContext.js";
 
 export interface Counts {
   all: number;
+  /** Problems due. */
   due: number;
+  /** Design topics due. Counted separately: the two have different review sessions. */
+  designDue: number;
   categories: CategoryCount[];
 }
 
@@ -24,20 +27,23 @@ export function collectCategoryCounts(rows: { tags: string[] }[]): CategoryCount
 /** Sidebar badge counts. `dep` retriggers the load (e.g. on view change). */
 export function useCounts(dep: unknown): Counts {
   const db = useDb();
-  const [counts, setCounts] = useState<Counts>({ all: 0, due: 0, categories: [] });
+  const [counts, setCounts] = useState<Counts>({ all: 0, due: 0, designDue: 0, categories: [] });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: `dep` is an intentional refresh trigger (re-count on view change)
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [allRows, dueRows] = await Promise.all([
+      const now = new Date().toISOString();
+      const [allRows, dueRows, dueDesign] = await Promise.all([
         listTableRows(db),
-        listDueRows(db, new Date().toISOString()),
+        listDueRows(db, now),
+        listDueDesignRows(db, now),
       ]);
       if (!cancelled) {
         setCounts({
           all: allRows.length,
           due: dueRows.length,
+          designDue: dueDesign.length,
           categories: collectCategoryCounts(allRows),
         });
       }
