@@ -219,3 +219,14 @@ Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
   deliberate (difficulty and topics cannot be invented), but the warning says so.
 - **Toast without a code snapshot** — the warning distinguishes a missing submission id in
   the URL from a `submissionDetails` call that returned nothing.
+
+### Quiz questions (authoring)
+
+- [ ] A topic with no questions invites you to write one.
+- [ ] Add a multiple-choice question, marking option 2. Reopen it: option 2 is still marked.
+- [ ] **Fill options 2 and 3 only, leaving option 1 blank, and mark option 3.** Save, reopen:
+      two options remain and the right one is still correct. Blank options are dropped on save,
+      so the marked index has to move with them.
+- [ ] Try to save a choice question with one option: it refuses and says why.
+- [ ] Add a written-answer question: no options appear, and it is labelled Written.
+- [ ] Edit and delete both kinds.

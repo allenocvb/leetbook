@@ -1,0 +1,80 @@
+.question-dialog__kinds {
+  display: flex;
+  gap: var(--lb-space-2);
+  margin-top: var(--lb-space-2);
+}
+
+.question-dialog__choices {
+  margin: var(--lb-space-4) 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.question-dialog__choice {
+  display: flex;
+  align-items: center;
+  gap: var(--lb-space-3);
+  margin-bottom: var(--lb-space-2);
+}
+
+.question-dialog__choice input[type="radio"] {
+  flex: 0 0 auto;
+  accent-color: var(--lb-accent);
+}
+
+/* The question list on the notes page. */
+.question-list {
+  margin: var(--lb-space-6) 0 0;
+}
+
+.question-list__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--lb-space-3);
+}
+
+.question-list__title {
+  margin: 0;
+  color: var(--lb-ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.question-list__empty {
+  padding: var(--lb-space-5) 0;
+  color: var(--lb-muted-2);
+  font-size: 12.5px;
+}
+
+.question-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-4) 0;
+  border-top: 1px solid var(--lb-bd);
+}
+
+.question-list__prompt {
+  flex: 1;
+  min-width: 0;
+  color: var(--lb-text-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.question-list__kind {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  color: var(--lb-text-3);
+  background: var(--lb-chip);
+  border-radius: var(--lb-radius-pill);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.question-list__actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--lb-space-1);
+}

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { DesignCanvas } from "../components/design/DesignCanvas.js";
 import { DesignTopicDialog } from "../components/design/DesignTopicDialog.js";
 import { DesignTopicHeader } from "../components/design/DesignTopicHeader.js";
+import { QuestionList } from "../components/design/QuestionList.js";
 import { NoteEditor } from "../components/editor/NoteEditor.js";
 import { Divider } from "../components/ui/Divider.js";
 import { useDb } from "../db/DbContext.js";
@@ -122,6 +123,8 @@ export function DesignTopicNotesPage({
             onChange={scene.handleChange}
             theme={theme}
           />
+
+          <QuestionList topicId={topic.id} />
         </div>
 
         {editing && (
