@@ -5,7 +5,7 @@ core logic, React behaviour and the extension adapter, but it runs in jsdom agai
 Node SQLite shim — it cannot prove anything about the OS window, the platform opener,
 native file dialogs, or a live LeetCode page.
 
-Run before checking PRD 9.24, and again before any release.
+Run before any release.
 
 ```bash
 pnpm install
@@ -65,7 +65,61 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
       does **not** navigate to notes. Cancel leaves the row; confirming removes it.
 - [ ] Tab through the table: the `×` is reachable by keyboard and visible when focused.
 
-## 5. Notes editor
+## 5. Problem table
+
+- [ ] Rows sit in a bordered card with visible breathing room, not flush to the page edge.
+- [ ] Hovering a row fills a **rounded** block inset from the card edge, and the hairlines
+      above and below that row disappear — no rule cutting through the rounded corners.
+- [ ] The first row has no rule above it; the last has none below.
+- [ ] Categories show as chips. A problem with 4+ categories shows two chips and `+2`, stays
+      one line tall, and reveals the full list on hover.
+- [ ] A problem with no categories shows an em dash, not an empty cell.
+- [ ] Difficulty is a coloured dot plus label; only Status is a pill.
+- [ ] Switch to compact density: rows tighten, and nothing overlaps or clips.
+- [ ] Toggle dark mode: the card, its border, the chips and the hover fill all remain
+      distinguishable from the page behind them.
+- [ ] Scroll a long list: the sticky header stays put and rows pass cleanly beneath it.
+
+## 6. System design table
+
+- [ ] The sidebar has **five** items; `System Design` sits after `Review Session`.
+- [ ] Add a topic with a title, prompt and two tags. It appears without a reload.
+- [ ] Tags typed as `Caching, caching` produce **one** chip, not two.
+- [ ] Adding with an empty title is refused with a visible message.
+- [ ] Search matches a word that appears only in a prompt, not in any title.
+- [ ] Sorting by each column works and reverses on a second click.
+- [ ] There is **no** Difficulty column.
+- [ ] Delete a topic: it confirms in a dialog, disappears, and stays gone after a restart.
+- [ ] Toggle dark mode: the table matches the problem table exactly.
+- [ ] Export JSON from Settings and open it: the `designTopics`, `designReviews`,
+      `designScheduling` and `designNotes` keys are present, and populated if you have topics.
+
+## 7. System design topic notes
+
+- [ ] Click a topic row: its notes page opens with the prompt shown behind a rule.
+- [ ] A topic with an empty prompt shows no prompt block at all — not a dash, not a gap.
+- [ ] Type notes: the status reads Saving… then Saved. Navigate away and back — they persist.
+- [ ] Slash commands, code blocks and the selection colour bar all work, same as problem notes.
+- [ ] Edit topic changes the title in the header without leaving the page.
+- [ ] **Type something, then delete the topic without pausing.** It returns to the table and the
+      topic is gone. Restart the app: it must still be gone, with no orphaned note behind it.
+- [ ] The back link reads `← System Design` and returns to the table.
+
+## 8. Design canvas
+
+- [ ] Open a topic: the canvas appears below the notes, briefly showing `Loading canvas…`.
+- [ ] Draw a few boxes and an arrow. Navigate away and back — the diagram is still there.
+- [ ] Toggle dark mode: the canvas follows the app rather than staying light.
+- [ ] Type in the notes **immediately after** drawing. Reload: both the prose and the diagram
+      survived. Then draw immediately after typing and reload again. Neither may erase the other.
+- [ ] Excalidraw's own menu offers no Open/Save-to-file/theme-toggle — the app owns those.
+- [ ] **Offline font check.** Run `pnpm --filter desktop tauri build`, open the packaged app
+      with wifi off, and draw some text. It must render in Excalidraw's handwriting font, not a
+      fallback. This is the one thing `tauri dev` cannot tell you: unset, Excalidraw fetches its
+      fonts from esm.sh, and a dev machine has network so it always looks fine.
+- [ ] Check devtools Network on first canvas open: no request should leave the machine.
+
+## 9. Notes editor
 
 - [ ] Typing autosaves — status shows Saving then Saved, and content survives navigating
       away and back.
@@ -81,61 +135,6 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Typing `l` at the start of a code line is **not** auto-capitalised; quotes stay
       straight, `--` is not turned into an en dash.
 - [ ] `/` inside a code block does not open the slash menu.
-### Problem table
-
-- [ ] Rows sit in a bordered card with visible breathing room, not flush to the page edge.
-- [ ] Hovering a row fills a **rounded** block inset from the card edge, and the hairlines
-      above and below that row disappear — no rule cutting through the rounded corners.
-- [ ] The first row has no rule above it; the last has none below.
-- [ ] Categories show as chips. A problem with 4+ categories shows two chips and `+2`, stays
-      one line tall, and reveals the full list on hover.
-- [ ] A problem with no categories shows an em dash, not an empty cell.
-- [ ] Difficulty is a coloured dot plus label; only Status is a pill.
-- [ ] Switch to compact density: rows tighten, and nothing overlaps or clips.
-- [ ] Toggle dark mode: the card, its border, the chips and the hover fill all remain
-      distinguishable from the page behind them.
-- [ ] Scroll a long list: the sticky header stays put and rows pass cleanly beneath it.
-
-### System design table
-
-- [ ] The sidebar has **five** items; `System Design` sits after `Review Session`.
-- [ ] Add a topic with a title, prompt and two tags. It appears without a reload.
-- [ ] Tags typed as `Caching, caching` produce **one** chip, not two.
-- [ ] Adding with an empty title is refused with a visible message.
-- [ ] Search matches a word that appears only in a prompt, not in any title.
-- [ ] Sorting by each column works and reverses on a second click.
-- [ ] There is **no** Difficulty column.
-- [ ] Delete a topic: it confirms in a dialog, disappears, and stays gone after a restart.
-- [ ] Toggle dark mode: the table matches the problem table exactly.
-- [ ] Export JSON from Settings and open it: the `designTopics`, `designReviews`,
-      `designScheduling` and `designNotes` keys are present, and populated if you have topics.
-
-### System design topic notes
-
-- [ ] Click a topic row: its notes page opens with the prompt shown behind a rule.
-- [ ] A topic with an empty prompt shows no prompt block at all — not a dash, not a gap.
-- [ ] Type notes: the status reads Saving… then Saved. Navigate away and back — they persist.
-- [ ] Slash commands, code blocks and the selection colour bar all work, same as problem notes.
-- [ ] Edit topic changes the title in the header without leaving the page.
-- [ ] **Type something, then delete the topic without pausing.** It returns to the table and the
-      topic is gone. Restart the app: it must still be gone, with no orphaned note behind it.
-- [ ] The back link reads `← System Design` and returns to the table.
-
-### Design canvas
-
-- [ ] Open a topic: the canvas appears below the notes, briefly showing `Loading canvas…`.
-- [ ] Draw a few boxes and an arrow. Navigate away and back — the diagram is still there.
-- [ ] Toggle dark mode: the canvas follows the app rather than staying light.
-- [ ] Type in the notes **immediately after** drawing. Reload: both the prose and the diagram
-      survived. Then draw immediately after typing and reload again. Neither may erase the other.
-- [ ] Excalidraw's own menu offers no Open/Save-to-file/theme-toggle — the app owns those.
-- [ ] **Offline font check.** Run `pnpm --filter desktop tauri build`, open the packaged app
-      with wifi off, and draw some text. It must render in Excalidraw's handwriting font, not a
-      fallback. This is the one thing `tauri dev` cannot tell you: unset, Excalidraw fetches its
-      fonts from esm.sh, and a dev machine has network so it always looks fine.
-- [ ] Check devtools Network on first canvas open: no request should leave the machine.
-
-### Notes editor
 
 - [ ] Select some prose: a format bar appears. Bold, italic, underline, strikethrough and
       inline code all apply and show as active. Clear formatting removes them.
@@ -152,7 +151,7 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Delete a problem: first click arms, Cancel backs out, Delete removes it and returns
       to the table. The problem is gone after a restart.
 
-## 6. Review flow
+## 10. Review flow
 
 - [ ] Due Today lists only due problems.
 - [ ] Review session: 0–5 selects, Enter confirms, Escape exits; progress advances and the
@@ -161,7 +160,7 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] Log review from the notes page updates next review, score and reps.
 - [ ] Edit latest review changes score, date and reps, and replays scheduling from history.
 
-## 7. Extension capture — the automation goal
+## 11. Extension capture — the automation goal
 
 Not yet verified against live LeetCode; PRD 9.15 checked a fixture page. This is the part
 that matters most for the automated workflow.
@@ -192,7 +191,7 @@ pnpm --filter extension dev   # then load unpacked from apps/extension/.output/
       flushes and the capture lands.
 - [ ] Dismiss/skip schedules as Good.
 
-### Capture — NeetCode
+## 12. Capture — NeetCode
 
 - [ ] Submit a real Accepted solution on neetcode.io. **A toast appears bottom-right**, with
       the runtime and memory NeetCode shows in the submission header ("Memory: 7.7 MB ·
@@ -220,7 +219,7 @@ Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
 - **Toast without a code snapshot** — the warning distinguishes a missing submission id in
   the URL from a `submissionDetails` call that returned nothing.
 
-### Quiz questions (authoring)
+## 13. Quiz questions (authoring)
 
 - [ ] A topic with no questions invites you to write one.
 - [ ] Add a multiple-choice question, marking option 2. Reopen it: option 2 is still marked.
