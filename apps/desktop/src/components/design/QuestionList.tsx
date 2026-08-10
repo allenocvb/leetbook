@@ -2,6 +2,7 @@ import { createDesignQuestionsRepo, type DesignQuestion } from "@leetbook/core";
 import { useCallback, useEffect, useState } from "react";
 import { useDb } from "../../db/DbContext.js";
 import { Button } from "../ui/Button.js";
+import { GenerateQuestionsDialog } from "./GenerateQuestionsDialog.js";
 import { QuestionDialog } from "./QuestionDialog.js";
 import "./QuestionDialog.css";
 
@@ -12,11 +13,20 @@ import "./QuestionDialog.css";
  * complete feature, and if the loop is wrong no model fixes it. Phase 16 fills this same list
  * from a generated draft that the user edits before saving.
  */
-export function QuestionList({ topicId }: { topicId: string }) {
+export interface QuestionListProps {
+  topicId: string;
+  /** Passed through to generation so questions are grounded in this topic. */
+  title?: string;
+  prompt?: string;
+  notes?: string;
+}
+
+export function QuestionList({ topicId, title = "", prompt = "", notes = "" }: QuestionListProps) {
   const db = useDb();
   const [questions, setQuestions] = useState<DesignQuestion[]>([]);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<DesignQuestion | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const refresh = useCallback(async () => {
     setQuestions(await createDesignQuestionsRepo(db).listByTopic(topicId));
@@ -37,9 +47,14 @@ export function QuestionList({ topicId }: { topicId: string }) {
         <h2 className="question-list__title">
           Quiz questions{questions.length > 0 ? ` (${questions.length})` : ""}
         </h2>
-        <Button variant="ghost" onClick={() => setAdding(true)}>
-          + Add question
-        </Button>
+        <span className="question-list__actions">
+          <Button variant="ghost" onClick={() => setGenerating(true)}>
+            Generate with AI
+          </Button>
+          <Button variant="ghost" onClick={() => setAdding(true)}>
+            + Add question
+          </Button>
+        </span>
       </header>
 
       {questions.length === 0 ? (
@@ -79,6 +94,16 @@ export function QuestionList({ topicId }: { topicId: string }) {
         <QuestionDialog
           topicId={topicId}
           onClose={() => setAdding(false)}
+          onSaved={() => void refresh()}
+        />
+      )}
+      {generating && (
+        <GenerateQuestionsDialog
+          topicId={topicId}
+          title={title}
+          prompt={prompt}
+          notes={notes}
+          onClose={() => setGenerating(false)}
           onSaved={() => void refresh()}
         />
       )}

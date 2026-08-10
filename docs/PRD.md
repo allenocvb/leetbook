@@ -363,7 +363,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 - [x] 16.2 Key handling: entered in Settings, stored in the OS keychain rather than SQLite or
       plain config, never logged, never included in exports. Absent key degrades to Phase 15's
       authored questions rather than erroring
-- [ ] 16.3 Question generation: produce a mix of multiple choice and free text from a topic's
+- [x] 16.3 Question generation: produce a mix of multiple choice and free text from a topic's
       notes, reviewed and editable by the user before they are saved. A model writing directly
       into stored content with no human pass is how bad questions become permanent
 - [ ] 16.4 Free-text grading: the model returns a score with reasoning. **It proposes; the user

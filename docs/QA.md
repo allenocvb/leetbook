@@ -270,3 +270,20 @@ was written without a compiler available.
 - [ ] Open Keychain Access, search `app.leetbook.desktop`: the entry exists and can be revoked
       by hand.
 - [ ] Remove key: the card returns to "Off" and the Keychain entry is gone.
+
+## 17. AI quiz — generating questions
+
+Needs a key set in Settings. This is the only part of the app that sends your writing anywhere.
+
+- [ ] A topic page shows **Generate with AI** beside `+ Add question`.
+- [ ] With no key set, generating explains that and points at Settings — it does not fail obscurely.
+- [ ] The dialog states, **before** you press Generate, that this topic's notes go to Anthropic
+      and that nothing is saved until you review.
+- [ ] A topic with no notes warns that questions will be generic.
+- [ ] Generated drafts appear in full — prompt, every option with the correct one marked, and
+      the explanation. Nothing is stored at this point: cancel, reopen the topic, and the
+      question list is unchanged.
+- [ ] Discard one: it dims, the count drops, and `Keep` restores it.
+- [ ] Save: only the kept drafts appear in the list, and each can then be edited or deleted
+      like a hand-written one.
+- [ ] Watch devtools Network: one request on Generate, none while reviewing afterwards.

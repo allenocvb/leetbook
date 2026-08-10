@@ -7,6 +7,7 @@ import {
   type DesignReview,
   type DesignSchedulingState,
   type DesignTopic,
+  tiptapToMarkdown,
 } from "@leetbook/core";
 import { useEffect, useState } from "react";
 import { DesignCanvas } from "../components/design/DesignCanvas.js";
@@ -124,7 +125,16 @@ export function DesignTopicNotesPage({
             theme={theme}
           />
 
-          <QuestionList topicId={topic.id} />
+          {/*
+            Notes go to the model as markdown, not TipTap JSON: the JSON is mostly structure,
+            which costs tokens and tells the model nothing about the material.
+          */}
+          <QuestionList
+            topicId={topic.id}
+            title={topic.title}
+            prompt={topic.prompt}
+            notes={note?.contentJson ? tiptapToMarkdown(note.contentJson) : ""}
+          />
         </div>
 
         {editing && (

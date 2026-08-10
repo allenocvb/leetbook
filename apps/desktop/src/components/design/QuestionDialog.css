@@ -78,3 +78,61 @@
   display: flex;
   gap: var(--lb-space-1);
 }
+
+/* Generated drafts, shown in full so nothing is saved sight-unseen. */
+.generate-drafts {
+  margin: var(--lb-space-4) 0 0;
+  padding: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.generate-drafts__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-4) 0;
+  border-top: 1px solid var(--lb-bd);
+}
+
+.generate-drafts__item:first-child {
+  border-top: 0;
+}
+
+/* Kept visible rather than removed, so a discard can be undone. */
+.generate-drafts__item[data-discarded="true"] {
+  opacity: 0.45;
+}
+
+.generate-drafts__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.generate-drafts__prompt {
+  margin: 0;
+  color: var(--lb-ink);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.generate-drafts__choices {
+  margin: var(--lb-space-2) 0 0;
+  padding-left: var(--lb-space-5);
+  color: var(--lb-text-3);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.generate-drafts__choices li[data-correct="true"] {
+  color: var(--lb-status-mastered-fg);
+  font-weight: 500;
+}
+
+.generate-drafts__model {
+  margin: var(--lb-space-2) 0 0;
+  color: var(--lb-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
