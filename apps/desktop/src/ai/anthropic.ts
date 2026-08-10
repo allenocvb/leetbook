@@ -44,6 +44,13 @@ export function createAnthropicProvider({
           "content-type": "application/json",
           "x-api-key": apiKey,
           "anthropic-version": API_VERSION,
+          /*
+           * A Tauri webview is a browser origin, and the API rejects those by default with a
+           * CORS failure. The header is Anthropic's documented opt-in. It is "dangerous" for
+           * web apps, where it would expose a key to every visitor — here the key is the
+           * user's own, held in their keychain, on their machine.
+           */
+          "anthropic-dangerous-direct-browser-access": "true",
         },
         body: JSON.stringify(body),
       });

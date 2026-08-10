@@ -144,6 +144,8 @@ describe("createAnthropicProvider", () => {
     const headers = init.headers as Record<string, string>;
     expect(headers["x-api-key"]).toBe("sk-test");
     expect(headers["anthropic-version"]).toBeDefined();
+    // Without this the API rejects the Tauri webview's origin outright.
+    expect(headers["anthropic-dangerous-direct-browser-access"]).toBe("true");
   });
 
   it("refuses to call out with no key", async () => {
