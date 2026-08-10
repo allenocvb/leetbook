@@ -360,7 +360,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 - [x] 16.1 Provider interface: `QuizProvider` with `generateQuestions(notes)` and
       `gradeAnswer(question, answer)`. One implementation (Anthropic), fully tested against
       recorded fixtures so the suite never makes a network call
-- [ ] 16.2 Key handling: entered in Settings, stored in the OS keychain rather than SQLite or
+- [x] 16.2 Key handling: entered in Settings, stored in the OS keychain rather than SQLite or
       plain config, never logged, never included in exports. Absent key degrades to Phase 15's
       authored questions rather than erroring
 - [ ] 16.3 Question generation: produce a mix of multiple choice and free text from a topic's

@@ -357,3 +357,11 @@
   font-size: 11px;
   line-height: 1.45;
 }
+
+/* Disclosure and status text inside a settings card. */
+.settings-note {
+  margin: var(--lb-space-4) 0 0;
+  color: var(--lb-text-3);
+  font-size: 12.5px;
+  line-height: 1.6;
+}

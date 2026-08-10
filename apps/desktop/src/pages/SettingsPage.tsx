@@ -7,6 +7,7 @@ import {
 } from "@leetbook/core";
 import { useCallback, useEffect, useState } from "react";
 import type { CaptureRuntime } from "../capture/useCaptureListener.js";
+import { AiCard } from "../components/settings/AiCard.js";
 import { ConnectionCard } from "../components/settings/ConnectionCard.js";
 import { DataCard, type DataStats } from "../components/settings/DataCard.js";
 import { SchedulingCard } from "../components/settings/SchedulingCard.js";
@@ -102,6 +103,8 @@ export function SettingsPage({ capture, onViewProblems }: SettingsPageProps) {
         </header>
         <div className="settings-page__cards">
           <ConnectionCard capture={capture} />
+          <AiCard />
+
           <SchedulingCard
             dailyNewLimit={dailyNewLimit}
             onChangeDailyNewLimit={changeDailyNewLimit}

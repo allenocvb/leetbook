@@ -253,3 +253,20 @@ Both failure modes now log to the LeetCode tab's console, prefixed `[LeetBook]`:
 - [ ] **The problems table still scrolls** under its sticky header with the banner present.
       The banner is a sibling of a page that takes `height: 100%`, so this is the thing most
       likely to have broken.
+
+## 16. AI quiz — key storage
+
+Needs `cd apps/desktop/src-tauri && cargo check` first; the keychain commands are Rust that
+was written without a compiler available.
+
+- [ ] Settings shows an **AI quiz** card reading "Off — no key set".
+- [ ] It states plainly that generating questions sends notes to Anthropic, and that reviewing
+      sends nothing.
+- [ ] Paste a key and save. The card flips to "On", the field clears, and only a masked hint
+      (`sk-ant…abcd`) is shown — never the whole key.
+- [ ] Quit and reopen: the key is still set. It is **not** in the app-data database — open the
+      `.db` in a SQLite browser and confirm it appears nowhere.
+- [ ] Export JSON and search it for the key. It must not be there.
+- [ ] Open Keychain Access, search `app.leetbook.desktop`: the entry exists and can be revoked
+      by hand.
+- [ ] Remove key: the card returns to "Off" and the Keychain entry is gone.
