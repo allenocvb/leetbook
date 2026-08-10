@@ -357,7 +357,7 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 >    fully offline, and the network is touched only when authoring or explicitly regenerating.
 >    This keeps the daily loop local even though the feature is not.
 
-- [ ] 16.1 Provider interface: `QuizProvider` with `generateQuestions(notes)` and
+- [x] 16.1 Provider interface: `QuizProvider` with `generateQuestions(notes)` and
       `gradeAnswer(question, answer)`. One implementation (Anthropic), fully tested against
       recorded fixtures so the suite never makes a network call
 - [ ] 16.2 Key handling: entered in Settings, stored in the OS keychain rather than SQLite or
