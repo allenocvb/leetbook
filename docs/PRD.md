@@ -366,12 +366,12 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 - [x] 16.3 Question generation: produce a mix of multiple choice and free text from a topic's
       notes, reviewed and editable by the user before they are saved. A model writing directly
       into stored content with no human pass is how bad questions become permanent
-- [ ] 16.4 Free-text grading: the model returns a score with reasoning. **It proposes; the user
+- [x] 16.4 Free-text grading: the model returns a score with reasoning. **It proposes; the user
       confirms or overrides, and the user's number is what is stored.** The entire review log
       rests on honest self-rating, and a lenient grader would push a topic weeks out while
       looking like it worked — corrupting the schedule invisibly. This constraint is not
       negotiable for a convenience win
-- [ ] 16.5 Failure behaviour: no network, bad key, rate limit and malformed response each say
+- [x] 16.5 Failure behaviour: no network, bad key, rate limit and malformed response each say
       what happened and fall back to self-rating. A quiz must never block a review
 - [ ] 16.6 Cost and consent: show what a generation will cost before it runs, and state plainly
       in the UI that notes are sent to the provider. Off by default

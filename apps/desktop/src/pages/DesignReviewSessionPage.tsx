@@ -8,7 +8,11 @@ import {
   type PerformanceScore,
 } from "@leetbook/core";
 import { useCallback, useEffect, useState } from "react";
+import { createAnthropicProvider } from "../ai/anthropic.js";
+import { createApiKeyStore } from "../ai/apiKeyStore.js";
+import type { QuizProvider } from "../ai/quizProvider.js";
 import { DesignQuizStage, scoreChoices } from "../components/design/DesignQuizStage.js";
+import { GradeSuggestion } from "../components/design/GradeSuggestion.js";
 import { ReviewSessionState } from "../components/review/ReviewSessionState.js";
 import { ScorePicker } from "../components/review/ScorePicker.js";
 import { Button } from "../components/ui/Button.js";
@@ -19,6 +23,19 @@ import "../components/design/DesignQuizStage.css";
 export interface DesignReviewSessionPageProps {
   onExit: () => void;
   onShowNotes?: (topicId: string) => void;
+  /** Injected in tests. Null means no key is set, and grading is simply not offered. */
+  loadProvider?: () => Promise<QuizProvider | null>;
+}
+
+interface GradeResult {
+  prompt: string;
+  suggestedScore: PerformanceScore;
+  reasoning: string;
+}
+
+async function defaultLoadProvider(): Promise<QuizProvider | null> {
+  const key = await createApiKeyStore().load();
+  return key ? createAnthropicProvider({ apiKey: key }) : null;
 }
 
 /**
@@ -33,6 +50,7 @@ export interface DesignReviewSessionPageProps {
 export function DesignReviewSessionPage({
   onExit,
   onShowNotes = () => {},
+  loadProvider = defaultLoadProvider,
 }: DesignReviewSessionPageProps) {
   const db = useDb();
   const [queue, setQueue] = useState<DesignTableRow[] | null>(null);
@@ -45,6 +63,24 @@ export function DesignReviewSessionPage({
   const [scores, setScores] = useState<PerformanceScore[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [grades, setGrades] = useState<GradeResult[] | null>(null);
+  const [grading, setGrading] = useState(false);
+  const [canGrade, setCanGrade] = useState(false);
+
+  // Whether a key exists at all. No key simply means the button never appears.
+  useEffect(() => {
+    let live = true;
+    void loadProvider()
+      .then((provider) => {
+        if (live) setCanGrade(provider !== null);
+      })
+      .catch(() => {
+        if (live) setCanGrade(false);
+      });
+    return () => {
+      live = false;
+    };
+  }, [loadProvider]);
 
   useEffect(() => {
     let live = true;
@@ -72,6 +108,7 @@ export function DesignReviewSessionPage({
         setWritten({});
         setRevealed(false);
         setSelected(null);
+        setGrades(null);
       });
     return () => {
       live = false;
@@ -125,6 +162,42 @@ export function DesignReviewSessionPage({
   if (!current) return null;
 
   const tally = scoreChoices(questions, choices);
+  const answered = questions.filter(
+    (question) => question.kind === "text" && (written[question.id] ?? "").trim() !== "",
+  );
+
+  const grade = async () => {
+    setGrading(true);
+    setError(null);
+    try {
+      const provider = await loadProvider();
+      if (!provider) return;
+
+      const results: GradeResult[] = [];
+      for (const question of answered) {
+        const graded = await provider.gradeAnswer({
+          question: question.prompt,
+          modelAnswer: question.modelAnswer,
+          answer: written[question.id] ?? "",
+        });
+        results.push({ prompt: question.prompt, ...graded });
+      }
+      setGrades(results);
+    } catch (cause) {
+      // Grading is optional, so a failure must never block the review behind it.
+      setError(
+        `Couldn't grade: ${cause instanceof Error ? cause.message : String(cause)}. Rate it yourself.`,
+      );
+    } finally {
+      setGrading(false);
+    }
+  };
+
+  const overall = ((): PerformanceScore => {
+    if (!grades || grades.length === 0) return 0;
+    const mean = grades.reduce((sum, g) => sum + g.suggestedScore, 0) / grades.length;
+    return Math.round(mean) as PerformanceScore;
+  })();
 
   return (
     <div className="review-session">
@@ -172,6 +245,11 @@ export function DesignReviewSessionPage({
             {questions.length > 0 && !revealed && (
               <Button onClick={() => setRevealed(true)}>Show answers</Button>
             )}
+            {revealed && canGrade && answered.length > 0 && grades === null && (
+              <Button variant="outline" disabled={grading} onClick={() => void grade()}>
+                {grading ? "Grading…" : "Grade my answers"}
+              </Button>
+            )}
           </div>
 
           {questions.length > 0 && (
@@ -198,6 +276,10 @@ export function DesignReviewSessionPage({
             recall before seeing whether you were right is guesswork, and a guessed score
             feeds straight into the schedule.
           */}
+          {grades !== null && grades.length > 0 && (
+            <GradeSuggestion results={grades} overall={overall} onUse={setSelected} />
+          )}
+
           {(questions.length === 0 || revealed) && (
             <section className="review-session__rating" aria-labelledby="design-review-question">
               <h2 id="design-review-question">How well did you recall it?</h2>

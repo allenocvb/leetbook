@@ -1,0 +1,80 @@
+.grade-suggestion {
+  margin: var(--lb-space-5) 0;
+  padding: var(--lb-space-5);
+  background: var(--lb-surf-3);
+  border-radius: var(--lb-radius-6);
+  text-align: left;
+}
+
+.grade-suggestion__header {
+  display: flex;
+  align-items: center;
+  gap: var(--lb-space-3);
+  margin-bottom: var(--lb-space-4);
+}
+
+.grade-suggestion__label {
+  color: var(--lb-muted);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.grade-suggestion__overall {
+  flex: 1;
+  color: var(--lb-text-3);
+  font-size: 12.5px;
+}
+
+.grade-suggestion__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grade-suggestion__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--lb-space-3);
+  padding: var(--lb-space-3) 0;
+  border-top: 1px solid var(--lb-bd);
+}
+
+.grade-suggestion__item:first-child {
+  border-top: 0;
+}
+
+.grade-suggestion__score {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: grid;
+  place-items: center;
+  color: var(--lb-text-3);
+  background: var(--lb-surf);
+  border-radius: var(--lb-radius-2);
+  font-family: var(--lb-font-mono);
+  font-size: 12px;
+}
+
+.grade-suggestion__prompt {
+  margin: 0;
+  color: var(--lb-text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.grade-suggestion__reasoning {
+  margin: var(--lb-space-1) 0 0;
+  color: var(--lb-muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+/* Deliberately not styled as fine print — it is the point, not a disclaimer. */
+.grade-suggestion__caveat {
+  margin: var(--lb-space-4) 0 0;
+  color: var(--lb-text-3);
+  font-size: 12.5px;
+  line-height: 1.55;
+}

@@ -291,3 +291,21 @@ are indistinguishable.
 - [ ] Save: only the kept drafts appear in the list, and each can then be edited or deleted
       like a hand-written one.
 - [ ] Watch devtools Network: one request on Generate, none while reviewing afterwards.
+
+## 18. AI quiz — grading written answers
+
+- [ ] With no key set, a written question offers **no** grading button.
+- [ ] With a key set but nothing typed, still no button — there is nothing to grade and no
+      reason to spend a request.
+- [ ] Type an answer, Show answers, then **Grade my answers**. Per-question scores and
+      reasoning appear.
+- [ ] **The picker is still empty.** Nothing was chosen on your behalf, and Save stays disabled
+      until you pick. This is the whole rule: the model suggests, you decide.
+- [ ] `Use N` fills the picker with the suggestion. Saving stores that number.
+- [ ] Ignore the suggestion and pick a different score. **That** number is what lands in the
+      review log — check the topic's history afterwards.
+- [ ] Pull the network and grade: it says grading failed and tells you to rate it yourself.
+      The rating and Save still work. The optional part must never block the review.
+- [ ] Deliberately write a weak answer and see whether the grader inflates it. A generous
+      grader is the failure this design exists to contain — if it consistently overrates,
+      tune `gradePrompt` in `apps/desktop/src/ai/anthropic.ts`.
