@@ -275,6 +275,10 @@ was written without a compiler available.
 
 Needs a key set in Settings. This is the only part of the app that sends your writing anywhere.
 
+Use `docs/qa-fixtures/url-shortener-notes.md` for the topic and notes. A fixed fixture makes
+generation comparable between runs — otherwise a prompt change and a different set of notes
+are indistinguishable.
+
 - [ ] A topic page shows **Generate with AI** beside `+ Add question`.
 - [ ] With no key set, generating explains that and points at Settings — it does not fail obscurely.
 - [ ] The dialog states, **before** you press Generate, that this topic's notes go to Anthropic
