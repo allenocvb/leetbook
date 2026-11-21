@@ -35,7 +35,8 @@ Getting started on LeetCode is hard. Spaced repetition works, but existing tooli
 - 4 — Correct after some hesitation or minor stumbling
 - 5 — Perfect recall, solved smoothly and confidently
 
-Internal FSRS mapping: 0–1 → Again, 2 → Hard, 3–4 → Good, 5 → Easy. UX stays 0–5.
+Internal FSRS mapping: 0–2 → Again (incorrect), 3 → Hard, 4 → Good, 5 → Easy. UX stays 0–5.
+FSRS runs at 93% target retention with a 90-day maximum interval (`packages/core/src/fsrs.ts`).
 
 ## 3. Product Scope (v1)
 

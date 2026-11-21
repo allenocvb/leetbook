@@ -48,13 +48,19 @@ export {
 } from "./designReview.js";
 export { type DatabaseExport, exportDatabaseJson } from "./export/json.js";
 export { exportNotesMarkdown, type NoteExport, tiptapToMarkdown } from "./export/markdown.js";
-export { nextSchedule, type ScheduleOutcome, scheduleReview } from "./fsrs.js";
+export {
+  MAX_INTERVAL_DAYS,
+  nextSchedule,
+  type ScheduleOutcome,
+  scheduleReview,
+} from "./fsrs.js";
 export {
   importNotionCsv,
   type NotionImportIssue,
   type NotionImportResult,
   slugFromUrl,
 } from "./import/notion.js";
+export { rescheduleOverlong } from "./rescheduleOverlong.js";
 export {
   type ApplyReviewInput,
   type ApplyReviewResult,

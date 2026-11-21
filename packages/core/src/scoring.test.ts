@@ -5,8 +5,8 @@ describe("mapScoreToRating", () => {
   it.each([
     [0, "again"],
     [1, "again"],
-    [2, "hard"],
-    [3, "good"],
+    [2, "again"],
+    [3, "hard"],
     [4, "good"],
     [5, "easy"],
   ] as const)("maps score %i to %s", (score, rating) => {

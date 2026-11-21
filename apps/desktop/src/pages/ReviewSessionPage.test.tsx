@@ -67,7 +67,7 @@ describe("ReviewSessionPage", () => {
     expect(screen.getByText(/3 — Correct, but with significant effort/)).toBeInTheDocument();
     await waitFor(() =>
       expect(
-        screen.getByText(/Struggled → Good · due in \d+ days? · Enter to confirm/),
+        screen.getByText(/Struggled → Hard · due in \d+ days? · Enter to confirm/),
       ).toBeInTheDocument(),
     );
   });
