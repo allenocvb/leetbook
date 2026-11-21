@@ -122,6 +122,7 @@ export function DesignTopicNotesPage({
           <DesignCanvas
             sceneJson={note?.sceneJson ?? null}
             onChange={scene.handleChange}
+            saveState={scene.saveState}
             theme={theme}
           />
 

@@ -55,6 +55,7 @@ export default function ExcalidrawCanvas({ sceneJson, onChange, theme }: Excalid
    * every autosave would reset the scene under the user's cursor mid-stroke.
    */
   const initial = useRef(parseScene(sceneJson));
+  const lastSaved = useRef(sceneJson);
 
   const handleChange = useCallback(
     (elements: readonly unknown[], appState: Record<string, unknown>) => {
@@ -63,15 +64,17 @@ export default function ExcalidrawCanvas({ sceneJson, onChange, theme }: Excalid
        * position, selection, collaborators and open menus — none of it belongs in a saved
        * document, and storing it would make every mouse move look like an edit.
        */
-      onChange(
-        JSON.stringify({
-          elements,
-          appState: {
-            viewBackgroundColor: appState.viewBackgroundColor,
-            gridSize: appState.gridSize,
-          },
-        }),
-      );
+      const next = JSON.stringify({
+        elements,
+        appState: {
+          viewBackgroundColor: appState.viewBackgroundColor,
+          gridSize: appState.gridSize,
+        },
+      });
+      // Excalidraw fires onChange on every pointer move and selection; only real edits save.
+      if (next === lastSaved.current) return;
+      lastSaved.current = next;
+      onChange(next);
     },
     [onChange],
   );

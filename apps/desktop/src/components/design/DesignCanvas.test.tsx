@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { DesignCanvas } from "./DesignCanvas.js";
 
@@ -36,5 +37,28 @@ describe("DesignCanvas", () => {
     const canvas = screen.getByTestId("excalidraw");
     expect(canvas).toHaveAttribute("data-theme", "dark");
     expect(canvas).toHaveAttribute("data-scene", '{"elements":[]}');
+  });
+
+  it("expands to full screen and leaves it on Escape without remounting the canvas", async () => {
+    render(<DesignCanvas sceneJson={null} onChange={vi.fn()} theme="light" />);
+    await waitFor(() => expect(screen.getByTestId("excalidraw")).toBeInTheDocument());
+    const canvas = screen.getByTestId("excalidraw");
+
+    await userEvent.click(screen.getByRole("button", { name: /Full screen/ }));
+    expect(screen.getByRole("region", { name: "Diagram, full screen" })).toBeInTheDocument();
+    expect(screen.getByTestId("excalidraw")).toBe(canvas);
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.getByRole("region", { name: "Diagram" })).toBeInTheDocument();
+    expect(screen.getByTestId("excalidraw")).toBe(canvas);
+  });
+
+  it("tells the user the drawing is being saved", async () => {
+    const { rerender } = render(
+      <DesignCanvas sceneJson={null} onChange={vi.fn()} theme="light" saveState="pending" />,
+    );
+    expect(screen.getByText("Saving…")).toBeInTheDocument();
+    rerender(<DesignCanvas sceneJson={null} onChange={vi.fn()} theme="light" saveState="saved" />);
+    expect(screen.getByText("Saved")).toBeInTheDocument();
   });
 });
