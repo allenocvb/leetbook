@@ -24,7 +24,9 @@
 }
 
 .review-history__list {
-  max-height: 176px;
+  /* Five rows (39px + 1px rule each), then it scrolls. */
+  max-height: 200px;
+  overscroll-behavior: contain;
   margin: 0;
   padding: 0;
   overflow: auto;
