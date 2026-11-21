@@ -18,6 +18,9 @@ export interface ProblemsHeaderProps {
   onClearFilters: () => void;
   onViewChange: (view: ProblemsView) => void;
   onNew: () => void;
+  /** Re-reads rows from the database, e.g. after a capture from the extension. */
+  onRefresh: () => void;
+  refreshing?: boolean;
 }
 
 export function ProblemsHeader({
@@ -33,6 +36,8 @@ export function ProblemsHeader({
   onClearFilters,
   onViewChange,
   onNew,
+  onRefresh,
+  refreshing = false,
 }: ProblemsHeaderProps) {
   const [optionsOpen, setOptionsOpen] = useState(false);
   const hasFilters = query.trim() !== "" || category !== null;
@@ -116,6 +121,15 @@ export function ProblemsHeader({
               </div>
             )}
           </div>
+          <Button
+            variant="outline"
+            aria-label="Refresh problems"
+            title="Reload from the database"
+            disabled={refreshing}
+            onClick={onRefresh}
+          >
+            ↻ Refresh
+          </Button>
           <Button onClick={onNew}>+ New problem</Button>
         </div>
       </div>
