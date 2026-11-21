@@ -5,8 +5,8 @@ import { createProblemsRepo } from "./db/repositories/problems.js";
 import { createReviewsRepo } from "./db/repositories/reviews.js";
 import { createSchedulingRepo } from "./db/repositories/scheduling.js";
 import { createTestDb } from "./db/test-helpers.js";
-import { scheduleReview } from "./fsrs.js";
 import { applyReview, correctLatestReview, previewReview, reviseLatestReview } from "./review.js";
+import { scheduleReview } from "./schedule.js";
 
 const NOW = new Date("2026-07-25T12:00:00.000Z");
 

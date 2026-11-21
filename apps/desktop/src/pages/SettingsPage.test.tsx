@@ -35,7 +35,9 @@ async function setup(capture: CaptureRuntime = READY_CAPTURE) {
       <SettingsPage capture={capture} />
     </DbProvider>,
   );
-  await waitFor(() => expect(screen.getByText("FSRS · ts-fsrs")).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText("Notion formula · score × 1.5^reps days")).toBeInTheDocument(),
+  );
   return { db };
 }
 
@@ -50,8 +52,7 @@ describe("SettingsPage", () => {
     expect(screen.queryByText("7F2K91QD")).not.toBeInTheDocument();
     expect(screen.getByText("Approve requests when they appear")).toBeInTheDocument();
     expect(screen.getByText("0 payloads")).toBeInTheDocument();
-    expect(screen.getByText("FSRS · ts-fsrs")).toBeInTheDocument();
-    expect(screen.getByText("0–2 Again · 3 Hard · 4 Good · 5 Easy")).toBeInTheDocument();
+    expect(screen.getByText("Notion formula · score × 1.5^reps days")).toBeInTheDocument();
     expect(screen.getByText("90 days")).toBeInTheDocument();
     // The Data card (import/export) was removed from Settings on request.
     expect(screen.queryByText(/Local SQLite/)).not.toBeInTheDocument();

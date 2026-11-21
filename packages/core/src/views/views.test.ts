@@ -5,7 +5,7 @@ import { createProblemsRepo } from "../db/repositories/problems.js";
 import { createReviewsRepo } from "../db/repositories/reviews.js";
 import { createSchedulingRepo } from "../db/repositories/scheduling.js";
 import { createTestDb } from "../db/test-helpers.js";
-import { scheduleReview } from "../fsrs.js";
+import { scheduleReview } from "../schedule.js";
 import type { PerformanceScore } from "../scoring.js";
 import { deriveStatus } from "./status.js";
 import { listDueRows, listTableRows } from "./table.js";

@@ -173,11 +173,6 @@
   text-align: center;
 }
 
-.settings-score-map {
-  color: var(--lb-text-3);
-  line-height: 1.5;
-}
-
 @media (max-width: 760px) {
   .settings-page {
     padding: 22px;

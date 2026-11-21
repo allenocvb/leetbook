@@ -12,7 +12,7 @@ export function SchedulingCard({ dailyNewLimit, onChangeDailyNewLimit }: Schedul
       <h2 id="scheduling-heading">Scheduling</h2>
       <dl className="settings-grid">
         <dt>Algorithm</dt>
-        <dd className="settings-mono">FSRS · ts-fsrs</dd>
+        <dd className="settings-mono">Notion formula · score × 1.5^reps days</dd>
         <dt>Daily new limit</dt>
         <dd className="settings-stepper">
           <button
@@ -33,8 +33,6 @@ export function SchedulingCard({ dailyNewLimit, onChangeDailyNewLimit }: Schedul
             +
           </button>
         </dd>
-        <dt>Score mapping</dt>
-        <dd className="settings-score-map">0–2 Again · 3 Hard · 4 Good · 5 Easy</dd>
         <dt>Longest gap</dt>
         <dd className="settings-mono">{MAX_INTERVAL_DAYS} days</dd>
       </dl>

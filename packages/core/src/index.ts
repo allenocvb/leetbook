@@ -49,18 +49,12 @@ export {
 export { type DatabaseExport, exportDatabaseJson } from "./export/json.js";
 export { exportNotesMarkdown, type NoteExport, tiptapToMarkdown } from "./export/markdown.js";
 export {
-  MAX_INTERVAL_DAYS,
-  nextSchedule,
-  type ScheduleOutcome,
-  scheduleReview,
-} from "./fsrs.js";
-export {
   importNotionCsv,
   type NotionImportIssue,
   type NotionImportResult,
   slugFromUrl,
 } from "./import/notion.js";
-export { rescheduleOverlong } from "./rescheduleOverlong.js";
+export { recomputeSchedules } from "./recomputeSchedules.js";
 export {
   type ApplyReviewInput,
   type ApplyReviewResult,
@@ -71,7 +65,14 @@ export {
   type ReviseLatestReviewInput,
   reviseLatestReview,
 } from "./review.js";
-export { type FsrsRating, mapScoreToRating, type PerformanceScore } from "./scoring.js";
+export {
+  intervalDays,
+  MAX_INTERVAL_DAYS,
+  nextSchedule,
+  type ScheduleOutcome,
+  scheduleReview,
+} from "./schedule.js";
+export type { PerformanceScore } from "./scoring.js";
 export {
   type ChoiceQuestion,
   type DesignNote,

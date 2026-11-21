@@ -2,7 +2,7 @@
 
 Spaced repetition and notebook-style notes for LeetCode — local-first, open source, no accounts.
 
-A desktop app (Tauri 2) that tracks your practice with FSRS scheduling and Notion-style notes,
+A desktop app (Tauri 2) that tracks your practice with spaced-repetition scheduling and Notion-style notes,
 plus a browser extension that captures Accepted submissions automatically so you never retype a
 problem again.
 

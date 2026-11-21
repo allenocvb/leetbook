@@ -43,7 +43,7 @@ export interface SeedProblem {
   title: string;
   difficulty?: "easy" | "medium" | "hard";
   tags?: string[];
-  /** Chronological scores; scheduling follows FSRS from the first date. */
+  /** Chronological scores; scheduling follows the formula from the first date. */
   scores?: PerformanceScore[];
   firstReviewedAt?: string;
 }

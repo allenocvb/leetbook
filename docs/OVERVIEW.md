@@ -16,9 +16,9 @@ rate your recall once, and the schedule takes care of itself.
 
 ## Features
 
-**Spaced repetition that adapts.** Every solve is rated 0–5 and FSRS picks the next review
-date from your actual recall history — not a fixed ladder. Getting something right pushes it
-weeks out; forgetting it pulls it back to days.
+**Spaced repetition that grows gently.** Every solve is rated 0–5 and the next review is
+`score × 1.5^reps` days out — the formula from the original Notion table. A run of perfect
+scores comes back after 8, 11, 17, 25, 38, 57, 85 days; a weak score pulls it back in.
 
 **Automatic capture.** A browser extension notices an Accepted submission on leetcode.com or
 neetcode.io and offers a 0–5 toast in the corner. Rating it creates or updates the problem in
@@ -40,20 +40,18 @@ import to get started, JSON and Markdown export to leave.
 
 ## The rubric
 
-The 0–5 score is the interface; FSRS speaks a four-point scale underneath.
+The 0–5 score drives the interval directly: it is the multiplier in `score × 1.5^reps`.
 
-| Score | Meaning | FSRS |
-|---|---|---|
-| 0 | Complete blackout | Again |
-| 1 | Incorrect, but familiar once seen | Again |
-| 2 | Incorrect, knew the approach after a hint | Hard |
-| 3 | Correct, with significant struggle | Good |
-| 4 | Correct after some hesitation | Good |
-| 5 | Perfect recall, smooth and confident | Easy |
+| Score | Meaning |
+|---|---|
+| 0 | Complete blackout |
+| 1 | Incorrect, but familiar once seen |
+| 2 | Incorrect, knew the approach after a hint |
+| 3 | Correct, with significant struggle |
+| 4 | Correct after some hesitation |
+| 5 | Perfect recall, smooth and confident |
 
-3 and 4 schedule identically — the distinction is kept for your own history. Rating honestly
-matters more than any setting: a 5 on something that took real thought will push the interval
-out much further than your memory deserves.
+Every interval is clamped to 1–90 days. Rating honestly matters more than any setting.
 
 ---
 
@@ -61,14 +59,14 @@ out much further than your memory deserves.
 
 ```
 leetbook/
-├── packages/core      pure TypeScript — schema, FSRS, data access, import/export
+├── packages/core      pure TypeScript — schema, scheduling, data access, import/export
 ├── apps/desktop       Tauri 2 + React shell over core
 └── apps/extension     MV3 browser extension (WXT), LeetCode + NeetCode content script
 ```
 
 ### packages/core
 
-All business logic, ~1,400 lines, one runtime dependency (`ts-fsrs`). It never imports from
+All business logic, ~1,400 lines, no runtime dependencies. It never imports from
 apps and never touches a database driver directly — platforms inject a `SqlExecutor`:
 
 ```ts
@@ -94,7 +92,7 @@ notes       (problem_id, content_json, updated_at)
 Migrations are versioned and forward-only, executed as raw SQL through the injected executor.
 
 Two things about `scheduling` that look like violations of "derived data is never stored" and
-are not: `fsrs_card` is FSRS's own state, which cannot be recomputed without it, and
+are not: `fsrs_card` (named for the FSRS scheduler it outlived) records what the scheduler saw, and
 `review_count` is a counter that legitimately exceeds the number of review rows — a Notion
 import brings six reps with one review.
 
@@ -158,7 +156,7 @@ closed, captures queue in extension storage and flush on reconnect.
 | Language | TypeScript, strict |
 | Desktop | Tauri 2 (Rust shell) + React 19 + Vite |
 | Editor | TipTap 3 (ProseMirror) + lowlight |
-| Scheduling | `ts-fsrs`, fuzz disabled for determinism |
+| Scheduling | Notion formula, `round(score × 1.5^reps)` days, no dependency |
 | Storage | SQLite via `tauri-plugin-sql` |
 | Extension | WXT, Manifest V3 |
 | Monorepo | pnpm workspaces + Turborepo |

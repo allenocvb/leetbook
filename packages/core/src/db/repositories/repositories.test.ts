@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { scheduleReview } from "../../fsrs.js";
+import { scheduleReview } from "../../schedule.js";
 import type { SqlExecutor } from "../executor.js";
 import { migrate } from "../migrate.js";
 import { createTestDb } from "../test-helpers.js";

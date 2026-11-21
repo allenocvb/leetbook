@@ -12,7 +12,7 @@ export type IngestResult =
 
 /**
  * Applies one extension capture: upserts the problem, appends the review with
- * submission metadata, and advances FSRS scheduling. The payload arrives as
+ * submission metadata, and advances scheduling. The payload arrives as
  * JSON via the Rust listener's `leetbook://capture` event.
  */
 export async function ingestCapture(

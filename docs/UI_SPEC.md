@@ -241,14 +241,13 @@ Dark status pills:
 - Provide a `Log review` action so any problem—not only an already-due problem—can receive a
   0–5 review.
 - `Edit latest review` changes the latest score, its date, and the rep count in one dialog,
-  then replays FSRS over the full history. Changing the date may reorder history, so the
-  replay sorts chronologically first. Rep count is an explicit override of stored FSRS state,
+  then reschedules from whichever review is now latest. Changing the date may reorder history,
+  so it sorts chronologically first. Rep count is an explicit override of the stored count,
   not a count of rows — the Notion import already sets it independently — so correcting an
-  imported total does not fabricate review records. A replay must **preserve** the stored rep
-  count unless explicitly overridden: it derives reps from the number of review rows, which is
-  wrong whenever the two legitimately differ, and silently reset imported problems to 1.
-  The dialog states that reps drives status (Mastered needs three), not the schedule — the
-  next review date comes from FSRS stability, so editing reps deliberately leaves it alone.
+  imported total does not fabricate review records. A correction must **preserve** the stored
+  rep count unless explicitly overridden; the row total is wrong whenever the two legitimately
+  differ. The dialog states that reps drives both the schedule (`score × 1.5^reps`) and status
+  (Mastered needs three).
 - Deleting a problem lives here, not in the table: a table row is a single button that opens
   notes, so a second control inside it would compete with that contract. The action is a ghost
   `Delete` that swaps in place for a `Delete for good?` label plus Cancel/Delete, matching the
@@ -306,9 +305,9 @@ Editor:
 - Top bar includes label, 4px progress track, mono `N of M`, and Exit.
 - Center content is 620px wide. Use Chewy 34px title and show difficulty, last score, and reps.
 - Provide working `Open on LeetCode` and `Show my notes` actions.
-- Six equal score tiles show 0–5, labels, hover/selected state, full rubric, and FSRS preview.
+- Six equal score tiles show 0–5, labels, hover/selected state, full rubric, and next-review preview.
 - Keyboard behavior: 0–5 selects, Enter confirms, Escape exits.
-- Confirming appends a review, recomputes FSRS, and advances. End with a session summary.
+- Confirming appends a review, reschedules, and advances. End with a session summary.
 
 ### Extension capture toast
 
@@ -327,7 +326,7 @@ Editor:
   Disconnect, and queued count. It also carries the three-step setup guide, shown **only while
   nothing is paired** — instructions that disappear once they stop being useful. The pairing token is **never displayed**. Showing it invites
   the copy-paste flow the approval handshake replaced.
-- Scheduling card: FSRS identity, daily new limit, score mapping, and the longest gap.
+- Scheduling card: the formula, daily new limit, and the longest gap.
 - No Data card. Import/export was removed from Settings at the owner's request; the core
   functions (`importNotionCsv`, `exportDatabaseJson`, `exportNotesMarkdown`) remain tested.
 
