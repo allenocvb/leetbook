@@ -55,17 +55,6 @@ describe("AllProblemsPage", () => {
     await waitFor(() => expect(screen.getByText("Captured Problem")).toBeInTheDocument());
   });
 
-  it("reloads rows when Refresh is pressed", async () => {
-    const { db } = await renderPage();
-    await seed(db, [{ slug: "saved-elsewhere", title: "Saved Elsewhere", tags: ["Array"] }]);
-    expect(screen.queryByText("Saved Elsewhere")).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole("button", { name: "Refresh problems" }));
-
-    await waitFor(() => expect(screen.getByText("Saved Elsewhere")).toBeInTheDocument());
-    expect(screen.getByText("3 problems")).toBeInTheDocument();
-  });
-
   it("opens notes from the full row and keeps the arrow decorative", async () => {
     const { onOpenProblem } = await renderPage();
     expect(

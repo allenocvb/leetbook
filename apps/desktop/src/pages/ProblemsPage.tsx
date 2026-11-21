@@ -99,8 +99,6 @@ export function ProblemsPage({
         }}
         onViewChange={onViewChange}
         onNew={() => setDialogOpen(true)}
-        onRefresh={() => void refresh()}
-        refreshing={loading}
       />
 
       <AddProblemDialog
