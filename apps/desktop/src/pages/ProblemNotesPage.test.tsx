@@ -1,4 +1,5 @@
 import {
+  applyReview,
   createNotesRepo,
   createProblemsRepo,
   createReviewsRepo,
@@ -256,6 +257,21 @@ describe("ProblemNotesPage", () => {
       const saved = await createNotesRepo(db as SqlExecutor).get(problem.id);
       expect(saved?.contentJson).toContain("leave safely");
     });
+  });
+
+  it("Refresh picks up a review saved elsewhere, such as an extension capture", async () => {
+    const { db, problem } = await setup();
+    await applyReview(
+      db,
+      { problemId: problem.id, score: 5, runtimeMs: 3, memoryMb: 17.5 },
+      new Date("2026-07-10T00:00:00.000Z"),
+    );
+    expect(screen.queryByText("Jul 10, 2026 · scored 5 · 2 reps")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Refresh problem" }));
+
+    expect(await screen.findByText("Jul 10, 2026 · scored 5 · 2 reps")).toBeInTheDocument();
+    expect(screen.getByText("3 ms · 17.5 MB")).toBeInTheDocument();
   });
 
   it("back button returns to the table", async () => {

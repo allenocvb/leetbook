@@ -79,6 +79,17 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
     setScheduling(nextScheduling);
     setReviews(nextReviews);
   };
+  /*
+   * Everything but the note: the editor is uncontrolled after mount, so re-reading the note
+   * would either do nothing or overwrite what is being typed.
+   */
+  const refreshAll = async () => {
+    const [nextProblem] = await Promise.all([
+      createProblemsRepo(db).getById(problem.id),
+      refreshReviewData(),
+    ]);
+    if (nextProblem) setProblem(nextProblem);
+  };
 
   return (
     <div className="problem-notes-page">
@@ -91,6 +102,7 @@ export function ProblemNotesPage({ problemId, onBack, saveDelayMs = 600 }: Probl
           onEdit={() => setEditing(true)}
           onLogReview={() => setLoggingReview(true)}
           onDelete={deleteProblem}
+          onRefresh={refreshAll}
         />
 
         <Divider className="problem-notes-page__divider" />

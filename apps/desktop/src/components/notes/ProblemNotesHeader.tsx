@@ -13,6 +13,8 @@ export interface ProblemNotesHeaderProps {
   onEdit: () => void;
   onLogReview: () => void;
   onDelete: () => void | Promise<void>;
+  /** Re-reads the problem, schedule and review history, e.g. after an extension capture. */
+  onRefresh: () => void | Promise<void>;
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -102,7 +104,9 @@ export function ProblemNotesHeader({
   onEdit,
   onLogReview,
   onDelete,
+  onRefresh,
 }: ProblemNotesHeaderProps) {
+  const [refreshing, setRefreshing] = useState(false);
   const latestReview = reviews.at(-1) ?? null;
   const performance = latestPerformance(reviews);
   const reviewCount = scheduling?.reviewCount ?? reviews.length;
@@ -131,6 +135,18 @@ export function ProblemNotesHeader({
           </ExternalLinkButton>
           <Button variant="ghost" onClick={onEdit}>
             Edit problem
+          </Button>
+          <Button
+            variant="ghost"
+            aria-label="Refresh problem"
+            title="Reload this problem's schedule and reviews"
+            disabled={refreshing}
+            onClick={() => {
+              setRefreshing(true);
+              void Promise.resolve(onRefresh()).finally(() => setRefreshing(false));
+            }}
+          >
+            ↻ Refresh
           </Button>
           <DeleteProblemAction title={problem.title} onDelete={onDelete} />
         </div>
