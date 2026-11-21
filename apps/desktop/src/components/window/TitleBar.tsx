@@ -10,9 +10,6 @@ import "./window.css";
 export function TitleBar() {
   return (
     <header className="titlebar" data-tauri-drag-region>
-      <span className="titlebar__name" data-tauri-drag-region>
-        LeetBook
-      </span>
       <ThemeToggle />
     </header>
   );

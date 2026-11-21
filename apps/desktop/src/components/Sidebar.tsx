@@ -56,7 +56,6 @@ export function Sidebar({
       <header className="sidebar__header">
         <LogoMark size={22} />
         <span className="sidebar__brand">LeetBook</span>
-        <span className="sidebar__version">v1</span>
       </header>
 
       <ul className="sidebar__nav-list">

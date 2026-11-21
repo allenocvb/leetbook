@@ -64,19 +64,19 @@ Status pills:
 
 ### Dark
 
-Use the same semantic keys: `bg #0e0d11`, `surf #18171d`, `surf2 #1c1b22`,
-`surf3 #212028`, `code #141319`, `chip #272631`, `tint #2a2340`, `bd #252430`,
-`bd2 #2f2e3b`, `ink #f2f1f6`, `txt2 #dcdae3`, `txt3 #a8a5b3`, `mut #8b8896`,
-`mut2 #7d7a89`, `mut3 #6a6776`, `mut4 #565364`, `acc #8b6bff`,
+Light Navy ground. Use the same semantic keys: `bg #112240`, `surf #152a4e`, `surf2 #183057`,
+`surf3 #1d3661`, `code #0d1b35`, `chip #22406e`, `tint #2b3474`, `bd #1f3a63`,
+`bd2 #2a4775`, `ink #e6f1ff`, `txt2 #ccd6f6`, `txt3 #a8b2d1`, `mut #8d98b8`,
+`mut2 #7f8bad`, `mut3 #6b789d`, `mut4 #566489`, `acc #8b6bff`,
 `accTxt #bda6ff`, `green #6cba86`, `amber #cfa04c`, `red #e0808f`,
-`softRed #301c22`, and `kw #a98bff`.
+`softRed #3b2440`, and `kw #a98bff`.
 
 Dark status pills:
 
-- Mastered: `#1c2a21` background, `#6cba86` foreground.
-- Learning: `#241f3a` background, `#bda6ff` foreground.
-- Leech: `#301c22` background, `#e0808f` foreground.
-- New: `#272631` background, `#a8a5b3` foreground.
+- Mastered: `#163a3e` background, `#6cba86` foreground.
+- Learning: `#262f68` background, `#bda6ff` foreground.
+- Leech: `#3b2440` background, `#e0808f` foreground.
+- New: `#22406e` background, `#a8b2d1` foreground.
 
 ### Typography and geometry
 
@@ -120,8 +120,8 @@ Dark status pills:
   forced the earlier transparent-window workaround. Nothing in CSS sets a window radius or
   shadow.
 - Titlebar: 38px high, `surf2`, 1px `bd` bottom border, with a **78px left inset** so app
-  content clears the overlaid system buttons. It carries the app name and a right-aligned
-  theme toggle only.
+  content clears the overlaid system buttons. It carries a right-aligned theme toggle only;
+  the app name lives in the sidebar.
 - The titlebar is a drag region. `data-tauri-drag-region` calls `startDragging()`, which
   `core:window:default` does not cover, so `core:window:allow-start-dragging` must be
   granted. Without it dragging fails silently while resizing still works, because resizing
@@ -134,7 +134,7 @@ Dark status pills:
 ### Sidebar
 
 - Fixed 236px width, `surf2`, 1px `bd` right border, `16px 10px 12px` padding.
-- Header: 22px logo, Chewy 16px name, mono 10px `v1`.
+- Header: 22px logo and Chewy 16px name. No version label.
 - Navigation order: All Problems, Due Today, Review Session, Settings & Pairing. There is no
   Capture view: the approval handshake made its setup guide a few lines, and every piece of
   live state it showed (listener, queue, last capture, pairing) already lives in Settings.

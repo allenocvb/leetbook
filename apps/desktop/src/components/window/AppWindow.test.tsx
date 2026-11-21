@@ -19,7 +19,8 @@ describe("AppWindow", () => {
       </ThemeProvider>,
     );
 
-    expect(screen.getByText("LeetBook")).toBeInTheDocument();
+    // The bar carries only the theme toggle; the app name lives in the sidebar.
+    expect(screen.queryByText("LeetBook")).not.toBeInTheDocument();
     expect(screen.getByText("Notebook content")).toBeInTheDocument();
     // macOS draws the window controls itself; the app must not render its own.
     expect(container.querySelector(".titlebar__traffic-lights")).toBeNull();

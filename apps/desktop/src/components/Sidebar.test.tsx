@@ -21,7 +21,7 @@ describe("Sidebar", () => {
       />,
     );
 
-    expect(screen.getByText("v1")).toBeInTheDocument();
+    expect(screen.queryByText("v1")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "All Problems 47" })).toHaveAttribute(
       "aria-current",
       "page",

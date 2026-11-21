@@ -24,13 +24,6 @@
   line-height: 1;
 }
 
-.sidebar__version {
-  margin-left: auto;
-  color: var(--lb-muted-2);
-  font-family: var(--lb-font-mono);
-  font-size: 10px;
-}
-
 .sidebar__nav-list,
 .sidebar__categories ul {
   padding: 0;
