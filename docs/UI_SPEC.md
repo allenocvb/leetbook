@@ -64,19 +64,19 @@ Status pills:
 
 ### Dark
 
-Light Navy ground. Use the same semantic keys: `bg #112240`, `surf #152a4e`, `surf2 #183057`,
-`surf3 #1d3661`, `code #0d1b35`, `chip #22406e`, `tint #2b3474`, `bd #1f3a63`,
-`bd2 #2a4775`, `ink #e6f1ff`, `txt2 #ccd6f6`, `txt3 #a8b2d1`, `mut #8d98b8`,
+Navy ground. Use the same semantic keys: `bg #0a192f`, `surf #0e203b`, `surf2 #112240`,
+`surf3 #172a4a`, `code #071325`, `chip #1d3557`, `tint #262d63`, `bd #1a2e4f`,
+`bd2 #233a60`, `ink #e6f1ff`, `txt2 #ccd6f6`, `txt3 #a8b2d1`, `mut #8d98b8`,
 `mut2 #7f8bad`, `mut3 #6b789d`, `mut4 #566489`, `acc #8b6bff`,
 `accTxt #bda6ff`, `green #6cba86`, `amber #cfa04c`, `red #e0808f`,
-`softRed #3b2440`, and `kw #a98bff`.
+`softRed #351f38`, and `kw #a98bff`.
 
 Dark status pills:
 
-- Mastered: `#163a3e` background, `#6cba86` foreground.
-- Learning: `#262f68` background, `#bda6ff` foreground.
-- Leech: `#3b2440` background, `#e0808f` foreground.
-- New: `#22406e` background, `#a8b2d1` foreground.
+- Mastered: `#12333a` background, `#6cba86` foreground.
+- Learning: `#232a5e` background, `#bda6ff` foreground.
+- Leech: `#351f38` background, `#e0808f` foreground.
+- New: `#1d3557` background, `#a8b2d1` foreground.
 
 ### Typography and geometry
 
