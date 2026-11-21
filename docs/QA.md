@@ -47,8 +47,6 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] `Open on LeetCode` from the notes page opens the **default browser**, not a new app
       window.
 - [ ] Same from the review session.
-- [ ] Export JSON: native save dialog, file written, valid JSON.
-- [ ] Export Markdown: native save dialog, notes readable.
 
 ## 4. Table basics
 
@@ -91,8 +89,6 @@ and controls. The config validates against the Tauri 2 schema, but only a build 
 - [ ] There is **no** Difficulty column.
 - [ ] Delete a topic: it confirms in a dialog, disappears, and stays gone after a restart.
 - [ ] Toggle dark mode: the table matches the problem table exactly.
-- [ ] Export JSON from Settings and open it: the `designTopics`, `designReviews`,
-      `designScheduling` and `designNotes` keys are present, and populated if you have topics.
 
 ## 7. System design topic notes
 
@@ -266,7 +262,6 @@ was written without a compiler available.
       (`sk-ant…abcd`) is shown — never the whole key.
 - [ ] Quit and reopen: the key is still set. It is **not** in the app-data database — open the
       `.db` in a SQLite browser and confirm it appears nowhere.
-- [ ] Export JSON and search it for the key. It must not be there.
 - [ ] Open Keychain Access, search `app.leetbook.desktop`: the entry exists and can be revoked
       by hand.
 - [ ] Remove key: the card returns to "Off" and the Keychain entry is gone.

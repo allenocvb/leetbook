@@ -327,9 +327,9 @@ Editor:
   Disconnect, and queued count. It also carries the three-step setup guide, shown **only while
   nothing is paired** — instructions that disappear once they stop being useful. The pairing token is **never displayed**. Showing it invites
   the copy-paste flow the approval handshake replaced.
-- Scheduling card: FSRS identity, daily new limit, and score mapping.
-- Data card: database stats, Import Notion CSV, Export JSON, and Export Markdown.
-- Import result explains imported/skipped rows and offers an immediate route to imported problems.
+- Scheduling card: FSRS identity, daily new limit, score mapping, and the longest gap.
+- No Data card. Import/export was removed from Settings at the owner's request; the core
+  functions (`importNotionCsv`, `exportDatabaseJson`, `exportNotesMarkdown`) remain tested.
 
 ## Required validation
 

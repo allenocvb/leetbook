@@ -1,3 +1,4 @@
+import { MAX_INTERVAL_DAYS } from "@leetbook/core";
 import { MAX_DAILY_NEW_LIMIT } from "../../settings/preferences.js";
 
 export interface SchedulingCardProps {
@@ -33,7 +34,9 @@ export function SchedulingCard({ dailyNewLimit, onChangeDailyNewLimit }: Schedul
           </button>
         </dd>
         <dt>Score mapping</dt>
-        <dd className="settings-score-map">0–1 Again · 2 Hard · 3–4 Good · 5 Easy</dd>
+        <dd className="settings-score-map">0–2 Again · 3 Hard · 4 Good · 5 Easy</dd>
+        <dt>Longest gap</dt>
+        <dd className="settings-mono">{MAX_INTERVAL_DAYS} days</dd>
       </dl>
     </section>
   );

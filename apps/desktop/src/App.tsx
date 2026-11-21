@@ -175,6 +175,6 @@ function Page({
     case "design-review":
       return <DesignReviewSessionPage onExit={onBack} onShowNotes={onOpenTopic} />;
     case "settings":
-      return <SettingsPage capture={capture} onViewProblems={() => onViewChange("all")} />;
+      return <SettingsPage capture={capture} />;
   }
 }

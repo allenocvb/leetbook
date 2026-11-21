@@ -7,7 +7,7 @@ plus a browser extension that captures Accepted submissions automatically so you
 problem again.
 
 > **Status:** v1 foundation, pre-release. Scheduling, local SQLite, the desktop views, notes,
-> review sessions, import/export and extension capture all work. Not yet signed or packaged, so
+> review sessions and extension capture all work. Not yet signed or packaged, so
 > for now you run it from source. See [`docs/PRD.md`](./docs/PRD.md) for what's next.
 
 **New here?** [`docs/OVERVIEW.md`](./docs/OVERVIEW.md) explains what the app does and how it's
@@ -42,8 +42,7 @@ seconds. The app window opens on its own; leave the command running while you us
 
 On first launch you get an intro screen, then an empty problem table. From there:
 
-- **Add a problem by hand** — `+ Add problem` in the table header
-- **Bring your Notion table across** — Settings → Import → pick your CSV export
+- **Add a problem by hand** — `+ New problem` in the table header
 - **Let the extension do it** — see below
 
 Your database lives in the OS application-data directory (on macOS,

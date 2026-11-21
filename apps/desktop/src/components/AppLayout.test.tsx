@@ -157,7 +157,6 @@ describe("App shell", () => {
 
     expect(screen.getByRole("heading", { name: "Settings & Pairing" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Scheduling" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Data" })).toBeInTheDocument();
-    expect(await screen.findByText(/Local SQLite · 2 problems/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Data" })).not.toBeInTheDocument();
   });
 });
