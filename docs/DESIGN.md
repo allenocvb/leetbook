@@ -22,7 +22,7 @@ Getting started on LeetCode is hard. Spaced repetition works, but existing tooli
 |---|---|---|
 | Platform | Desktop app (Tauri 2) + browser extension | Local-first, no servers, no hosting cost — sustainable for free open source |
 | Data | Local SQLite + JSON/Markdown export/import | Zero infra; schema designed to be sync-friendly later |
-| Scheduling | FSRS (`ts-fsrs`) | Modern, adaptive, open-source; 0–5 UX maps to FSRS ratings |
+| Scheduling | Notion formula, `round(score × 1.5^reps)` days | Matches the owner's Notion table; gentle, predictable growth. Replaced FSRS (Nov 2026), whose intervals jumped to years |
 | Sync/accounts | None in v1 | Local-first is a feature. Append-only review log keeps the door open |
 | License | MIT | |
 
@@ -35,8 +35,8 @@ Getting started on LeetCode is hard. Spaced repetition works, but existing tooli
 - 4 — Correct after some hesitation or minor stumbling
 - 5 — Perfect recall, solved smoothly and confidently
 
-Internal FSRS mapping: 0–2 → Again (incorrect), 3 → Hard, 4 → Good, 5 → Easy. UX stays 0–5.
-FSRS runs at 93% target retention with a 90-day maximum interval (`packages/core/src/fsrs.ts`).
+Next review = last review + `round(score × 1.5^reps)` days, `reps` counting this review, clamped
+to 1–90 days (`packages/core/src/schedule.ts`). `recomputeSchedules` realigns stored due dates at boot.
 
 ## 3. Product Scope (v1)
 
@@ -63,7 +63,7 @@ Monorepo with three parts:
 leetbook/
 ├── packages/core        # Pure TS, no UI. All business logic.
 │   ├── schema + migrations
-│   ├── FSRS scheduling (ts-fsrs wrapper)
+│   ├── scheduling (Notion formula)
 │   ├── data-access layer
 │   └── import/export (Notion CSV, JSON, Markdown)
 ├── apps/desktop         # Tauri 2 + React. SQLite via Tauri SQL plugin.
@@ -103,7 +103,7 @@ Everything downstream — toast, queue, delivery relay, desktop listener — is 
    neetcode.io calling leetcode.com is cross-origin and LeetCode sends no permissive
    `Access-Control-Allow-Origin`; the worker holds the host permission and is exempt.
 3. In-page toast: "Rate your recall 0–5."
-4. Payload sent to app → upsert problem → log review (with code snapshot + perf stats) → FSRS computes next due date.
+4. Payload sent to app → upsert problem → log review (with code snapshot + perf stats) → the scheduler computes the next due date.
 
 **Identity is always LeetCode's slug.** A problem solved on NeetCode and the same problem
 solved on LeetCode must land on one row, or the review history splits in two and the schedule
@@ -149,7 +149,7 @@ full history. This keeps mistakes recoverable without adding a redundant score f
 
 1. **Spec + wireframes** — this doc → Claude design phase (table, notes page, review queue, capture toast).
 2. **Repo scaffold** — monorepo, tooling, CI skeleton, license.
-3. **`packages/core`** — schema, migrations, FSRS wrapper, unit tests. Logic before pixels.
+3. **`packages/core`** — schema, migrations, scheduler, unit tests. Logic before pixels.
 4. **Desktop shell + table view** — Tauri app on SQLite, manual problem add.
 5. **Notes editor** — TipTap integration.
 6. **Review queue + in-app scoring** — functional foundation complete.

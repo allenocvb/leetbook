@@ -5,8 +5,8 @@ import { createProblemsRepo } from "./db/repositories/problems.js";
 import { createReviewsRepo } from "./db/repositories/reviews.js";
 import { createSchedulingRepo } from "./db/repositories/scheduling.js";
 import { createTestDb } from "./db/test-helpers.js";
-import { MAX_INTERVAL_DAYS, scheduleReview } from "./fsrs.js";
-import { rescheduleOverlong } from "./rescheduleOverlong.js";
+import { recomputeSchedules } from "./recomputeSchedules.js";
+import { scheduleReview } from "./schedule.js";
 
 const LAST = "2026-11-21T21:07:34.932Z";
 
@@ -29,7 +29,7 @@ beforeEach(async () => {
   problemId = problem.id;
   const reviews = createReviewsRepo(db);
   for (const [score, reviewedAt] of [
-    [5, "2025-09-22T00:00:00.000Z"],
+    [2, "2026-07-26T17:48:19.886Z"],
     [5, LAST],
   ] as const) {
     await reviews.add({
@@ -48,27 +48,30 @@ function daysOut(dueAt: string): number {
   return (Date.parse(dueAt) - Date.parse(LAST)) / 86_400_000;
 }
 
-describe("rescheduleOverlong", () => {
-  it("pulls a schedule written before the cap back inside it, keeping the rep count", async () => {
-    const base = scheduleReview(null, problemId, 5, new Date(LAST));
+describe("recomputeSchedules", () => {
+  it("rewrites an old FSRS due date with the formula, keeping the rep count", async () => {
+    // Binary Search as FSRS left it: 4 reps, latest score 5, due 477 days out.
     await createSchedulingRepo(db).put({
-      ...base,
+      problemId,
       dueAt: "2028-03-12T21:07:34.932Z",
       reviewCount: 4,
+      lastReviewedAt: LAST,
+      fsrsCard: { stability: 477 },
     });
 
-    expect(await rescheduleOverlong(db)).toBe(1);
+    expect(await recomputeSchedules(db)).toBe(1);
     const state = await createSchedulingRepo(db).get(problemId);
-    expect(daysOut(state?.dueAt as string)).toBeLessThanOrEqual(MAX_INTERVAL_DAYS);
+    expect(daysOut(state?.dueAt as string)).toBe(25); // round(5 × 1.5^4)
     expect(state?.reviewCount).toBe(4);
     expect(state?.lastReviewedAt).toBe(LAST);
   });
 
-  it("leaves schedules inside the cap alone and is idempotent", async () => {
-    const base = scheduleReview(null, problemId, 5, new Date(LAST));
-    await createSchedulingRepo(db).put(base);
+  it("is idempotent: a schedule that already agrees is left alone", async () => {
+    await createSchedulingRepo(db).put({
+      ...scheduleReview({ reviewCount: 1 } as never, problemId, 5, new Date(LAST)),
+    });
 
-    expect(await rescheduleOverlong(db)).toBe(0);
-    expect(await createSchedulingRepo(db).get(problemId)).toEqual(base);
+    expect(await recomputeSchedules(db)).toBe(0);
+    expect(await recomputeSchedules(db)).toBe(0);
   });
 });

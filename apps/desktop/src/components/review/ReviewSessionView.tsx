@@ -1,4 +1,4 @@
-import { mapScoreToRating, type PerformanceScore, type TableRow } from "@leetbook/core";
+import type { PerformanceScore, TableRow } from "@leetbook/core";
 import type { RefObject } from "react";
 import { DifficultyText } from "../table/pills.js";
 import { Button } from "../ui/Button.js";
@@ -89,7 +89,7 @@ export function ReviewSessionView({
             />
             <p className="review-session__preview" aria-live="polite">
               {selected !== null && previewDueAt
-                ? `${SCORE_LABELS[selected]} → ${capitalize(mapScoreToRating(selected))} · ${formatDue(previewDueAt)} · Enter to confirm`
+                ? `${SCORE_LABELS[selected]} · ${formatDue(previewDueAt)} · Enter to confirm`
                 : "Choose 0–5. Your next review will be previewed before saving."}
             </p>
             {error && (
@@ -107,8 +107,4 @@ export function ReviewSessionView({
 function formatDue(dueAt: string): string {
   const days = Math.max(0, Math.round((new Date(dueAt).getTime() - Date.now()) / 86_400_000));
   return `due in ${days} day${days === 1 ? "" : "s"}`;
-}
-
-function capitalize(word: string): string {
-  return word.charAt(0).toUpperCase() + word.slice(1);
 }

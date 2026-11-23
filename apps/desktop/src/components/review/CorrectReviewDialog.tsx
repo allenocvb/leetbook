@@ -29,7 +29,7 @@ function toDateInput(iso: string): string {
 
 /**
  * Keeps the original time of day. Editing "the date" should not silently move a review to
- * midnight, which would shift the FSRS interval by up to a day.
+ * midnight, which would shift the interval by up to a day.
  */
 function withDate(iso: string, date: string): string {
   const next = new Date(iso);
@@ -146,8 +146,8 @@ export function CorrectReviewDialog({
         </div>
 
         <p className="review-score-dialog__note">
-          The next review date comes from the score and FSRS history, not from reps. Reps only
-          affects status — Mastered needs at least three.
+          The next review is score × 1.5^reps days after the review date, so changing reps moves it
+          too. Mastered also needs at least three reps.
         </p>
 
         {error && (

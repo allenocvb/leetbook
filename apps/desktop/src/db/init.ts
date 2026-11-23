@@ -1,7 +1,7 @@
 import {
   migrate,
   normalizeStoredCategories,
-  rescheduleOverlong,
+  recomputeSchedules,
   type SqlExecutor,
 } from "@leetbook/core";
 import Database from "@tauri-apps/plugin-sql";
@@ -20,7 +20,7 @@ export async function initDatabase(): Promise<SqlExecutor> {
   // Fold pre-canonical category spellings together (e.g. "HashTable" → "Hash Table").
   // Idempotent and cheap, so it runs every boot rather than needing a schema migration.
   await normalizeStoredCategories(executor);
-  // Pull schedules written before the 90-day maximum interval back inside it. Idempotent.
-  await rescheduleOverlong(executor);
+  // Bring every due date in line with the Notion formula (replaces old FSRS dates). Idempotent.
+  await recomputeSchedules(executor);
   return executor;
 }

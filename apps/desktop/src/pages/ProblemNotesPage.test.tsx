@@ -162,7 +162,7 @@ describe("ProblemNotesPage", () => {
     const scheduling = await createSchedulingRepo(db).get(problem.id);
     const reviews = await createReviewsRepo(db).listByProblem(problem.id);
     expect(scheduling?.lastReviewedAt?.slice(0, 10)).toBe("2026-06-15");
-    // Reps is an explicit override of stored FSRS state, so no rows are fabricated.
+    // Reps is an explicit override of the stored rep count, so no rows are fabricated.
     expect(scheduling?.reviewCount).toBe(6);
     expect(reviews).toHaveLength(1);
     expect(screen.getByText(/scored 4 · 6 reps/)).toBeInTheDocument();

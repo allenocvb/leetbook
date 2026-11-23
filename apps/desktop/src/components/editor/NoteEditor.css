@@ -209,3 +209,37 @@
   color: var(--lb-muted);
   font-size: 11.5px;
 }
+
+.note-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid var(--lb-bd-2);
+  border-radius: 7px;
+}
+.note-image.ProseMirror-selectednode {
+  outline: 2px solid var(--lb-accent);
+  outline-offset: 2px;
+}
+.note-images {
+  margin-bottom: 12px;
+}
+.note-images__tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--lb-muted);
+  font-size: 11.5px;
+}
+.note-images--dragging {
+  background: var(--lb-tint);
+  outline: 1px dashed var(--lb-accent);
+  border-radius: 5px;
+}
+.note-images__error {
+  margin: 4px 0;
+  color: var(--lb-red);
+  font-size: 12px;
+}

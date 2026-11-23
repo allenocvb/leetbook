@@ -13,6 +13,7 @@ import { DesignReviewSessionPage } from "./pages/DesignReviewSessionPage.js";
 import { DesignTopicNotesPage } from "./pages/DesignTopicNotesPage.js";
 import { DesignTopicsPage } from "./pages/DesignTopicsPage.js";
 import { DueTodayPage } from "./pages/DueTodayPage.js";
+import { FilesPage } from "./pages/FilesPage.js";
 import { ProblemNotesPage } from "./pages/ProblemNotesPage.js";
 import { ReviewSessionPage } from "./pages/ReviewSessionPage.js";
 import { SettingsPage } from "./pages/SettingsPage.js";
@@ -84,6 +85,7 @@ function Shell() {
         route.view === "system-design" ||
         route.view === "design-topic" ||
         route.view === "design-review" ||
+        route.view === "files" ||
         route.view === "settings"
       }
     >
@@ -174,6 +176,8 @@ function Page({
       return <DesignTopicNotesPage topicId={route.topicId} onBack={onBack} />;
     case "design-review":
       return <DesignReviewSessionPage onExit={onBack} onShowNotes={onOpenTopic} />;
+    case "files":
+      return <FilesPage />;
     case "settings":
       return <SettingsPage capture={capture} />;
   }

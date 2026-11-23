@@ -1,5 +1,8 @@
 mod api_key;
 mod capture_server;
+mod files;
+#[cfg(target_os = "macos")]
+mod file_promises;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,9 +19,18 @@ pub fn run() {
             capture_server::resolve_pair_request,
             api_key::save_api_key,
             api_key::load_api_key,
-            api_key::delete_api_key
+            api_key::delete_api_key,
+            files::import_library_file,
+            files::open_library_file,
+            files::discard_library_file,
+            files::expand_library_sources,
+            files::read_note_image
         ])
         .setup(|app| {
+            #[cfg(target_os = "macos")]
+            if let Err(error) = file_promises::install(app.handle()) {
+                eprintln!("screenshot drop setup failed: {error}");
+            }
             if let Err(error) = capture_server::start(app.handle().clone()) {
                 // Port taken (e.g. second instance): the app still works, capture doesn't.
                 eprintln!("capture server failed to start: {error}");

@@ -67,7 +67,7 @@ describe("ReviewSessionPage", () => {
     expect(screen.getByText(/3 — Correct, but with significant effort/)).toBeInTheDocument();
     await waitFor(() =>
       expect(
-        screen.getByText(/Struggled → Hard · due in \d+ days? · Enter to confirm/),
+        screen.getByText(/Struggled · due in \d+ days? · Enter to confirm/),
       ).toBeInTheDocument(),
     );
   });
@@ -146,7 +146,7 @@ describe("ReviewSessionPage", () => {
       "aria-pressed",
       "true",
     );
-    await waitFor(() => expect(screen.getByText(/Perfect → Easy/)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Perfect · due in/)).toBeInTheDocument());
   });
 
   it("Escape exits the session", async () => {

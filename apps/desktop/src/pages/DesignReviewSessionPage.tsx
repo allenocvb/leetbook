@@ -4,7 +4,6 @@ import {
   type DesignQuestion,
   type DesignTableRow,
   listDueDesignRows,
-  mapScoreToRating,
   type PerformanceScore,
 } from "@leetbook/core";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +13,7 @@ import type { QuizProvider } from "../ai/quizProvider.js";
 import { DesignQuizStage, scoreChoices } from "../components/design/DesignQuizStage.js";
 import { GradeSuggestion } from "../components/design/GradeSuggestion.js";
 import { ReviewSessionState } from "../components/review/ReviewSessionState.js";
-import { ScorePicker } from "../components/review/ScorePicker.js";
+import { SCORE_LABELS, ScorePicker } from "../components/review/ScorePicker.js";
 import { Button } from "../components/ui/Button.js";
 import { useDb } from "../db/DbContext.js";
 import "../components/review/ReviewSessionView.css";
@@ -292,7 +291,7 @@ export function DesignReviewSessionPage({
               <p className="review-session__preview" aria-live="polite">
                 {selected === null
                   ? "Choose 0–5 to schedule the next review."
-                  : `${mapScoreToRating(selected)} · saves and moves on`}
+                  : `${SCORE_LABELS[selected]} · saves and moves on`}
               </p>
               <div className="review-session__actions">
                 <Button disabled={selected === null || submitting} onClick={confirm}>

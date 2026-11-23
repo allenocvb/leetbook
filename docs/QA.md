@@ -304,3 +304,53 @@ are indistinguishable.
 - [ ] Deliberately write a weak answer and see whether the grader inflates it. A generous
       grader is the failure this design exists to contain — if it consistently overrates,
       tune `gradePrompt` in `apps/desktop/src/ai/anthropic.ts`.
+
+
+## File library (Phase 17.1)
+
+Automated: SQLite migration and independent duplicate filenames; import rollback; picker, search,
+double-click and keyboard Open; Rust managed-path validation. Native acceptance still required:
+upload a PDF and image, double-click both, move the originals and reopen the saved copies, relaunch
+and confirm the rows persist. Drag files from Finder into the table. Check light/dark at 1280×820.
+
+
+## Inline screenshots (Phase 17.2, November 22, 2026)
+
+Automated checks cover image paste, browser drop, native-drop callback insertion, undo, restoring
+saved image JSON with surrounding prose, invalid/oversized images, Markdown export and omission
+of image bytes from quiz prompts. Rust tests cover bounded native file reading and path validation.
+
+Browser verification at 1280×820 in light/dark used a disposable fixture with the real FilesPage
+and NoteEditor: file table layout; image picker; successful decode/render; typing below the image;
+reload and restore. No real user notes were changed. The macOS debug app bundle built successfully.
+Native UI automation could not attach to the running dev executable and failed to launch/attach
+to the bundle. **Native acceptance remains unverified:** Finder drop onto notes and library;
+OS picker; default-app opening; persistence across a real desktop relaunch. Test those in Tauri,
+not just the browser fixture. Include a Retina display to exercise physical/logical drop coordinates.
+
+
+### macOS screenshot promises (17.3)
+
+The native bridge registers NSFilePromiseReceiver types on WryWebView and delegates existing
+file drags to Wry. It receives floating-thumbnail promises into per-drop cache directories and
+notifies the active editor/library only after delivery. Unclaimed cache directories expire after
+24 hours on startup. Wry 0.55 macOS coordinates are AppKit points despite their public physical
+position type; do not divide these by Retina scale a second time. Automated regressions cover
+both platform coordinate conventions, promised events and stale transfers. Native acceptance:
+Cmd-Shift-4, drag the floating thumbnail into an empty and a scrolled note; also try an ordinary
+Finder PNG, moving/resizing the window, and a second drop. This OS interaction needs a manual
+check because computer-use cannot attach to the dev executable in this environment.
+
+### Library folders and order (17.5)
+
+Automated: core repository tests (folders, moves, cycle refusal, order), the Rust folder walk,
+import hierarchy with partial failures, and Files page drag/keyboard behaviour in jsdom. Native
+acceptance on macOS: Upload folder with nested subfolders; drag a Finder folder onto the page;
+drag rows to reorder and into a folder, then relaunch and confirm the order held; drag a row
+onto `All files` to move it back up.
+
+### Code block Enter (17.4)
+
+WebKitGTK reproduced the dropped Enter by ending a composition just before it. On a Mac, turn
+on inline predictive text (Keyboard settings), type `for i in range(3):` in a code block while a
+grey suggestion shows, press Enter: the line must break with the caret indented.

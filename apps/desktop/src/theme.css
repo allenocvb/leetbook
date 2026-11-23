@@ -99,17 +99,17 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Light Navy (#112240) ground; surfaces step up in the same hue so cards still separate. */
+  /* Navy (#0a192f) ground; surfaces step up in the same hue so cards still separate. */
 
-  --lb-bg: #112240;
-  --lb-surf: #152a4e;
-  --lb-surf-2: #183057;
-  --lb-surf-3: #1d3661;
-  --lb-code: #0d1b35;
-  --lb-chip: #22406e;
-  --lb-tint: #2b3474;
-  --lb-bd: #1f3a63;
-  --lb-bd-2: #2a4775;
+  --lb-bg: #0a192f;
+  --lb-surf: #0e203b;
+  --lb-surf-2: #112240;
+  --lb-surf-3: #172a4a;
+  --lb-code: #071325;
+  --lb-chip: #1d3557;
+  --lb-tint: #262d63;
+  --lb-bd: #1a2e4f;
+  --lb-bd-2: #233a60;
   --lb-ink: #e6f1ff;
   --lb-text-2: #ccd6f6;
   --lb-text-3: #a8b2d1;
@@ -122,16 +122,16 @@
   --lb-green: #6cba86;
   --lb-amber: #cfa04c;
   --lb-red: #e0808f;
-  --lb-soft-red: #3b2440;
+  --lb-soft-red: #351f38;
   --lb-keyword: #a98bff;
 
-  --lb-status-mastered-bg: #163a3e;
+  --lb-status-mastered-bg: #12333a;
   --lb-status-mastered-fg: #6cba86;
-  --lb-status-learning-bg: #262f68;
+  --lb-status-learning-bg: #232a5e;
   --lb-status-learning-fg: #bda6ff;
-  --lb-status-leech-bg: #3b2440;
+  --lb-status-leech-bg: #351f38;
   --lb-status-leech-fg: #e0808f;
-  --lb-status-new-bg: #22406e;
+  --lb-status-new-bg: #1d3557;
   --lb-status-new-fg: #a8b2d1;
 
   /* Lifted for contrast against the dark surface; highlights become deep tints. */
@@ -141,11 +141,11 @@
   --lb-note-amber: #cfa04c;
   --lb-note-red: #e0808f;
 
-  --lb-mark-purple: #2e3068;
-  --lb-mark-blue: #1a3d6b;
-  --lb-mark-green: #173b3f;
-  --lb-mark-amber: #3a3528;
-  --lb-mark-red: #42263f;
+  --lb-mark-purple: #292b5c;
+  --lb-mark-blue: #16365e;
+  --lb-mark-green: #133438;
+  --lb-mark-amber: #332f24;
+  --lb-mark-red: #3b2138;
 }
 
 * {

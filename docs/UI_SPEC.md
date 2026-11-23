@@ -64,19 +64,19 @@ Status pills:
 
 ### Dark
 
-Light Navy ground. Use the same semantic keys: `bg #112240`, `surf #152a4e`, `surf2 #183057`,
-`surf3 #1d3661`, `code #0d1b35`, `chip #22406e`, `tint #2b3474`, `bd #1f3a63`,
-`bd2 #2a4775`, `ink #e6f1ff`, `txt2 #ccd6f6`, `txt3 #a8b2d1`, `mut #8d98b8`,
+Navy ground. Use the same semantic keys: `bg #0a192f`, `surf #0e203b`, `surf2 #112240`,
+`surf3 #172a4a`, `code #071325`, `chip #1d3557`, `tint #262d63`, `bd #1a2e4f`,
+`bd2 #233a60`, `ink #e6f1ff`, `txt2 #ccd6f6`, `txt3 #a8b2d1`, `mut #8d98b8`,
 `mut2 #7f8bad`, `mut3 #6b789d`, `mut4 #566489`, `acc #8b6bff`,
 `accTxt #bda6ff`, `green #6cba86`, `amber #cfa04c`, `red #e0808f`,
-`softRed #3b2440`, and `kw #a98bff`.
+`softRed #351f38`, and `kw #a98bff`.
 
 Dark status pills:
 
-- Mastered: `#163a3e` background, `#6cba86` foreground.
-- Learning: `#262f68` background, `#bda6ff` foreground.
-- Leech: `#3b2440` background, `#e0808f` foreground.
-- New: `#22406e` background, `#a8b2d1` foreground.
+- Mastered: `#12333a` background, `#6cba86` foreground.
+- Learning: `#232a5e` background, `#bda6ff` foreground.
+- Leech: `#351f38` background, `#e0808f` foreground.
+- New: `#1d3557` background, `#a8b2d1` foreground.
 
 ### Typography and geometry
 
@@ -135,7 +135,7 @@ Dark status pills:
 
 - Fixed 236px width, `surf2`, 1px `bd` right border, `16px 10px 12px` padding.
 - Header: 22px logo and Chewy 16px name. No version label.
-- Navigation order: All Problems, Due Today, Review Session, Settings & Pairing. There is no
+- Navigation order: All Problems, Due Today, Review Session, System Design, Files & Notes, Settings & Pairing. There is no
   Capture view: the approval handshake made its setup guide a few lines, and every piece of
   live state it showed (listener, queue, last capture, pairing) already lives in Settings.
 - Navigation rows use 7px radius and `7px 9px` padding. Active and hover states use `tint`;
@@ -241,14 +241,13 @@ Dark status pills:
 - Provide a `Log review` action so any problem—not only an already-due problem—can receive a
   0–5 review.
 - `Edit latest review` changes the latest score, its date, and the rep count in one dialog,
-  then replays FSRS over the full history. Changing the date may reorder history, so the
-  replay sorts chronologically first. Rep count is an explicit override of stored FSRS state,
+  then reschedules from whichever review is now latest. Changing the date may reorder history,
+  so it sorts chronologically first. Rep count is an explicit override of the stored count,
   not a count of rows — the Notion import already sets it independently — so correcting an
-  imported total does not fabricate review records. A replay must **preserve** the stored rep
-  count unless explicitly overridden: it derives reps from the number of review rows, which is
-  wrong whenever the two legitimately differ, and silently reset imported problems to 1.
-  The dialog states that reps drives status (Mastered needs three), not the schedule — the
-  next review date comes from FSRS stability, so editing reps deliberately leaves it alone.
+  imported total does not fabricate review records. A correction must **preserve** the stored
+  rep count unless explicitly overridden; the row total is wrong whenever the two legitimately
+  differ. The dialog states that reps drives both the schedule (`score × 1.5^reps`) and status
+  (Mastered needs three).
 - Deleting a problem lives here, not in the table: a table row is a single button that opens
   notes, so a second control inside it would compete with that contract. The action is a ghost
   `Delete` that swaps in place for a `Delete for good?` label plus Cancel/Delete, matching the
@@ -281,8 +280,16 @@ Editor:
 - The document surface takes no focus ring. `:focus-visible` matches while typing, so a ring
   there boxes the whole note on every keystroke; the caret is the focus indicator, as in any
   text field. Discrete controls inside the editor keep their own focus styles.
-- Code blocks show a `surf2` header with language on the left and optional snapshot date on the
-  right, followed by a `code` body using JetBrains Mono 12.5px.
+- Code blocks are one soft `surf3` surface with an 8px radius and no header bar or hairlines,
+  JetBrains Mono 12.5px with ligatures off. The language sits top-left as a quiet text button
+  (`Python ⌄`) that gains a `chip` fill on hover and opens a searchable language menu: search
+  field focused on open, arrow keys move, Enter picks, Escape closes and returns to the code.
+  `Copy` sits top-right and appears on hover. Snapshots show the language and snapshot date in
+  the same corners.
+- Enter inside a code block always breaks the line. WebKit ends a composition just before Enter
+  whenever macOS inline predictions or autocorrect had marked text up, and ProseMirror would
+  read that Enter as an IME confirmation and drop it, so the code block handles a plain Enter
+  (not keyCode 229) before that check, and sets `writingsuggestions="false"` on the code.
 - Inserting a code block leaves the caret **inside** it, ready to type.
 - The editable code block uses a plain DOM node view whose `contentDOM` is the `<code>` element.
   It must not be a React node view: React's renderer nests its own managed element inside the
@@ -306,9 +313,9 @@ Editor:
 - Top bar includes label, 4px progress track, mono `N of M`, and Exit.
 - Center content is 620px wide. Use Chewy 34px title and show difficulty, last score, and reps.
 - Provide working `Open on LeetCode` and `Show my notes` actions.
-- Six equal score tiles show 0–5, labels, hover/selected state, full rubric, and FSRS preview.
+- Six equal score tiles show 0–5, labels, hover/selected state, full rubric, and next-review preview.
 - Keyboard behavior: 0–5 selects, Enter confirms, Escape exits.
-- Confirming appends a review, recomputes FSRS, and advances. End with a session summary.
+- Confirming appends a review, reschedules, and advances. End with a session summary.
 
 ### Extension capture toast
 
@@ -327,7 +334,7 @@ Editor:
   Disconnect, and queued count. It also carries the three-step setup guide, shown **only while
   nothing is paired** — instructions that disappear once they stop being useful. The pairing token is **never displayed**. Showing it invites
   the copy-paste flow the approval handshake replaced.
-- Scheduling card: FSRS identity, daily new limit, score mapping, and the longest gap.
+- Scheduling card: the formula, daily new limit, and the longest gap.
 - No Data card. Import/export was removed from Settings at the owner's request; the core
   functions (`importNotionCsv`, `exportDatabaseJson`, `exportNotesMarkdown`) remain tested.
 
@@ -340,3 +347,32 @@ Each remediation task ships with focused tests. Before checking a PRD item:
 3. Compare against the UI contract for layout, typography, color, states, and interaction.
 4. Test Tauri-only behavior, including external links and file operations, in the desktop shell.
 5. Verify the extension toast on an actual or fixture LeetCode page.
+
+### Files & Notes
+
+- Local reference shelf after System Design. Reuse the table-page typography, surfaces and spacing.
+- File icon and original filename, type, size and date in rows. Double-click a row opens the saved
+  copy in the default OS app; a focusable Open action offers the same behavior by keyboard.
+- Multi-file picker and native drag-and-drop copy into app storage (100 MB per file). Search by name.
+- Show empty, loading, saving, drag-over and error states. A failed database insert rolls back its
+  file copy; partial multi-file failures leave successful imports visible.
+- Folders: `Upload folder` (folder picker) and dropping a folder from Finder both recreate the
+  folder with its subfolders and files, in name order; hidden entries such as `.DS_Store` are
+  skipped. `New folder` adds an inline name row (Enter creates, Escape cancels). Folders list
+  before files, with a folder icon, `Folder` type and an item count; double-click or `→` opens one.
+- A breadcrumb (`All files / Algorithms / Graphs`) sits under the title. Each crumb opens its
+  folder and accepts a dragged row, which is how an item moves back up.
+- Manual order: drag a row to reorder it (an accent line shows where it lands) or onto a folder
+  to move it inside (the folder row tints). A folder's middle nests a dragged folder; its top and
+  bottom edges reorder. `⌥↑/↓` reorders the focused row and `⌥←` moves it to the parent folder.
+  The order persists. Search spans every folder and turns reordering off.
+
+### Inline note images
+
+- Shared problem/design editor supports local PNG, JPEG, GIF and WebP images up to 10 MB each.
+- Drop from the desktop onto the editor, paste a screenshot, or use the quiet `+ Image` action.
+- Images are block nodes, constrained to the editor width without distortion. A paragraph after
+  insertion keeps typing straightforward; normal undo and selected-block deletion work.
+- Bytes are embedded in note JSON to keep offline autosave and note exports self-contained.
+  Quiz generation uses image labels only, never base64 image bytes in its text prompt.
+- Preserve the targeted position while loading, report failed images, and keep surrounding prose.

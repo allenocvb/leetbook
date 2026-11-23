@@ -3,7 +3,7 @@ import type { SqlExecutor } from "../db/executor.js";
 import { createProblemsRepo } from "../db/repositories/problems.js";
 import { createReviewsRepo } from "../db/repositories/reviews.js";
 import { createSchedulingRepo } from "../db/repositories/scheduling.js";
-import { scheduleReview } from "../fsrs.js";
+import { scheduleReview } from "../schedule.js";
 import type { Problem, SchedulingState } from "../types.js";
 import { isPerformanceScore } from "../types.js";
 import { parseCsvWithHeader } from "./csv.js";

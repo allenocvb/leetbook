@@ -1,7 +1,7 @@
 import type { SqlExecutor } from "./db/executor.js";
 import { createReviewsRepo, type ReviewInput } from "./db/repositories/reviews.js";
 import { createSchedulingRepo } from "./db/repositories/scheduling.js";
-import { scheduleReview } from "./fsrs.js";
+import { nextSchedule, scheduleReview } from "./schedule.js";
 import type { PerformanceScore } from "./scoring.js";
 import type { Review, SchedulingState } from "./types.js";
 
@@ -117,33 +117,26 @@ export async function reviseLatestReview(
     reviewedAt: input.reviewedAt ?? latest.reviewedAt,
   };
 
-  // Re-sort: a new date can move this review before earlier ones, and FSRS must fold the
-  // history in the order it actually happened.
+  // Re-sort: a new date can move this review before earlier ones, so "latest" is whichever
+  // review now comes last.
   const revised = [...history.slice(0, -1), corrected].sort((a, b) =>
     a.reviewedAt.localeCompare(b.reviewedAt),
   );
-  const replayed = replayScheduling(problemId, revised);
+  const last = revised.at(-1) as Review;
 
   /*
-   * Keep the stored rep count unless the user overrode it. The replay derives reps from the
-   * number of review rows, which is wrong whenever the two legitimately differ — an imported
-   * Notion problem carries six reps and one review, so correcting its score used to silently
-   * reset it to one. FSRS state (interval, difficulty, due date) still comes from the replay.
+   * Keep the stored rep count unless the user overrode it. It can legitimately exceed the
+   * number of review rows — an imported Notion problem carries six reps and one review — and
+   * the formula's interval depends on it, so it is the count, not the row total, that counts.
    */
   const existing = await createSchedulingRepo(db).get(problemId);
-  const reviewCount = input.reviewCount ?? existing?.reviewCount ?? replayed.reviewCount;
-  const state = { ...replayed, reviewCount };
+  const reviewCount = input.reviewCount ?? existing?.reviewCount ?? revised.length;
+  const state: SchedulingState = {
+    problemId,
+    ...nextSchedule({ reviewCount: reviewCount - 1 }, last.score, new Date(last.reviewedAt)),
+  };
 
   await reviews.revise(latest.id, { score: input.score, reviewedAt: input.reviewedAt });
   await createSchedulingRepo(db).put(state);
   return { review: corrected, state };
-}
-
-function replayScheduling(problemId: string, reviews: Review[]): SchedulingState {
-  let state: SchedulingState | null = null;
-  for (const review of reviews) {
-    state = scheduleReview(state, problemId, review.score, new Date(review.reviewedAt));
-  }
-  if (!state) throw new Error("Cannot replay empty review history.");
-  return state;
 }

@@ -3,7 +3,7 @@ import {
   createDesignReviewsRepo,
   createDesignSchedulingRepo,
 } from "./db/repositories/designReviews.js";
-import { nextSchedule } from "./fsrs.js";
+import { nextSchedule } from "./schedule.js";
 import type { PerformanceScore } from "./scoring.js";
 import type { DesignReview, DesignSchedulingState } from "./types.js";
 
@@ -31,7 +31,7 @@ export async function applyDesignReview(
   const current = await scheduling.get(input.topicId);
   const state: DesignSchedulingState = {
     topicId: input.topicId,
-    ...nextSchedule(current?.fsrsCard ?? null, input.score, now),
+    ...nextSchedule(current, input.score, now),
   };
 
   const review = await reviews.add({
@@ -51,5 +51,5 @@ export async function previewDesignReview(
   now: Date,
 ): Promise<DesignSchedulingState> {
   const current = await createDesignSchedulingRepo(db).get(topicId);
-  return { topicId, ...nextSchedule(current?.fsrsCard ?? null, score, now) };
+  return { topicId, ...nextSchedule(current, score, now) };
 }

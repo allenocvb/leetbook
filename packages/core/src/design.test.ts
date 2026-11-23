@@ -10,8 +10,8 @@ import { createDesignTopicsRepo, normalizeTopicTags } from "./db/repositories/de
 import { createProblemsRepo } from "./db/repositories/problems.js";
 import { createTestDb } from "./db/test-helpers.js";
 import { applyDesignReview, previewDesignReview } from "./designReview.js";
-import { scheduleReview } from "./fsrs.js";
 import { applyReview } from "./review.js";
+import { scheduleReview } from "./schedule.js";
 import { listDesignTableRows, listDueDesignRows } from "./views/designTable.js";
 
 const NOW = new Date("2026-08-01T09:00:00.000Z");

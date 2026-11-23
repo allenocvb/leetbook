@@ -134,7 +134,9 @@ export function DesignTopicNotesPage({
             topicId={topic.id}
             title={topic.title}
             prompt={topic.prompt}
-            notes={note?.contentJson ? tiptapToMarkdown(note.contentJson) : ""}
+            notes={
+              note?.contentJson ? tiptapToMarkdown(note.contentJson, { includeImages: false }) : ""
+            }
           />
         </div>
 

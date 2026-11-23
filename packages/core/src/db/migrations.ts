@@ -135,4 +135,43 @@ export const MIGRATIONS: readonly Migration[] = [
       `CREATE INDEX idx_design_questions_topic_id ON design_questions(topic_id, position)`,
     ],
   },
+  {
+    version: 5,
+    name: "file-library",
+    statements: [
+      `CREATE TABLE library_files (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        size INTEGER NOT NULL CHECK (size >= 0),
+        created_at TEXT NOT NULL
+      )`,
+    ],
+  },
+  {
+    version: 6,
+    name: "library-folders",
+    /*
+     * Folders in the file library, and a manual order for everything in it. Files and folders
+     * keep separate positions: a folder always lists its subfolders first, then its files, the
+     * way Finder and Notion do, so one shared sequence would only invite impossible orders.
+     *
+     * `folder_id` NULL is the library root. Existing files keep their newest-first order.
+     */
+    statements: [
+      `CREATE TABLE library_folders (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        parent_id TEXT REFERENCES library_folders(id) ON DELETE CASCADE,
+        position INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )`,
+      "ALTER TABLE library_files ADD COLUMN folder_id TEXT REFERENCES library_folders(id)",
+      "ALTER TABLE library_files ADD COLUMN position INTEGER NOT NULL DEFAULT 0",
+      `UPDATE library_files SET position = (
+        SELECT COUNT(*) FROM library_files AS newer
+        WHERE newer.created_at > library_files.created_at
+          OR (newer.created_at = library_files.created_at AND newer.id < library_files.id)
+      )`,
+    ],
+  },
 ];
