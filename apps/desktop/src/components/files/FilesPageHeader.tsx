@@ -45,8 +45,7 @@ export function FilesPageHeader(props: {
       <div className="files-page__toolbar">
         {props.children}
         <p className="files-page__hint">
-          Drop files or folders here · Double-click to open · ⌥↑/↓ reorders · Up to 100 MB per
-          file
+          Drop files or folders here · Double-click to open · ⌥↑/↓ reorders · Up to 100 MB per file
         </p>
       </div>
       {props.error && (
