@@ -327,3 +327,16 @@ Native UI automation could not attach to the running dev executable and failed t
 to the bundle. **Native acceptance remains unverified:** Finder drop onto notes and library;
 OS picker; default-app opening; persistence across a real desktop relaunch. Test those in Tauri,
 not just the browser fixture. Include a Retina display to exercise physical/logical drop coordinates.
+
+
+### macOS screenshot promises (17.3)
+
+The native bridge registers NSFilePromiseReceiver types on WryWebView and delegates existing
+file drags to Wry. It receives floating-thumbnail promises into per-drop cache directories and
+notifies the active editor/library only after delivery. Unclaimed cache directories expire after
+24 hours on startup. Wry 0.55 macOS coordinates are AppKit points despite their public physical
+position type; do not divide these by Retina scale a second time. Automated regressions cover
+both platform coordinate conventions, promised events and stale transfers. Native acceptance:
+Cmd-Shift-4, drag the floating thumbnail into an empty and a scrolled note; also try an ordinary
+Finder PNG, moving/resizing the window, and a second drop. This OS interaction needs a manual
+check because computer-use cannot attach to the dev executable in this environment.
