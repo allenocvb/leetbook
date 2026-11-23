@@ -376,8 +376,9 @@ Each remediation task ships with focused tests. Before checking a PRD item:
 - Shared problem/design editor supports local PNG, JPEG, GIF and WebP images up to 10 MB each.
 - Drop from the desktop or the Cmd-Shift-4 floating thumbnail onto the editor, paste a
   screenshot, or use the quiet `+ Image` action.
-- Drag an image in a note to move it above or below other blocks; the drop cursor shows where
-  it will land.
+- Press and drag an image in a note to move it above or below other top-level blocks: the image
+  dims, an accent line shows where it will land, the page scrolls near its edges, and `Esc`
+  cancels. A plain click selects the image. This runs on mouse events, not HTML5 drag and drop.
 - Images are block nodes, constrained to the editor width without distortion. A paragraph after
   insertion keeps typing straightforward; normal undo and selected-block deletion work.
 - Bytes are embedded in note JSON to keep offline autosave and note exports self-contained.

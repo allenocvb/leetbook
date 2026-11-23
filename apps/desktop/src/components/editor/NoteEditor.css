@@ -224,6 +224,24 @@
 .note-image:active {
   cursor: grabbing;
 }
+.note-image--moving {
+  opacity: 0.4;
+}
+body.note-image-moving,
+body.note-image-moving .ProseMirror,
+body.note-image-moving .note-image {
+  cursor: grabbing;
+  user-select: none;
+}
+.note-image-drop {
+  position: fixed;
+  z-index: 50;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--lb-accent);
+  opacity: 0.7;
+  pointer-events: none;
+}
 .note-image.ProseMirror-selectednode {
   outline: 2px solid var(--lb-accent);
   outline-offset: 2px;

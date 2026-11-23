@@ -338,6 +338,8 @@ path — was dropped on the floor. `drag_routing.m` keeps plain Finder file-URL 
 (the library needs folder paths) and hands everything else to WebKit, which fulfils promises
 and gives the page File objects, as Safari does. Wry 0.55 macOS coordinates are AppKit points
 despite their public physical position type; do not divide them by Retina scale again.
+Moving a note image (17.7) deliberately bypasses this path: it is a mouse-driven move in
+`imageMove.ts`, so it works even if the routing is not installed.
 
 Native acceptance (macOS, `tauri dev`): Cmd-Shift-4, drag the floating thumbnail into a note
 and onto Files & Notes; drag an image in a note above a paragraph; drag library rows to
