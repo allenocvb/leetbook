@@ -9,8 +9,11 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppRoot } from "./AppRoot.js";
 import { AppWindow } from "./components/window/AppWindow.js";
+import { preventStrayFileDrops } from "./files/strayDrops.js";
 import { ThemeProvider } from "./theme/ThemeProvider.js";
 import "./theme.css";
+
+preventStrayFileDrops();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("missing #root element");

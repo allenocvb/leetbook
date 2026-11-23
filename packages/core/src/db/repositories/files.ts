@@ -165,6 +165,34 @@ export function createFilesRepo(db: SqlExecutor) {
       ]);
     },
 
+    /** Forgets one file. Its stored bytes are the caller's to remove. */
+    async removeFile(id: string) {
+      await db.execute("DELETE FROM library_files WHERE id = ?", [id]);
+    },
+
+    /**
+     * Forgets a folder with everything inside it, and returns the files that went with it so
+     * the caller can remove their stored bytes. Done by hand rather than by cascade: the app's
+     * SQLite connection doesn't enforce foreign keys.
+     */
+    async removeFolder(id: string): Promise<LibraryFile[]> {
+      const folders = await listFolders();
+      const doomed = new Set(
+        folders.filter((folder) => isWithinFolder(folders, folder.id, id)).map((f) => f.id),
+      );
+      doomed.add(id);
+      const files = (
+        await db.select<LibraryFile>(`SELECT ${FILE_COLUMNS} FROM library_files`)
+      ).filter((file) => file.folderId !== null && doomed.has(file.folderId));
+      for (const file of files) {
+        await db.execute("DELETE FROM library_files WHERE id = ?", [file.id]);
+      }
+      for (const folderId of doomed) {
+        await db.execute("DELETE FROM library_folders WHERE id = ?", [folderId]);
+      }
+      return files;
+    },
+
     /** Persist a manual order: `ids` are one folder's files, top to bottom. */
     reorderFiles: (ids: readonly string[]) => setOrder("library_files", ids),
 

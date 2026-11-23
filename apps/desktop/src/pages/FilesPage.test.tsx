@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import { DbProvider } from "../db/DbContext.js";
-import { importLibrarySources, openLibraryFile } from "../files/library.js";
+import { importDroppedFiles, importLibrarySources, openLibraryFile } from "../files/library.js";
 import { makeDb } from "../test-utils.js";
 import { FilesPage } from "./FilesPage.js";
 
@@ -12,6 +12,7 @@ vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("../files/library.js", async (original) => ({
   ...(await original<typeof import("../files/library.js")>()),
   importLibrarySources: vi.fn().mockResolvedValue([]),
+  importDroppedFiles: vi.fn().mockResolvedValue([]),
   openLibraryFile: vi.fn().mockResolvedValue(undefined),
 }));
 beforeEach(() => vi.clearAllMocks());
@@ -137,4 +138,43 @@ it("reorders with Alt+arrow keys", async () => {
   screen.getByRole("button", { name: "Open a.pdf" }).focus();
   await userEvent.keyboard("{Alt>}{ArrowUp}{/Alt}");
   await waitFor(() => expect(names()).toEqual(["a.pdf", "b.pdf"]));
+});
+
+it("deletes a file after an inline confirm, and can be cancelled", async () => {
+  const db = await renderPage((db) => addFile(db, "a", "a.pdf"));
+  await screen.findByText("a.pdf");
+
+  await userEvent.click(screen.getByRole("button", { name: "Delete a.pdf" }));
+  expect(screen.getByText("Delete for good?")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(screen.queryByText("Delete for good?")).not.toBeInTheDocument();
+
+  await userEvent.click(screen.getByRole("button", { name: "Delete a.pdf" }));
+  await userEvent.click(screen.getByRole("button", { name: "Delete this file" }));
+  await waitFor(() => expect(screen.queryByText("a.pdf")).not.toBeInTheDocument());
+  expect(await createFilesRepo(db).list()).toEqual([]);
+});
+
+it("deletes a folder with its contents", async () => {
+  const db = await renderPage(async (db) => {
+    await createFilesRepo(db).addFolder({ id: "f", name: "Trees", parentId: null, createdAt: "t" });
+    await addFile(db, "a", "inside.pdf", "f");
+  });
+  await screen.findByText("Trees");
+  await userEvent.click(screen.getByRole("button", { name: "Delete Trees" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Delete this folder and everything in it" }),
+  );
+  await waitFor(() => expect(screen.queryByText("Trees")).not.toBeInTheDocument());
+  expect(await createFilesRepo(db).listFolders()).toEqual([]);
+  expect(await createFilesRepo(db).list()).toEqual([]);
+});
+
+it("saves a dropped screenshot thumbnail (a browser File) into the open folder", async () => {
+  const db = await renderPage();
+  const screenshot = new File(["png"], "Screenshot.png", { type: "image/png" });
+  fireEvent.drop(screen.getByRole("region", { name: "Files & Notes" }), {
+    dataTransfer: { files: [screenshot], types: ["Files"] },
+  });
+  await waitFor(() => expect(importDroppedFiles).toHaveBeenCalledWith(db, [screenshot], null));
 });

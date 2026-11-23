@@ -21,6 +21,7 @@ export interface FilesTableProps {
   onDragChange: (item: LibraryItem | null) => void;
   onDrop: (target: LibraryItem, zone: DropZone) => void;
   onKeyMove: (item: LibraryItem, direction: "up" | "down" | "out") => void;
+  onDelete: (item: LibraryItem) => void;
 }
 
 const added = (createdAt: string) => new Date(createdAt).toLocaleDateString();
@@ -36,6 +37,7 @@ export function FilesTable(props: FilesTableProps) {
     onDragEnd: () => props.onDragChange(null),
     onDrop: (zone: DropZone) => props.onDrop(item, zone),
     onKeyMove: (direction: "up" | "down" | "out") => props.onKeyMove(item, direction),
+    onDelete: () => props.onDelete(item),
   });
 
   return (

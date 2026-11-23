@@ -329,17 +329,19 @@ OS picker; default-app opening; persistence across a real desktop relaunch. Test
 not just the browser fixture. Include a Retina display to exercise physical/logical drop coordinates.
 
 
-### macOS screenshot promises (17.3)
+### macOS drag routing (17.3, 17.6)
 
-The native bridge registers NSFilePromiseReceiver types on WryWebView and delegates existing
-file drags to Wry. It receives floating-thumbnail promises into per-drop cache directories and
-notifies the active editor/library only after delivery. Unclaimed cache directories expire after
-24 hours on startup. Wry 0.55 macOS coordinates are AppKit points despite their public physical
-position type; do not divide these by Retina scale a second time. Automated regressions cover
-both platform coordinate conventions, promised events and stale transfers. Native acceptance:
-Cmd-Shift-4, drag the floating thumbnail into an empty and a scrolled note; also try an ordinary
-Finder PNG, moving/resizing the window, and a second drop. This OS interaction needs a manual
-check because computer-use cannot attach to the dev executable in this environment.
+Tauri's macOS drop handler (Wry) claims every drag that enters the window and reports only file
+paths, so drags that start inside the page (notes images, library rows) never produced HTML5
+drop events and snapped back, and the floating screenshot thumbnail — a file promise with no
+path — was dropped on the floor. `drag_routing.m` keeps plain Finder file-URL drags with Tauri
+(the library needs folder paths) and hands everything else to WebKit, which fulfils promises
+and gives the page File objects, as Safari does. Wry 0.55 macOS coordinates are AppKit points
+despite their public physical position type; do not divide them by Retina scale again.
+
+Native acceptance (macOS, `tauri dev`): Cmd-Shift-4, drag the floating thumbnail into a note
+and onto Files & Notes; drag an image in a note above a paragraph; drag library rows to
+reorder and into a folder; drag a Finder folder onto Files & Notes.
 
 ### Library folders and order (17.5)
 
