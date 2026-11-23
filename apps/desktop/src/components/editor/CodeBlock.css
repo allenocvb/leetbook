@@ -1,8 +1,12 @@
+/*
+ * Notion-style code block: one soft surface, no header bar or hairlines. The language control
+ * and Copy sit quietly in the top corners and only gain a fill on hover.
+ */
 .code-block {
-  margin: 16px 0;
-  overflow: hidden;
-  background: var(--lb-code);
-  border: 1px solid var(--lb-bd);
+  position: relative;
+  margin: 14px 0;
+  background: var(--lb-surf-3);
+  border: 1px solid transparent;
   border-radius: var(--lb-radius-4);
 }
 
@@ -12,38 +16,18 @@
 
 .code-block__header {
   display: flex;
-  min-height: 33px;
+  min-height: 30px;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
+  padding: 6px 8px 0;
   color: var(--lb-muted);
-  background: var(--lb-surf-2);
-  border-bottom: 1px solid var(--lb-bd);
-  font-family: var(--lb-font-mono);
-  font-size: 11px;
+  font-family: var(--lb-font-body);
+  font-size: 11.5px;
+  user-select: none;
 }
 
-.code-block__language {
-  max-width: 180px;
-  height: 23px;
-  padding: 0 5px;
-  color: var(--lb-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--lb-radius-1);
-  font: inherit;
-  cursor: pointer;
-}
-
-.code-block__language:hover {
-  color: var(--lb-accent-text);
-  background: var(--lb-tint);
-}
-
-.code-block__language:focus-visible {
-  color: var(--lb-accent-text);
-  outline: 2px solid var(--lb-accent);
-  outline-offset: 1px;
+.code-block--readonly .code-block__header {
+  padding: 6px 14px 0;
 }
 
 .code-block__caption {
@@ -51,18 +35,131 @@
   color: var(--lb-muted-2);
 }
 
+.code-language {
+  position: relative;
+}
+
+.code-language__trigger,
+.code-block__copy {
+  display: inline-flex;
+  height: 22px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  color: var(--lb-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--lb-radius-1);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+
+.code-language__trigger:hover,
+.code-language[data-open="true"] .code-language__trigger,
+.code-block__copy:hover {
+  color: var(--lb-text-2);
+  background: var(--lb-chip);
+}
+
+.code-language__trigger:focus-visible,
+.code-block__copy:focus-visible {
+  outline: 2px solid var(--lb-accent);
+  outline-offset: 1px;
+}
+
+.code-block__copy {
+  margin-left: auto;
+  opacity: 0;
+}
+
+.code-block:hover .code-block__copy,
+.code-block__copy:focus-visible {
+  opacity: 1;
+}
+
+.code-language__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 220px;
+  padding: 6px;
+  background: var(--lb-surf);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-4);
+  box-shadow: var(--lb-shadow-floating);
+}
+
+.code-language__menu[hidden] {
+  display: none;
+}
+
+.code-language__search {
+  width: 100%;
+  height: 28px;
+  margin-bottom: 4px;
+  padding: 0 8px;
+  color: var(--lb-text-2);
+  background: var(--lb-surf-2);
+  border: 1px solid var(--lb-bd-2);
+  border-radius: var(--lb-radius-2);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.code-language__search:focus {
+  border-color: var(--lb-accent);
+}
+
+.code-language__list {
+  max-height: 232px;
+  overflow-y: auto;
+}
+
+.code-language__option,
+.code-language__empty {
+  display: flex;
+  height: 28px;
+  align-items: center;
+  padding: 0 8px;
+  color: var(--lb-text-2);
+  border-radius: var(--lb-radius-2);
+  font-size: 12.5px;
+}
+
+.code-language__option {
+  cursor: pointer;
+}
+
+.code-language__option[aria-selected="true"] {
+  background: var(--lb-tint);
+}
+
+.code-language__option[data-current="true"]::after {
+  content: "✓";
+  margin-left: auto;
+  color: var(--lb-accent-text);
+}
+
+.code-language__empty {
+  color: var(--lb-muted);
+}
+
 .code-block .code-block__body {
   margin: 0;
-  padding: 14px 16px;
+  padding: 6px 14px 16px;
   overflow-x: auto;
   color: var(--lb-text-2);
-  background: var(--lb-code);
+  background: transparent;
   border: 0;
   border-radius: 0;
   font-family: var(--lb-font-mono);
   font-size: 12.5px;
-  line-height: 1.85;
+  line-height: 1.7;
   tab-size: 2;
+  font-variant-ligatures: none;
 }
 
 .code-block .code-block__code,

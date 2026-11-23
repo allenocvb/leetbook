@@ -1,9 +1,16 @@
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
 import { TextStyleKit } from "@tiptap/extension-text-style";
+import { Plugin } from "@tiptap/pm/state";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Callout } from "./Callout.js";
 import { codeBlockNodeView } from "./codeBlockNodeView.js";
 import {
@@ -28,6 +35,19 @@ function codeTextBefore(editor: Editor): string {
   return $from.parent.textBetween(0, $from.parentOffset);
 }
 
+/** Enter with no modifiers, and not the keystroke that confirms an IME composition. */
+export function isPlainEnter(event: KeyboardEvent): boolean {
+  return (
+    event.key === "Enter" &&
+    !event.isComposing &&
+    event.keyCode !== 229 &&
+    !event.shiftKey &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey
+  );
+}
+
 /**
  * A code block should behave like a code editor: Tab indents instead of escaping to the
  * language picker, and Enter carries the current indentation forward, stepping in after
@@ -40,6 +60,38 @@ const EditorCodeBlock = CodeBlockLowlight.extend({
    * block in two, so the indentation handler below never runs.
    */
   priority: 1000,
+
+  addStorage() {
+    return { newlineWithIndent: (): boolean => false };
+  },
+
+  /*
+   * WebKit (Safari, and the macOS app's webview) ends a composition right before Enter
+   * whenever macOS inline predictions or autocorrect had marked text on screen. ProseMirror
+   * then treats that Enter as an IME confirmation and ignores it — the line never breaks and
+   * the next keystrokes can vanish too. A real IME confirmation reports keyCode 229, so any
+   * other plain Enter inside a code block is handled here, ahead of that check.
+   */
+  addProseMirrorPlugins() {
+    const parentPlugins = this.parent?.() ?? [];
+    const storage = this.storage;
+    const editor = this.editor;
+    return [
+      ...parentPlugins,
+      new Plugin({
+        props: {
+          handleDOMEvents: {
+            keydown: (_view, event) => {
+              if (!isPlainEnter(event) || !editor.isActive("codeBlock")) return false;
+              if (!storage.newlineWithIndent()) return false;
+              event.preventDefault();
+              return true;
+            },
+          },
+        },
+      }),
+    ];
+  },
 
   addNodeView() {
     return codeBlockNodeView;
@@ -87,6 +139,19 @@ const EditorCodeBlock = CodeBlockLowlight.extend({
       );
     };
 
+    const newlineWithIndent = () => {
+      const indent = indentAfterNewline(codeTextBefore(this.editor));
+      return this.editor
+        .chain()
+        .newlineInCode()
+        .command(({ tr }) => {
+          if (indent) tr.insertText(indent, tr.selection.from);
+          return true;
+        })
+        .run();
+    };
+    this.storage.newlineWithIndent = newlineWithIndent;
+
     return {
       ...this.parent?.(),
 
@@ -113,16 +178,7 @@ const EditorCodeBlock = CodeBlockLowlight.extend({
       // Delegate the line break to newlineInCode, then apply the indent to the new line.
       Enter: () => {
         if (!inCodeBlock()) return false;
-
-        const indent = indentAfterNewline(codeTextBefore(this.editor));
-        return this.editor
-          .chain()
-          .newlineInCode()
-          .command(({ tr }) => {
-            if (indent) tr.insertText(indent, tr.selection.from);
-            return true;
-          })
-          .run();
+        return newlineWithIndent();
       },
     };
   },
@@ -275,7 +331,7 @@ export function NoteEditor({
     }
   }, [activeIndex, editor, slashMenu]);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (!editor || !slashMenu) return;
     const items = filterSlashCommands(slashMenu.query);
     if (items.length === 0) return;

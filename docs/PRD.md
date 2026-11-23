@@ -391,5 +391,5 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
       picker, persisted with the note, responsive image blocks and recoverable errors.
 
 - [x] 17.3 Accept macOS floating screenshot file promises and correct Retina drop coordinates.
-- [ ] 17.4 Repair code-block line breaks in WebKit and refine the code header/language control.
+- [x] 17.4 Repair code-block line breaks in WebKit and refine the code header/language control.
 - [ ] 17.5 Upload folders with their hierarchy, create folders, move items and persist manual order.

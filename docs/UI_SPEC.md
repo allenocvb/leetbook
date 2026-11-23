@@ -280,8 +280,16 @@ Editor:
 - The document surface takes no focus ring. `:focus-visible` matches while typing, so a ring
   there boxes the whole note on every keystroke; the caret is the focus indicator, as in any
   text field. Discrete controls inside the editor keep their own focus styles.
-- Code blocks show a `surf2` header with language on the left and optional snapshot date on the
-  right, followed by a `code` body using JetBrains Mono 12.5px.
+- Code blocks are one soft `surf3` surface with an 8px radius and no header bar or hairlines,
+  JetBrains Mono 12.5px with ligatures off. The language sits top-left as a quiet text button
+  (`Python ⌄`) that gains a `chip` fill on hover and opens a searchable language menu: search
+  field focused on open, arrow keys move, Enter picks, Escape closes and returns to the code.
+  `Copy` sits top-right and appears on hover. Snapshots show the language and snapshot date in
+  the same corners.
+- Enter inside a code block always breaks the line. WebKit ends a composition just before Enter
+  whenever macOS inline predictions or autocorrect had marked text up, and ProseMirror would
+  read that Enter as an IME confirmation and drop it, so the code block handles a plain Enter
+  (not keyCode 229) before that check, and sets `writingsuggestions="false"` on the code.
 - Inserting a code block leaves the caret **inside** it, ready to type.
 - The editable code block uses a plain DOM node view whose `contentDOM` is the `<code>` element.
   It must not be a React node view: React's renderer nests its own managed element inside the

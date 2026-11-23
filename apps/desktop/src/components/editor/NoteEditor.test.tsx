@@ -2,7 +2,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Editor } from "@tiptap/react";
 import { describe, expect, it, vi } from "vitest";
-import { NOTE_PLACEHOLDER, NoteEditor } from "./NoteEditor.js";
+import { isPlainEnter, NOTE_PLACEHOLDER, NoteEditor } from "./NoteEditor.js";
 import { SLASH_COMMANDS } from "./slashCommands.js";
 
 /**
@@ -108,7 +108,7 @@ describe("NoteEditor", () => {
     expect(screen.getByText("Intuition")).toBeInTheDocument();
     expect(screen.getByText("Use a hash map.")).toBeInTheDocument();
     expect(screen.getByText(/seen = \{\}/)).toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Code language" })).toHaveValue("python");
+    expect(screen.getByRole("button", { name: "Code language" })).toHaveTextContent("Python");
   });
 
   it("renders marks, lists, and blockquotes from stored JSON", async () => {
@@ -278,7 +278,7 @@ describe("NoteEditor", () => {
     await userEvent.keyboard("{Tab}x");
 
     expect(editor.state.selection.$from.parent.textContent).toBe("  x");
-    expect(screen.getByRole("combobox", { name: "Code language" })).not.toHaveFocus();
+    expect(screen.getByRole("button", { name: "Code language" })).not.toHaveFocus();
   });
 
   it("leaves the slash menu closed inside a code block", async () => {
@@ -422,11 +422,14 @@ describe("NoteEditor", () => {
     await userEvent.click(surface);
     await userEvent.keyboard("/code{Enter}");
 
-    const language = screen.getByRole("combobox", { name: "Code language" });
-    expect(language).toHaveValue("");
+    const language = screen.getByRole("button", { name: "Code language" });
+    expect(language).toHaveTextContent("Auto detect");
     editor.view.focus();
     await userEvent.keyboard("const answer = 42");
-    await userEvent.selectOptions(language, "javascript");
+    await userEvent.click(language);
+    await userEvent.keyboard("javasc{Enter}");
+    expect(language).toHaveTextContent("JavaScript");
+    expect(language).toHaveAttribute("aria-expanded", "false");
 
     await waitFor(() => {
       expect(document.querySelector(".code-block .hljs-keyword")).toHaveTextContent("const");
@@ -470,5 +473,61 @@ describe("NoteEditor", () => {
     // lowlight splits "return" into its own token span, so match the block's full text
     const code = document.querySelector(".note-editor pre code");
     expect(code?.textContent).toBe("return []");
+  });
+
+  it("picks a language from the searchable menu with the pointer", async () => {
+    await renderEditor(SAMPLE);
+    await userEvent.click(screen.getByRole("button", { name: "Code language" }));
+    const search = screen.getByRole("textbox", { name: "Search languages" });
+    expect(search).toHaveFocus();
+    await userEvent.type(search, "rus");
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["Rust"]);
+    await userEvent.click(screen.getByRole("option", { name: "Rust" }));
+    expect(screen.getByRole("button", { name: "Code language" })).toHaveTextContent("Rust");
+  });
+
+  it("closes the language menu on Escape without changing the language", async () => {
+    await renderEditor(SAMPLE);
+    const trigger = screen.getByRole("button", { name: "Code language" });
+    await userEvent.click(trigger);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await userEvent.keyboard("go{Escape}");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveTextContent("Python");
+  });
+
+  it("breaks the line on Enter even right after a composition ends", async () => {
+    const { editor } = await renderEditor(null);
+    editor.commands.insertContent({
+      type: "codeBlock",
+      attrs: { language: "python" },
+      content: [{ type: "text", text: "for i in range(3):" }],
+    });
+    editor.commands.setTextSelection(19);
+    const dom = editor.view.dom;
+    dom.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    dom.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true }));
+    dom.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", keyCode: 13, bubbles: true, cancelable: true }),
+    );
+    expect(codeBlockTexts(editor)).toEqual(["for i in range(3):\n  "]);
+  });
+
+  it("leaves an IME's confirming Enter and modified Enters to the default handling", () => {
+    const enter = (init: KeyboardEventInit) =>
+      new KeyboardEvent("keydown", { key: "Enter", ...init });
+    expect(isPlainEnter(enter({ keyCode: 13 }))).toBe(true);
+    expect(isPlainEnter(enter({ keyCode: 229 }))).toBe(false);
+    expect(isPlainEnter(enter({ isComposing: true }))).toBe(false);
+    expect(isPlainEnter(enter({ shiftKey: true }))).toBe(false);
+    expect(isPlainEnter(enter({ metaKey: true }))).toBe(false);
+  });
+
+  it("turns off writing suggestions inside code", async () => {
+    await renderEditor(SAMPLE);
+    expect(document.querySelector(".code-block__code")).toHaveAttribute(
+      "writingsuggestions",
+      "false",
+    );
   });
 });
