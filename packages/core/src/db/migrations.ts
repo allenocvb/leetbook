@@ -135,4 +135,16 @@ export const MIGRATIONS: readonly Migration[] = [
       `CREATE INDEX idx_design_questions_topic_id ON design_questions(topic_id, position)`,
     ],
   },
+  {
+    version: 5,
+    name: "file-library",
+    statements: [
+      `CREATE TABLE library_files (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        size INTEGER NOT NULL CHECK (size >= 0),
+        created_at TEXT NOT NULL
+      )`,
+    ],
+  },
 ];

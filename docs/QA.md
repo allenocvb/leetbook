@@ -304,3 +304,11 @@ are indistinguishable.
 - [ ] Deliberately write a weak answer and see whether the grader inflates it. A generous
       grader is the failure this design exists to contain — if it consistently overrates,
       tune `gradePrompt` in `apps/desktop/src/ai/anthropic.ts`.
+
+
+## File library (Phase 17.1)
+
+Automated: SQLite migration and independent duplicate filenames; import rollback; picker, search,
+double-click and keyboard Open; Rust managed-path validation. Native acceptance still required:
+upload a PDF and image, double-click both, move the originals and reopen the saved copies, relaunch
+and confirm the rows persist. Drag files from Finder into the table. Check light/dark at 1280×820.

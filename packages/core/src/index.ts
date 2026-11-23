@@ -29,6 +29,7 @@ export {
   type DesignTopicsRepo,
   normalizeTopicTags,
 } from "./db/repositories/designTopics.js";
+export { createFilesRepo, type LibraryFile } from "./db/repositories/files.js";
 export { createNotesRepo, type NotesRepo } from "./db/repositories/notes.js";
 export {
   createProblemsRepo,

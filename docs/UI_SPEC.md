@@ -135,7 +135,7 @@ Dark status pills:
 
 - Fixed 236px width, `surf2`, 1px `bd` right border, `16px 10px 12px` padding.
 - Header: 22px logo and Chewy 16px name. No version label.
-- Navigation order: All Problems, Due Today, Review Session, Settings & Pairing. There is no
+- Navigation order: All Problems, Due Today, Review Session, System Design, Files & Notes, Settings & Pairing. There is no
   Capture view: the approval handshake made its setup guide a few lines, and every piece of
   live state it showed (listener, queue, last capture, pairing) already lives in Settings.
 - Navigation rows use 7px radius and `7px 9px` padding. Active and hover states use `tint`;
@@ -339,3 +339,12 @@ Each remediation task ships with focused tests. Before checking a PRD item:
 3. Compare against the UI contract for layout, typography, color, states, and interaction.
 4. Test Tauri-only behavior, including external links and file operations, in the desktop shell.
 5. Verify the extension toast on an actual or fixture LeetCode page.
+
+### Files & Notes
+
+- Local reference shelf after System Design. Reuse the table-page typography, surfaces and spacing.
+- File icon and original filename, type, size and date in rows. Double-click a row opens the saved
+  copy in the default OS app; a focusable Open action offers the same behavior by keyboard.
+- Multi-file picker and native drag-and-drop copy into app storage (100 MB per file). Search by name.
+- Show empty, loading, saving, drag-over and error states. A failed database insert rolls back its
+  file copy; partial multi-file failures leave successful imports visible.

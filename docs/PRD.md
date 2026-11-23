@@ -381,3 +381,11 @@ docs must say so plainly rather than keeping a promise that has quietly stopped 
 - [ ] 16.8 Acceptance: generate, edit, quiz, grade, override and reschedule a real topic
       end to end; then pull the network cable and confirm the whole loop still runs on cached
       questions. Add both walkthroughs to `docs/QA.md`
+
+## Phase 17 — Files and image notes
+
+- [x] 17.1 Local Files & Notes library after System Design: upload or drop files, preserve
+      private app-owned copies, searchable table with file icons and metadata, double-click
+      or keyboard-accessible Open action launches the saved copy in its default app.
+- [ ] 17.2 Inline screenshots in the shared notes editor: native file drops, paste and image
+      picker, persisted with the note, responsive image blocks and recoverable errors.

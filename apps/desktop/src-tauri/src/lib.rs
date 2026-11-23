@@ -1,5 +1,6 @@
 mod api_key;
 mod capture_server;
+mod files;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,7 +17,10 @@ pub fn run() {
             capture_server::resolve_pair_request,
             api_key::save_api_key,
             api_key::load_api_key,
-            api_key::delete_api_key
+            api_key::delete_api_key,
+            files::import_library_file,
+            files::open_library_file,
+            files::discard_library_file
         ])
         .setup(|app| {
             if let Err(error) = capture_server::start(app.handle().clone()) {
