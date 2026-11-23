@@ -81,6 +81,81 @@ fn copy_to_library(root: &Path, source: &Path, id: &str) -> Result<ImportedFile,
     }
 }
 
+const MAX_FOLDER_ENTRIES: usize = 2000;
+
+/// One item found when expanding dropped or picked paths. `folders` is the chain of folder
+/// names it sits in, starting with the top-level folder that was dropped; empty for a loose file.
+#[derive(serde::Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct LibrarySource {
+    kind: &'static str,
+    source: String,
+    folders: Vec<String>,
+}
+
+/// Expands dropped/picked paths into files and folders, preserving each folder's hierarchy.
+/// Hidden entries (".DS_Store", ".git") and symlinks are skipped.
+#[tauri::command]
+pub async fn expand_library_sources(paths: Vec<String>) -> Result<Vec<LibrarySource>, String> {
+    tauri::async_runtime::spawn_blocking(move || expand_sources(&paths))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+fn expand_sources(paths: &[String]) -> Result<Vec<LibrarySource>, String> {
+    let mut found = Vec::new();
+    for path in paths {
+        let path = Path::new(path);
+        let meta = fs::symlink_metadata(path).map_err(|e| e.to_string())?;
+        if meta.is_dir() {
+            walk(path, Vec::new(), &mut found)?;
+        } else if meta.is_file() {
+            found.push(LibrarySource {
+                kind: "file",
+                source: path.to_string_lossy().into_owned(),
+                folders: Vec::new(),
+            });
+        }
+    }
+    Ok(found)
+}
+
+fn walk(dir: &Path, mut trail: Vec<String>, found: &mut Vec<LibrarySource>) -> Result<(), String> {
+    let name = dir
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or("Invalid folder name")?
+        .to_owned();
+    trail.push(name);
+    found.push(LibrarySource {
+        kind: "folder",
+        source: dir.to_string_lossy().into_owned(),
+        folders: trail.clone(),
+    });
+    let mut entries: Vec<_> = fs::read_dir(dir)
+        .map_err(|e| e.to_string())?
+        .flatten()
+        .filter(|entry| !entry.file_name().to_string_lossy().starts_with('.'))
+        .collect();
+    entries.sort_by_key(|entry| entry.file_name());
+    for entry in entries {
+        if found.len() >= MAX_FOLDER_ENTRIES {
+            return Err(format!("Folders can hold up to {MAX_FOLDER_ENTRIES} items per upload"));
+        }
+        let Ok(kind) = entry.file_type() else { continue };
+        if kind.is_dir() {
+            walk(&entry.path(), trail.clone(), found)?;
+        } else if kind.is_file() {
+            found.push(LibrarySource {
+                kind: "file",
+                source: entry.path().to_string_lossy().into_owned(),
+                folders: trail.clone(),
+            });
+        }
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub fn open_library_file(app: tauri::AppHandle, id: String, name: String) -> Result<(), String> {
     let path = file_path(&root(&app)?, &id, &name)?;
@@ -115,6 +190,41 @@ mod tests {
         fs::remove_file(source).unwrap();
         let saved = file_path(&root, id, &imported.name).unwrap();
         assert_eq!(fs::read(saved).unwrap(), b"test document bytes");
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn expands_folders_with_their_hierarchy_and_skips_hidden_entries() {
+        let root = std::env::temp_dir().join(format!("leetbook-expand-{}", rand::random::<u64>()));
+        let top = root.join("Graphs");
+        fs::create_dir_all(top.join("BFS")).unwrap();
+        fs::create_dir_all(top.join("Empty")).unwrap();
+        fs::write(top.join("intro.md"), b"x").unwrap();
+        fs::write(top.join(".DS_Store"), b"x").unwrap();
+        fs::write(top.join("BFS").join("grid.pdf"), b"x").unwrap();
+        let loose = root.join("loose.txt");
+        fs::write(&loose, b"x").unwrap();
+
+        let found = expand_sources(&[
+            top.to_string_lossy().into_owned(),
+            loose.to_string_lossy().into_owned(),
+        ])
+        .unwrap();
+        let summary: Vec<(&str, String)> = found
+            .iter()
+            .map(|item| (item.kind, item.folders.join("/")))
+            .collect();
+        assert_eq!(
+            summary,
+            vec![
+                ("folder", "Graphs".to_string()),
+                ("folder", "Graphs/BFS".to_string()),
+                ("file", "Graphs/BFS".to_string()),
+                ("folder", "Graphs/Empty".to_string()),
+                ("file", "Graphs".to_string()),
+                ("file", String::new()),
+            ]
+        );
         fs::remove_dir_all(root).unwrap();
     }
 

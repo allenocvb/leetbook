@@ -340,3 +340,17 @@ both platform coordinate conventions, promised events and stale transfers. Nativ
 Cmd-Shift-4, drag the floating thumbnail into an empty and a scrolled note; also try an ordinary
 Finder PNG, moving/resizing the window, and a second drop. This OS interaction needs a manual
 check because computer-use cannot attach to the dev executable in this environment.
+
+### Library folders and order (17.5)
+
+Automated: core repository tests (folders, moves, cycle refusal, order), the Rust folder walk,
+import hierarchy with partial failures, and Files page drag/keyboard behaviour in jsdom. Native
+acceptance on macOS: Upload folder with nested subfolders; drag a Finder folder onto the page;
+drag rows to reorder and into a folder, then relaunch and confirm the order held; drag a row
+onto `All files` to move it back up.
+
+### Code block Enter (17.4)
+
+WebKitGTK reproduced the dropped Enter by ending a composition just before it. On a Mac, turn
+on inline predictive text (Keyboard settings), type `for i in range(3):` in a code block while a
+grey suggestion shows, press Enter: the line must break with the caret indented.

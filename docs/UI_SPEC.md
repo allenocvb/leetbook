@@ -356,6 +356,16 @@ Each remediation task ships with focused tests. Before checking a PRD item:
 - Multi-file picker and native drag-and-drop copy into app storage (100 MB per file). Search by name.
 - Show empty, loading, saving, drag-over and error states. A failed database insert rolls back its
   file copy; partial multi-file failures leave successful imports visible.
+- Folders: `Upload folder` (folder picker) and dropping a folder from Finder both recreate the
+  folder with its subfolders and files, in name order; hidden entries such as `.DS_Store` are
+  skipped. `New folder` adds an inline name row (Enter creates, Escape cancels). Folders list
+  before files, with a folder icon, `Folder` type and an item count; double-click or `→` opens one.
+- A breadcrumb (`All files / Algorithms / Graphs`) sits under the title. Each crumb opens its
+  folder and accepts a dragged row, which is how an item moves back up.
+- Manual order: drag a row to reorder it (an accent line shows where it lands) or onto a folder
+  to move it inside (the folder row tints). A folder's middle nests a dragged folder; its top and
+  bottom edges reorder. `⌥↑/↓` reorders the focused row and `⌥←` moves it to the parent folder.
+  The order persists. Search spans every folder and turns reordering off.
 
 ### Inline note images
 

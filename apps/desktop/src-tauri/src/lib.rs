@@ -23,6 +23,7 @@ pub fn run() {
             files::import_library_file,
             files::open_library_file,
             files::discard_library_file,
+            files::expand_library_sources,
             files::read_note_image
         ])
         .setup(|app| {

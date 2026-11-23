@@ -1,18 +1,43 @@
-import type { LibraryFile } from "@leetbook/core";
+import type { LibraryFile, LibraryFolder } from "@leetbook/core";
 import { fileKind, fileSize } from "../../files/library.js";
-import { Button } from "../ui/Button.js";
+import type { DropZone } from "../../files/rowDrop.js";
+import type { LibraryItem } from "../../files/useFileLibrary.js";
+import { LibraryRow } from "./LibraryRow.js";
+import { NewFolderRow } from "./NewFolderRow.js";
 
-export function FilesTable({
-  files,
-  loading,
-  filtered,
-  onOpen,
-}: {
+export interface FilesTableProps {
+  folders: LibraryFolder[];
   files: LibraryFile[];
+  /** Items inside each folder, for its Size column. */
+  folderCounts: Map<string, number>;
   loading: boolean;
   filtered: boolean;
+  creatingFolder: boolean;
+  dragged: LibraryItem | null;
   onOpen: (file: LibraryFile) => void;
-}) {
+  onOpenFolder: (folder: LibraryFolder) => void;
+  onCreateFolder: (name: string) => void;
+  onCancelFolder: () => void;
+  onDragChange: (item: LibraryItem | null) => void;
+  onDrop: (target: LibraryItem, zone: DropZone) => void;
+  onKeyMove: (item: LibraryItem, direction: "up" | "down" | "out") => void;
+}
+
+const added = (createdAt: string) => new Date(createdAt).toLocaleDateString();
+
+export function FilesTable(props: FilesTableProps) {
+  const { folders, files, folderCounts, loading, filtered, dragged } = props;
+  const empty = folders.length === 0 && files.length === 0 && !props.creatingFolder;
+  const rowProps = (item: LibraryItem) => ({
+    item,
+    dragged,
+    movable: !filtered,
+    onDragStart: () => props.onDragChange(item),
+    onDragEnd: () => props.onDragChange(null),
+    onDrop: (zone: DropZone) => props.onDrop(item, zone),
+    onKeyMove: (direction: "up" | "down" | "out") => props.onKeyMove(item, direction),
+  });
+
   return (
     <div className="files-page__body">
       <table className="files-table">
@@ -28,48 +53,46 @@ export function FilesTable({
           </tr>
         </thead>
         <tbody>
+          {props.creatingFolder && (
+            <NewFolderRow onCreate={props.onCreateFolder} onCancel={props.onCancelFolder} />
+          )}
+          {folders.map((folder) => {
+            const count = folderCounts.get(folder.id) ?? 0;
+            return (
+              <LibraryRow
+                key={`folder-${folder.id}`}
+                {...rowProps({ kind: "folder", id: folder.id })}
+                name={folder.name}
+                details={[
+                  "Folder",
+                  `${count} ${count === 1 ? "item" : "items"}`,
+                  added(folder.createdAt),
+                ]}
+                onOpen={() => props.onOpenFolder(folder)}
+              />
+            );
+          })}
           {files.map((file) => (
-            <tr key={file.id} onDoubleClick={() => onOpen(file)}>
-              <td>
-                <span className="files-table__name">
-                  <svg
-                    aria-hidden="true"
-                    width="20"
-                    height="24"
-                    viewBox="0 0 20 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                  >
-                    <path d="M3 1h9l5 5v17H3zM12 1v6h5M6 12h8M6 16h8" />
-                  </svg>
-                  <span title={file.name}>{file.name}</span>
-                </span>
-              </td>
-              <td>{fileKind(file.name)}</td>
-              <td>{fileSize(file.size)}</td>
-              <td>{new Date(file.createdAt).toLocaleDateString()}</td>
-              <td>
-                <Button
-                  variant="ghost"
-                  aria-label={`Open ${file.name}`}
-                  onClick={() => onOpen(file)}
-                >
-                  ↗
-                </Button>
-              </td>
-            </tr>
+            <LibraryRow
+              key={file.id}
+              {...rowProps({ kind: "file", id: file.id })}
+              name={file.name}
+              details={[fileKind(file.name), fileSize(file.size), added(file.createdAt)]}
+              onOpen={() => props.onOpen(file)}
+            />
           ))}
         </tbody>
       </table>
-      {files.length === 0 && (
+      {empty && (
         <div className="files-page__empty">
           {loading
             ? "Loading files…"
             : filtered
               ? "No files match your search."
               : "A place for your PDFs, screenshots, and study material."}
-          {!loading && !filtered && <p>Upload a file or drag one into this page to get started.</p>}
+          {!loading && !filtered && (
+            <p>Upload files or a folder, or drag them into this page to get started.</p>
+          )}
         </div>
       )}
     </div>
