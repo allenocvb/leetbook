@@ -39,43 +39,46 @@ pub async fn import_library_file(
     id: String,
 ) -> Result<ImportedFile, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let source = Path::new(&source);
-        let name = source
-            .file_name()
-            .and_then(|n| n.to_str())
-            .ok_or("Invalid filename")?
-            .to_owned();
-        let mut input = fs::File::open(source).map_err(|e| e.to_string())?;
-        let meta = input.metadata().map_err(|e| e.to_string())?;
-        if !meta.is_file() || meta.len() > MAX_FILE {
-            return Err("Choose a file up to 100 MB".into());
-        }
-        let destination = file_path(&root(&app)?, &id, &name)?;
-        let parent = destination.parent().ok_or("Invalid destination")?;
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-        let mut output = fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&destination)
-            .map_err(|e| e.to_string())?;
-        let result = std::io::copy(
-            &mut Read::by_ref(&mut input).take(MAX_FILE + 1),
-            &mut output,
-        )
-        .and_then(|size| {
-            output.flush()?;
-            Ok(size)
-        });
-        match result {
-            Ok(size) if size <= MAX_FILE => Ok(ImportedFile { name, size }),
-            _ => {
-                let _ = fs::remove_file(destination);
-                Err("Could not copy this file (100 MB maximum)".into())
-            }
-        }
+        copy_to_library(&root(&app)?, Path::new(&source), &id)
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+fn copy_to_library(root: &Path, source: &Path, id: &str) -> Result<ImportedFile, String> {
+    let name = source
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or("Invalid filename")?
+        .to_owned();
+    let mut input = fs::File::open(source).map_err(|e| e.to_string())?;
+    let meta = input.metadata().map_err(|e| e.to_string())?;
+    if !meta.is_file() || meta.len() > MAX_FILE {
+        return Err("Choose a file up to 100 MB".into());
+    }
+    let destination = file_path(root, id, &name)?;
+    let parent = destination.parent().ok_or("Invalid destination")?;
+    fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    let mut output = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&destination)
+        .map_err(|e| e.to_string())?;
+    let result = std::io::copy(
+        &mut Read::by_ref(&mut input).take(MAX_FILE + 1),
+        &mut output,
+    )
+    .and_then(|size| {
+        output.flush()?;
+        Ok(size)
+    });
+    match result {
+        Ok(size) if size <= MAX_FILE => Ok(ImportedFile { name, size }),
+        _ => {
+            let _ = fs::remove_file(destination);
+            Err("Could not copy this file (100 MB maximum)".into())
+        }
+    }
 }
 
 #[tauri::command]
@@ -98,6 +101,23 @@ pub fn discard_library_file(app: tauri::AppHandle, id: String, name: String) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn copies_bytes_without_overwriting_and_survives_source_removal() {
+        let root = std::env::temp_dir().join(format!("leetbook-library-{}", rand::random::<u64>()));
+        fs::create_dir_all(&root).unwrap();
+        let source = root.join("reference.pdf");
+        let id = "00000000-0000-0000-0000-000000000001";
+        fs::write(&source, b"test document bytes").unwrap();
+        let imported = copy_to_library(&root, &source, id).unwrap();
+        assert_eq!(imported.name, "reference.pdf");
+        assert_eq!(imported.size, 19);
+        assert!(copy_to_library(&root, &source, id).is_err());
+        fs::remove_file(source).unwrap();
+        let saved = file_path(&root, id, &imported.name).unwrap();
+        assert_eq!(fs::read(saved).unwrap(), b"test document bytes");
+        fs::remove_dir_all(root).unwrap();
+    }
+
     #[test]
     fn confines_saved_files_to_the_library() {
         let root = Path::new("/tmp/leetbook-test");

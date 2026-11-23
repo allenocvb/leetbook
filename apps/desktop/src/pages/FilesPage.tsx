@@ -1,9 +1,10 @@
 import { createFilesRepo, type LibraryFile } from "@leetbook/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useRef, useState } from "react";
+import { FilesTable } from "../components/files/FilesTable.js";
 import { Button } from "../components/ui/Button.js";
 import { useDb } from "../db/DbContext.js";
-import { fileKind, fileSize, importLibraryFile, openLibraryFile } from "../files/library.js";
+import { importLibraryFile, openLibraryFile } from "../files/library.js";
 import { useFileDrop } from "../files/useFileDrop.js";
 import "../components/table/ProblemsPage.css";
 import "./FilesPage.css";
@@ -120,65 +121,7 @@ export function FilesPage() {
           </p>
         )}
       </header>
-      <div className="files-page__body">
-        <table className="files-table">
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Type</th>
-              <th scope="col">Size</th>
-              <th scope="col">Added</th>
-              <th scope="col">
-                <span className="files-page__sr-only">Open</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((file) => (
-              <tr key={file.id} onDoubleClick={() => openFile(file)}>
-                <td>
-                  <span className="files-table__name">
-                    <svg
-                      aria-hidden="true"
-                      width="20"
-                      height="24"
-                      viewBox="0 0 20 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.4"
-                    >
-                      <path d="M3 1h9l5 5v17H3zM12 1v6h5M6 12h8M6 16h8" />
-                    </svg>
-                    <span title={file.name}>{file.name}</span>
-                  </span>
-                </td>
-                <td>{fileKind(file.name)}</td>
-                <td>{fileSize(file.size)}</td>
-                <td>{new Date(file.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <Button
-                    variant="ghost"
-                    aria-label={`Open ${file.name}`}
-                    onClick={() => openFile(file)}
-                  >
-                    ↗
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {visible.length === 0 && (
-          <div className="files-page__empty">
-            {loading
-              ? "Loading files…"
-              : query
-                ? "No files match your search."
-                : "A place for your PDFs, screenshots, and study material."}
-            {!loading && !query && <p>Upload a file or drag one into this page to get started.</p>}
-          </div>
-        )}
-      </div>
+      <FilesTable files={visible} loading={loading} filtered={!!query} onOpen={openFile} />
       <div className="files-page__footer" role="status">
         {dragging
           ? "Drop to save a copy"
