@@ -84,3 +84,49 @@ it("shows a failed upload without replacing existing notes", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("10 MB or smaller");
   expect(screen.getByText("Keep this text.")).toBeInTheDocument();
 });
+it("moves an image above text by dragging it with the mouse", async () => {
+  const { editor, onChange } = await setup(
+    JSON.stringify({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "First idea." }] },
+        { type: "image", attrs: { src: "data:image/png;base64,aGVsbG8=", alt: "Shot.png" } },
+      ],
+    }),
+  );
+  // jsdom has no layout: give each top-level block a 40px-tall row.
+  const blocks = Array.from(editor.view.dom.children) as HTMLElement[];
+  blocks.forEach((block, index) => {
+    vi.spyOn(block, "getBoundingClientRect").mockReturnValue(new DOMRect(0, index * 40, 600, 40));
+  });
+  const image = screen.getByAltText("Shot.png");
+  fireEvent.mouseDown(image, { button: 0, clientX: 100, clientY: 60 });
+  fireEvent.mouseMove(document, { clientX: 100, clientY: 30 });
+  expect(document.querySelector(".note-image-drop")).toBeInTheDocument();
+  fireEvent.mouseMove(document, { clientX: 100, clientY: 5 });
+  fireEvent.mouseUp(document, { clientX: 100, clientY: 5 });
+  expect(document.querySelector(".note-image-drop")).not.toBeInTheDocument();
+  expect(editor.state.doc.firstChild?.type.name).toBe("image");
+  expect(editor.state.doc.child(1).textContent).toBe("First idea.");
+  expect(onChange.mock.calls.at(-1)?.[0]).toMatch(/"image".*First idea/);
+  editor.commands.undo();
+  expect(editor.state.doc.firstChild?.textContent).toBe("First idea.");
+});
+it("leaves the image in place when a move is cancelled with Escape", async () => {
+  const { editor } = await setup(
+    JSON.stringify({
+      type: "doc",
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "Stay." }] },
+        { type: "image", attrs: { src: "data:image/png;base64,aGVsbG8=", alt: "Shot.png" } },
+      ],
+    }),
+  );
+  const image = screen.getByAltText("Shot.png");
+  fireEvent.mouseDown(image, { button: 0, clientX: 100, clientY: 60 });
+  fireEvent.mouseMove(document, { clientX: 100, clientY: 0 });
+  fireEvent.keyDown(document, { key: "Escape" });
+  fireEvent.mouseUp(document);
+  expect(editor.state.doc.firstChild?.textContent).toBe("Stay.");
+  expect(image).not.toHaveClass("note-image--moving");
+});
