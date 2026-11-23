@@ -1,59 +1,35 @@
 import { folderTrail, type LibraryFile } from "@leetbook/core";
-import { open } from "@tauri-apps/plugin-dialog";
 import { useRef, useState } from "react";
 import { FilesBreadcrumbs } from "../components/files/FilesBreadcrumbs.js";
 import { FilesPageHeader } from "../components/files/FilesPageHeader.js";
 import { FilesTable } from "../components/files/FilesTable.js";
 import { useDb } from "../db/DbContext.js";
-import { importLibrarySources, openLibraryFile } from "../files/library.js";
+import { deleteLibraryItem, openLibraryFile } from "../files/library.js";
 import { placeBefore, siblingIds, stepBefore } from "../files/librarySiblings.js";
 import type { DropZone } from "../files/rowDrop.js";
+import { useBrowserFileDrop } from "../files/useBrowserFileDrop.js";
 import { useFileDrop } from "../files/useFileDrop.js";
 import { type LibraryItem, useFileLibrary } from "../files/useFileLibrary.js";
+import { useLibraryUpload } from "../files/useLibraryUpload.js";
 import "../components/table/ProblemsPage.css";
 import "./FilesPage.css";
 
 export function FilesPage() {
   const db = useDb();
   const target = useRef<HTMLElement>(null);
-  const working = useRef(false);
   const [error, setError] = useState("");
   const [folderId, setFolderId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [busy, setBusy] = useState(false);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [dragged, setDragged] = useState<LibraryItem | null>(null);
   const library = useFileLibrary(db, setError);
   const { files, folders } = library;
 
-  const upload = async (paths: string[]) => {
-    if (working.current || paths.length === 0) return;
-    working.current = true;
-    setBusy(true);
-    setError("");
-    try {
-      setError((await importLibrarySources(db, paths, folderId)).join(" · "));
-    } catch (reason) {
-      setError(String(reason));
-    } finally {
-      await library.reload().catch(() => undefined);
-      working.current = false;
-      setBusy(false);
-    }
-  };
-  const dragging = useFileDrop(target, (paths) => void upload(paths), setError);
-  const choose = async (directory: boolean) => {
-    try {
-      const selected = await open({
-        multiple: true,
-        directory,
-        title: directory ? "Add folders to LeetBook" : "Add files to LeetBook",
-      });
-      if (selected) await upload(Array.isArray(selected) ? selected : [selected]);
-    } catch (reason) {
-      setError(String(reason));
-    }
-  };
+  const { busy, upload, choose } = useLibraryUpload(db, folderId, library.reload, setError);
+  const nativeDragging = useFileDrop(target, (paths) => void upload(paths), setError);
+  // Screenshot thumbnails and other file promises arrive as browser Files, not paths.
+  const browserDragging = useBrowserFileDrop(target, (dropped) => void upload(dropped));
+  const dragging = nativeDragging || browserDragging;
   const openFile = (file: LibraryFile) => {
     setError("");
     void openLibraryFile(file).catch((reason: unknown) =>
@@ -143,6 +119,12 @@ export function FilesPage() {
         onDragChange={setDragged}
         onDrop={dropOnRow}
         onKeyMove={keyMove}
+        onDelete={(item) => {
+          setError("");
+          void deleteLibraryItem(db, item)
+            .catch((reason: unknown) => setError(String(reason)))
+            .finally(() => void library.reload());
+        }}
       />
       <div className="files-page__footer" role="status">
         {dragging

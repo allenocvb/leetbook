@@ -17,6 +17,8 @@ export function ImageAttachments({
   const working = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // A screenshot thumbnail (file promise) arrives as an HTML5 drag, not a native path drop.
+  const [browserDragging, setBrowserDragging] = useState(false);
   const insert = useCallback(
     async (sources: (File | string)[], position?: number) => {
       if (!editor || editor.isDestroyed || working.current || sources.length === 0) return;
@@ -61,7 +63,7 @@ export function ImageAttachments({
   );
   const positionAt = (point: { x: number; y: number }) =>
     editor?.view.posAtCoords({ left: point.x, top: point.y })?.pos;
-  const dragging = useFileDrop(
+  const nativeDragging = useFileDrop(
     container,
     (paths, point) => void insert(paths, positionAt(point)),
     setError,
@@ -77,24 +79,36 @@ export function ImageAttachments({
       void insert(files);
     };
     const drop = (event: DragEvent) => {
+      setBrowserDragging(false);
+      // Moving an image already in the note is ProseMirror's job, even when WebKit also
+      // attaches the dragged image as a file.
+      if (editor.view.dragging) return;
       const files = Array.from(event.dataTransfer?.files ?? []);
-      if (!files.length) return; // Leave internal block dragging to ProseMirror.
+      if (!files.length) return;
       event.preventDefault();
       event.stopPropagation();
       void insert(files, editor.view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos);
     };
     const over = (event: DragEvent) => {
-      if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
+      if (editor.view.dragging || !event.dataTransfer?.types.includes("Files")) return;
+      event.preventDefault();
+      setBrowserDragging(true);
+    };
+    const leave = (event: DragEvent) => {
+      if (!dom.contains(event.relatedTarget as Node | null)) setBrowserDragging(false);
     };
     dom.addEventListener("paste", paste, true);
     dom.addEventListener("drop", drop, true);
     dom.addEventListener("dragover", over);
+    dom.addEventListener("dragleave", leave);
     return () => {
+      dom.removeEventListener("dragleave", leave);
       dom.removeEventListener("paste", paste, true);
       dom.removeEventListener("drop", drop, true);
       dom.removeEventListener("dragover", over);
     };
   }, [editor, insert]);
+  const dragging = nativeDragging || browserDragging;
   const choose = async () => {
     if (!isTauri()) {
       input.current?.click();

@@ -174,3 +174,23 @@
   font: inherit;
   outline: none;
 }
+.files-table__actions,
+.files-table__confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.files-table__delete {
+  opacity: 0;
+}
+.files-table__row:hover .files-table__delete,
+.files-table__delete:focus-visible {
+  opacity: 1;
+}
+.files-table__confirm-text {
+  color: var(--lb-red);
+  font-family: var(--lb-font-body);
+  font-size: 11.5px;
+  white-space: nowrap;
+}

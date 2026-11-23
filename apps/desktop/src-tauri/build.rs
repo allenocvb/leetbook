@@ -2,12 +2,12 @@ fn main() {
     #[cfg(target_os = "macos")]
     {
         cc::Build::new()
-            .file("src/file_promises.m")
+            .file("src/drag_routing.m")
             .flag("-fobjc-arc")
             .flag("-fblocks")
-            .compile("leetbook_file_promises");
+            .compile("leetbook_drag_routing");
         println!("cargo:rustc-link-lib=framework=AppKit");
-        println!("cargo:rerun-if-changed=src/file_promises.m");
+        println!("cargo:rerun-if-changed=src/drag_routing.m");
     }
     tauri_build::build()
 }

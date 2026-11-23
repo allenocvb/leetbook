@@ -77,6 +77,24 @@ describe("file library", () => {
     expect((await repo.listFolders()).find((f) => f.id === "inner")?.name).toBe("Renamed");
     await expect(repo.renameFolder("inner", "  ")).rejects.toThrow("1–255");
   });
+
+  it("removes a file, and a folder with everything inside it", async () => {
+    const repo = createFilesRepo(db);
+    await repo.addFolder({ id: "top", name: "Top", parentId: null, createdAt: "1" });
+    await repo.addFolder({ id: "sub", name: "Sub", parentId: "top", createdAt: "2" });
+    await repo.addFolder({ id: "keep", name: "Keep", parentId: null, createdAt: "3" });
+    await repo.add({ id: "a", name: "a.pdf", size: 1, createdAt: "4", folderId: "top" });
+    await repo.add({ id: "b", name: "b.pdf", size: 1, createdAt: "5", folderId: "sub" });
+    await repo.add({ id: "c", name: "c.pdf", size: 1, createdAt: "6", folderId: "keep" });
+    await repo.add({ id: "d", name: "d.pdf", size: 1, createdAt: "7" });
+
+    await repo.removeFile("d");
+    const removed = await repo.removeFolder("top");
+
+    expect(removed.map((file) => file.id).sort()).toEqual(["a", "b"]);
+    expect((await repo.list()).map((file) => file.id)).toEqual(["c"]);
+    expect((await repo.listFolders()).map((folder) => folder.id)).toEqual(["keep"]);
+  });
 });
 
 describe("folder helpers", () => {

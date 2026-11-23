@@ -92,3 +92,66 @@ export async function importLibrarySources(
   }
   return failures;
 }
+
+function readBytes(file: File): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+    reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/**
+ * Saves browser File objects — what WebKit hands the page for a dropped file promise such as
+ * the Cmd-Shift-4 thumbnail — into the library. Returns one message per file that failed.
+ */
+export async function importDroppedFiles(
+  db: SqlExecutor,
+  files: File[],
+  folderId: string | null,
+): Promise<string[]> {
+  const failures: string[] = [];
+  for (const file of files) {
+    const id = crypto.randomUUID();
+    try {
+      const bytes = await readBytes(file);
+      const saved = await invoke<{ name: string; size: number }>("save_library_bytes", bytes, {
+        headers: { "x-library-id": id, "x-library-name": encodeURIComponent(file.name) },
+      });
+      try {
+        await createFilesRepo(db).add({
+          ...saved,
+          id,
+          folderId,
+          createdAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        await invoke("discard_library_file", { id, name: saved.name }).catch(() => undefined);
+        throw error;
+      }
+    } catch (reason) {
+      failures.push(`${file.name}: ${String(reason)}`);
+    }
+  }
+  return failures;
+}
+
+/** Deletes a file, or a folder with everything in it, from the library and from disk. */
+export async function deleteLibraryItem(
+  db: SqlExecutor,
+  item: { kind: "file" | "folder"; id: string },
+): Promise<void> {
+  const repo = createFilesRepo(db);
+  const files =
+    item.kind === "folder"
+      ? await repo.removeFolder(item.id)
+      : (await repo.list()).filter((file) => file.id === item.id);
+  if (item.kind === "file") await repo.removeFile(item.id);
+  // The rows are gone first, so a failed byte removal leaves an orphan copy, never a broken row.
+  await Promise.all(
+    files.map((file) =>
+      invoke("remove_library_file", { id: file.id, name: file.name }).catch(() => undefined),
+    ),
+  );
+}

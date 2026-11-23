@@ -3,6 +3,7 @@ import { type DropZone, dropZone, LIBRARY_DRAG_TYPE } from "../../files/rowDrop.
 import type { LibraryItem } from "../../files/useFileLibrary.js";
 import { Button } from "../ui/Button.js";
 import { FileIcon, FolderIcon } from "./LibraryIcons.js";
+import { RowConfirm } from "./RowConfirm.js";
 
 export interface LibraryRowProps {
   item: LibraryItem;
@@ -18,6 +19,7 @@ export interface LibraryRowProps {
   onDrop: (zone: DropZone) => void;
   /** Keyboard moves: Alt+↑/↓ reorder, Alt+← moves out to the parent folder. */
   onKeyMove: (direction: "up" | "down" | "out") => void;
+  onDelete: () => void;
 }
 
 const KEY_MOVES: Record<string, "up" | "down" | "out"> = {
@@ -29,6 +31,7 @@ const KEY_MOVES: Record<string, "up" | "down" | "out"> = {
 export function LibraryRow(props: LibraryRowProps) {
   const { item, name, details, dragged, movable } = props;
   const [zone, setZone] = useState<DropZone | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   const zoneFor = (event: DragEvent<HTMLTableRowElement>) => {
     if (!dragged || !movable) return null;
@@ -38,6 +41,11 @@ export function LibraryRow(props: LibraryRowProps) {
   };
 
   const keyMove = (event: KeyboardEvent<HTMLTableRowElement>) => {
+    if ((event.key === "Delete" || event.key === "Backspace") && !confirming) {
+      event.preventDefault();
+      setConfirming(true);
+      return;
+    }
     const direction = KEY_MOVES[event.key];
     if (!event.altKey || !direction || !movable) return;
     event.preventDefault();
@@ -86,9 +94,30 @@ export function LibraryRow(props: LibraryRowProps) {
       <td>{details[1]}</td>
       <td>{details[2]}</td>
       <td>
-        <Button variant="ghost" aria-label={`Open ${name}`} onClick={props.onOpen}>
-          {item.kind === "folder" ? "→" : "↗"}
-        </Button>
+        {confirming ? (
+          <RowConfirm
+            what={item.kind === "folder" ? "folder and everything in it" : "file"}
+            onCancel={() => setConfirming(false)}
+            onDelete={() => {
+              setConfirming(false);
+              props.onDelete();
+            }}
+          />
+        ) : (
+          <span className="files-table__actions">
+            <Button
+              variant="ghost"
+              className="files-table__delete"
+              aria-label={`Delete ${name}`}
+              onClick={() => setConfirming(true)}
+            >
+              Delete
+            </Button>
+            <Button variant="ghost" aria-label={`Open ${name}`} onClick={props.onOpen}>
+              {item.kind === "folder" ? "→" : "↗"}
+            </Button>
+          </span>
+        )}
       </td>
     </tr>
   );

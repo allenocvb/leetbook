@@ -140,9 +140,13 @@ fn walk(dir: &Path, mut trail: Vec<String>, found: &mut Vec<LibrarySource>) -> R
     entries.sort_by_key(|entry| entry.file_name());
     for entry in entries {
         if found.len() >= MAX_FOLDER_ENTRIES {
-            return Err(format!("Folders can hold up to {MAX_FOLDER_ENTRIES} items per upload"));
+            return Err(format!(
+                "Folders can hold up to {MAX_FOLDER_ENTRIES} items per upload"
+            ));
         }
-        let Ok(kind) = entry.file_type() else { continue };
+        let Ok(kind) = entry.file_type() else {
+            continue;
+        };
         if kind.is_dir() {
             walk(&entry.path(), trail.clone(), found)?;
         } else if kind.is_file() {
@@ -154,6 +158,91 @@ fn walk(dir: &Path, mut trail: Vec<String>, found: &mut Vec<LibrarySource>) -> R
         }
     }
     Ok(())
+}
+
+/// Saves dropped bytes (a browser File, such as a screenshot thumbnail's fulfilled promise)
+/// into the library. The bytes arrive as the raw request body; id and name ride in headers.
+#[tauri::command]
+pub async fn save_library_bytes(
+    app: tauri::AppHandle,
+    request: tauri::ipc::Request<'_>,
+) -> Result<ImportedFile, String> {
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err("Expected the file's bytes".into());
+    };
+    let header = |key: &str| {
+        request
+            .headers()
+            .get(key)
+            .and_then(|value| value.to_str().ok())
+            .map(|value| percent_decode(value))
+            .ok_or_else(|| format!("Missing {key}"))
+    };
+    let (id, name) = (header("x-library-id")?, header("x-library-name")?);
+    let bytes = bytes.clone();
+    let root = root(&app)?;
+    tauri::async_runtime::spawn_blocking(move || write_to_library(&root, &id, &name, &bytes))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+fn percent_decode(value: &str) -> String {
+    let bytes = value.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(byte) = u8::from_str_radix(&value[i + 1..i + 3], 16) {
+                out.push(byte);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+fn write_to_library(
+    root: &Path,
+    id: &str,
+    name: &str,
+    bytes: &[u8],
+) -> Result<ImportedFile, String> {
+    if bytes.len() as u64 > MAX_FILE {
+        return Err("Choose a file up to 100 MB".into());
+    }
+    let destination = file_path(root, id, name)?;
+    let parent = destination.parent().ok_or("Invalid destination")?;
+    fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    let mut output = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&destination)
+        .map_err(|e| e.to_string())?;
+    output
+        .write_all(bytes)
+        .and_then(|_| output.flush())
+        .map_err(|e| {
+            let _ = fs::remove_file(&destination);
+            e.to_string()
+        })?;
+    Ok(ImportedFile {
+        name: name.to_owned(),
+        size: bytes.len() as u64,
+    })
+}
+
+/// Removes a library item's stored copy (its whole id folder). Missing is fine: the goal is gone.
+#[tauri::command]
+pub fn remove_library_file(app: tauri::AppHandle, id: String, name: String) -> Result<(), String> {
+    let path = file_path(&root(&app)?, &id, &name)?;
+    let folder = path.parent().ok_or("Invalid stored file reference")?;
+    match fs::remove_dir_all(folder) {
+        Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(error.to_string()),
+        _ => Ok(()),
+    }
 }
 
 #[tauri::command]
@@ -225,6 +314,23 @@ mod tests {
                 ("file", String::new()),
             ]
         );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn writes_dropped_bytes_and_decodes_header_names() {
+        let root = std::env::temp_dir().join(format!("leetbook-bytes-{}", rand::random::<u64>()));
+        let id = "00000000-0000-0000-0000-000000000002";
+        let name = percent_decode("Screenshot%202026-11-22%20at%2011.03.46%E2%80%AFPM.png");
+        assert_eq!(name, "Screenshot 2026-11-22 at 11.03.46\u{202f}PM.png");
+        let saved = write_to_library(&root, id, &name, b"png bytes").unwrap();
+        assert_eq!(saved.size, 9);
+        assert_eq!(
+            fs::read(file_path(&root, id, &name).unwrap()).unwrap(),
+            b"png bytes"
+        );
+        assert!(write_to_library(&root, id, "../escape.png", b"x").is_err());
+        assert_eq!(percent_decode("100%"), "100%");
         fs::remove_dir_all(root).unwrap();
     }
 

@@ -218,6 +218,12 @@
   border: 1px solid var(--lb-bd-2);
   border-radius: 7px;
 }
+.note-image {
+  cursor: grab;
+}
+.note-image:active {
+  cursor: grabbing;
+}
 .note-image.ProseMirror-selectednode {
   outline: 2px solid var(--lb-accent);
   outline-offset: 2px;
