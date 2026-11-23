@@ -112,3 +112,48 @@ mod tests {
         assert!(file_path(root, "../../outside", "notes.pdf").is_err());
     }
 }
+
+/// Screenshot bytes are embedded in the note JSON, never fetched from remote URLs.
+#[tauri::command]
+pub async fn read_note_image(path: String) -> Result<Vec<u8>, String> {
+    tauri::async_runtime::spawn_blocking(move || read_image_bytes(Path::new(&path)))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+fn read_image_bytes(path: &Path) -> Result<Vec<u8>, String> {
+    let file = fs::File::open(path).map_err(|e| e.to_string())?;
+    let meta = file.metadata().map_err(|e| e.to_string())?;
+    const MAX_IMAGE: u64 = 10 * 1024 * 1024;
+    if !meta.is_file() || meta.len() > MAX_IMAGE {
+        return Err("Images must be 10 MB or smaller".into());
+    }
+    let mut bytes = Vec::new();
+    file.take(MAX_IMAGE + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|e| e.to_string())?;
+    if bytes.len() as u64 > MAX_IMAGE {
+        return Err("Images must be 10 MB or smaller".into());
+    }
+    Ok(bytes)
+}
+
+#[cfg(test)]
+mod image_tests {
+    use super::*;
+    #[test]
+    fn reads_bytes_and_rejects_large_images() {
+        let path =
+            std::env::temp_dir().join(format!("leetbook-image-{}.png", rand::random::<u64>()));
+        fs::write(&path, [137, 80, 78, 71]).unwrap();
+        assert_eq!(read_image_bytes(&path).unwrap(), vec![137, 80, 78, 71]);
+        fs::OpenOptions::new()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_len(10 * 1024 * 1024 + 1)
+            .unwrap();
+        assert!(read_image_bytes(&path).unwrap_err().contains("10 MB"));
+        fs::remove_file(path).unwrap();
+    }
+}

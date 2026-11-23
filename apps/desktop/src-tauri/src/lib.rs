@@ -20,7 +20,8 @@ pub fn run() {
             api_key::delete_api_key,
             files::import_library_file,
             files::open_library_file,
-            files::discard_library_file
+            files::discard_library_file,
+            files::read_note_image
         ])
         .setup(|app| {
             if let Err(error) = capture_server::start(app.handle().clone()) {

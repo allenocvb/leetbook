@@ -16,7 +16,10 @@ interface TipTapNode {
  * uses (paragraphs, headings, code blocks, lists, bold/italic/code marks).
  * Unknown nodes degrade to their text content rather than being dropped.
  */
-export function tiptapToMarkdown(contentJson: string): string {
+export function tiptapToMarkdown(
+  contentJson: string,
+  options: { includeImages?: boolean } = {},
+): string {
   let doc: TipTapNode;
   try {
     doc = JSON.parse(contentJson) as TipTapNode;
@@ -24,13 +27,21 @@ export function tiptapToMarkdown(contentJson: string): string {
     return contentJson; // not JSON — return as-is rather than losing data
   }
   return (doc.content ?? [])
-    .map((node) => renderBlock(node))
+    .map((node) => renderBlock(node, options.includeImages !== false))
     .join("\n\n")
     .trim();
 }
 
-function renderBlock(node: TipTapNode): string {
+function renderBlock(node: TipTapNode, includeImages: boolean): string {
   switch (node.type) {
+    case "image": {
+      const src = typeof node.attrs?.src === "string" ? node.attrs.src : "";
+      const alt = String(node.attrs?.alt ?? "Screenshot").replace(/[[\]\\]/g, "\\$&");
+      if (!includeImages) return `[Image: ${alt}]`;
+      return /^data:image\/(png|jpeg|gif|webp);base64,[a-z0-9+/=]+$/i.test(src)
+        ? `![${alt}](${src})`
+        : alt;
+    }
     case "heading": {
       const level = typeof node.attrs?.level === "number" ? node.attrs.level : 1;
       return `${"#".repeat(Math.min(level, 6))} ${renderInline(node.content)}`;
@@ -48,10 +59,15 @@ function renderBlock(node: TipTapNode): string {
         .map((item, i) => `${i + 1}. ${renderInline(item.content?.[0]?.content)}`)
         .join("\n");
     case "blockquote":
-      return (node.content ?? []).map((child) => `> ${renderBlock(child)}`).join("\n");
+      return (node.content ?? [])
+        .map((child) => `> ${renderBlock(child, includeImages)}`)
+        .join("\n");
     case "callout":
       return (node.content ?? [])
-        .map((child, index) => `> ${index === 0 ? "**Recall:** " : ""}${renderBlock(child)}`)
+        .map(
+          (child, index) =>
+            `> ${index === 0 ? "**Recall:** " : ""}${renderBlock(child, includeImages)}`,
+        )
         .join("\n");
     default:
       return renderInline(node.content);

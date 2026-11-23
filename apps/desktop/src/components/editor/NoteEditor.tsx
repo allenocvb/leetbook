@@ -14,6 +14,8 @@ import {
   shiftLines,
 } from "./codeIndent.js";
 import { codeLowlight } from "./codeLanguages.js";
+import { ImageAttachments } from "./ImageAttachments.js";
+import { NoteImage } from "./NoteImage.js";
 import { SelectionToolbar } from "./SelectionToolbar.js";
 import { SlashCommandMenu, type SlashMenuState } from "./SlashCommandMenu.js";
 import { filterSlashCommands, type SlashCommand } from "./slashCommands.js";
@@ -225,6 +227,7 @@ export function NoteEditor({
       EditorCodeBlock,
       Placeholder.configure({ placeholder: NOTE_PLACEHOLDER }),
       Callout,
+      NoteImage,
     ],
     content: parseInitialContent(initialContentJson),
     editorProps: {
@@ -308,6 +311,7 @@ export function NoteEditor({
   return (
     <div ref={container} className="note-editor" onKeyDownCapture={handleKeyDown}>
       {editor && <SelectionToolbar editor={editor} />}
+      <ImageAttachments editor={editor} container={container} />
       <EditorContent editor={editor} />
       {slashMenu && (
         <SlashCommandMenu

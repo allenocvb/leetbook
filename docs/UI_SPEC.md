@@ -348,3 +348,13 @@ Each remediation task ships with focused tests. Before checking a PRD item:
 - Multi-file picker and native drag-and-drop copy into app storage (100 MB per file). Search by name.
 - Show empty, loading, saving, drag-over and error states. A failed database insert rolls back its
   file copy; partial multi-file failures leave successful imports visible.
+
+### Inline note images
+
+- Shared problem/design editor supports local PNG, JPEG, GIF and WebP images up to 10 MB each.
+- Drop from the desktop onto the editor, paste a screenshot, or use the quiet `+ Image` action.
+- Images are block nodes, constrained to the editor width without distortion. A paragraph after
+  insertion keeps typing straightforward; normal undo and selected-block deletion work.
+- Bytes are embedded in note JSON to keep offline autosave and note exports self-contained.
+  Quiz generation uses image labels only, never base64 image bytes in its text prompt.
+- Preserve the targeted position while loading, report failed images, and keep surrounding prose.

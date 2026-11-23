@@ -312,3 +312,18 @@ Automated: SQLite migration and independent duplicate filenames; import rollback
 double-click and keyboard Open; Rust managed-path validation. Native acceptance still required:
 upload a PDF and image, double-click both, move the originals and reopen the saved copies, relaunch
 and confirm the rows persist. Drag files from Finder into the table. Check light/dark at 1280×820.
+
+
+## Inline screenshots (Phase 17.2, November 22, 2026)
+
+Automated checks cover image paste, browser drop, native-drop callback insertion, undo, restoring
+saved image JSON with surrounding prose, invalid/oversized images, Markdown export and omission
+of image bytes from quiz prompts. Rust tests cover bounded native file reading and path validation.
+
+Browser verification at 1280×820 in light/dark used a disposable fixture with the real FilesPage
+and NoteEditor: file table layout; image picker; successful decode/render; typing below the image;
+reload and restore. No real user notes were changed. The macOS debug app bundle built successfully.
+Native UI automation could not attach to the running dev executable and failed to launch/attach
+to the bundle. **Native acceptance remains unverified:** Finder drop onto notes and library;
+OS picker; default-app opening; persistence across a real desktop relaunch. Test those in Tauri,
+not just the browser fixture. Include a Retina display to exercise physical/logical drop coordinates.
